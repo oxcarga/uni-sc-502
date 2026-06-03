@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" role="img" aria-label="Mapa mundial de calor mostrando puntos críticos de donación" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="bg" cx="40%" cy="35%" r="80%">
+      <stop offset="0%" stop-color="#2b3a4d"/>
+      <stop offset="100%" stop-color="#1b2533"/>
+    </radialGradient>
+    <radialGradient id="hot" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff5470" stop-opacity="0.95"/>
+      <stop offset="45%" stop-color="#e23a5a" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#e23a5a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="warm" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8fb4c9" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#8fb4c9" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="440" fill="url(#bg)"/>
+
+  <!-- Stylized landmasses -->
+  <g fill="#48586b" opacity="0.85">
+    <!-- North America -->
+    <path d="M70 90 C120 70 190 75 210 105 C230 135 200 170 170 200 C150 220 120 235 100 215 C80 195 95 170 80 150 C65 130 50 105 70 90 Z"/>
+    <!-- South America -->
+    <path d="M210 250 C235 240 255 260 250 295 C245 335 225 370 205 360 C188 352 195 320 190 295 C186 270 190 258 210 250 Z"/>
+    <!-- Europe -->
+    <path d="M380 95 C410 85 440 95 445 115 C450 135 430 150 405 150 C385 150 365 135 368 118 C370 105 375 98 380 95 Z"/>
+    <!-- Africa -->
+    <path d="M390 170 C425 160 460 175 460 215 C460 260 435 320 405 320 C380 320 375 275 380 240 C383 210 375 180 390 170 Z"/>
+    <!-- Asia -->
+    <path d="M470 90 C560 75 660 90 700 130 C720 155 690 185 640 195 C590 205 540 200 510 180 C485 163 470 150 465 125 C462 108 462 95 470 90 Z"/>
+    <!-- India -->
+    <path d="M560 190 C585 188 600 205 595 235 C590 260 570 270 558 250 C548 233 545 205 560 190 Z"/>
+    <!-- Australia -->
+    <path d="M650 290 C695 282 730 295 728 325 C726 350 690 360 660 350 C638 343 632 308 650 290 Z"/>
+  </g>
+
+  <!-- Moderate density (cool) -->
+  <circle cx="205" cy="290" r="60" fill="url(#warm)"/>
+  <circle cx="680" cy="320" r="55" fill="url(#warm)"/>
+  <circle cx="410" cy="250" r="55" fill="url(#warm)"/>
+
+  <!-- High density hotspots (rose) -->
+  <circle cx="150" cy="150" r="70" fill="url(#hot)"/>
+  <circle cx="410" cy="120" r="60" fill="url(#hot)"/>
+  <circle cx="575" cy="215" r="75" fill="url(#hot)"/>
+  <circle cx="630" cy="150" r="50" fill="url(#hot)"/>
+</svg>
