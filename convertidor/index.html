@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Convertidor de Monedas</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>💱 Convertidor de Monedas</h1>
+
+    <form id="currency-form">
+      <input 
+        type="number" 
+        id="amount" 
+        placeholder="Ingrese el monto" 
+        required
+      >
+
+      <select id="from"></select>
+      <select id="to"></select>
+
+      <button type="submit">Convertir</button>
+    </form>
+
+    <!-- Resultado -->
+    <p id="result"></p>
+
+    <!-- Gráfica -->
+    <canvas id="chart" width="300" height="200"></canvas>
+
+  </div>
+
+  <!-- JS -->
+  <script src="script.js"></script>
+
+</body>
+</html>
