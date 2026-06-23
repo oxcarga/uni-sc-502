@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pulso-solidario-web
+    ports:
+      - "8000:80"
+    volumes:
+      - ./backend:/var/www/html
+      - ./frontend:/var/www/html/public
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=${DB_USER:-pulso_user}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-pulso_password}
+      - MYSQL_DATABASE=${DB_NAME:-pulso_solidario}
+    depends_on:
+      - db
+    networks:
+      - pulso-network
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: pulso-solidario-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-root_password}
+      - MYSQL_DATABASE=${DB_NAME:-pulso_solidario}
+      - MYSQL_USER=${DB_USER:-pulso_user}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-pulso_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+    networks:
+      - pulso-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: pulso-solidario-phpmyadmin
+    environment:
+      - PMA_HOST=db
+      - PMA_USER=${DB_USER:-pulso_user}
+      - PMA_PASSWORD=${DB_PASSWORD:-pulso_password}
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - pulso-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  pulso-network:
+    driver: bridge

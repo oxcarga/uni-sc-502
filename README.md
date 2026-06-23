@@ -15,7 +15,9 @@ Este repositorio contiene los trabajos y prácticas desarrollados a lo largo del
 - Sistemas de diseño y componentes reutilizables
 - Accesibilidad web (WCAG 2.1)
 - Versionamiento con Git y GitHub
-- Integración frontend-backend (fases posteriores)
+- **Backend con PHP y MySQL**
+- **Containerización con Docker**
+- Integración frontend-backend
 
 ---
 
@@ -27,10 +29,20 @@ Este repositorio contiene los trabajos y prácticas desarrollados a lo largo del
 ├── proyecto/                           # Proyecto principal: Pulso Solidario
 │   ├── README.md                       # Documentación completa del proyecto
 │   ├── DESIGN.md                       # Sistema de diseño y tokens
-│   └── (archivos del proyecto)
+│   ├── estaticos/                      # Maqueta frontend estática
+│   ├── presentacion/                   # Presentación multimedia
+│   └── src/                            # 🚀 RAÍZ DEL PROYECTO (Docker)
+│       ├── docker-compose.yml          # Orquestación (PHP, MySQL, phpMyAdmin)
+│       ├── Dockerfile                  # Configuración de contenedor PHP
+│       ├── DOCKER.md                   # Documentación Docker
+│       ├── QUICKSTART.md               # Guía de inicio rápido
+│       ├── frontend/                   # HTML, CSS, JavaScript
+│       ├── backend/                    # Código PHP
+│       └── database/                   # Scripts SQL
 ├── practicas/                          # Ejercicios y prácticas de clase
-    ├── Práctica1                       # Práctica1 - tarea
-    ├── conversor                       # Práctica2 - tarea  
+│   ├── Práctica1/                      # Práctica1 - tarea
+│   └── conversor/                      # Práctica2 - tarea  
+└── .gitignore                          # Archivos ignorados por Git
 ```
 
 ---
@@ -38,14 +50,48 @@ Este repositorio contiene los trabajos y prácticas desarrollados a lo largo del
 ## 📁 Contenido del Repositorio
 
 ### 🎯 [Proyecto Principal: Pulso Solidario](proyecto/)
-Plataforma integral de gestión de donaciones de sangre con interfaz web responsiva.
 
-**Ir a:** [proyecto/README.md](proyecto/README.md)
+Plataforma integral de gestión de donaciones de sangre con interfaz web responsiva y backend con PHP + MySQL.
+
+**Stack Tecnológico**:
+- Frontend: HTML5, CSS3, JavaScript, Bootstrap 5
+- Backend: PHP 8.2
+- Base de Datos: MySQL 8.0
+- DevOps: Docker & Docker Compose
+
+**Iniciar el proyecto**:
+```bash
+cd proyecto/src
+docker-compose up -d
+# Accede a http://localhost:8000
+```
+
+**Documentación**: [proyecto/README.md](proyecto/README.md)
 
 ### 📖 Prácticas de Clase
 Ejercicios y materiales de aprendizaje desarrollados durante el curso.
 
-**Ir a:** [practicas/README.md](proyecto/README.md)
+**Ir a**: [practicas/README.md](practicas/README.md)
+
+---
+
+## 🚀 Quick Start - Pulso Solidario
+
+### Requisitos
+- Docker Desktop instalado ([Descargar](https://www.docker.com/products/docker-desktop))
+
+### Iniciar la Aplicación
+```bash
+cd proyecto/src
+docker-compose up -d
+```
+
+### Acceder a los Servicios
+- 🌐 Frontend/Backend: http://localhost:8000
+- 🗄️ phpMyAdmin: http://localhost:8080
+- 🔌 MySQL: localhost:3306
+
+Para más información, consulta [proyecto/src/QUICKSTART.md](proyecto/src/QUICKSTART.md)
 
 ---
 
@@ -58,7 +104,9 @@ Este curso tiene como objetivo:
 3. Implementar interfaces responsivas y accesibles
 4. Aplicar principios de diseño UX/UI en proyectos reales
 5. Practicar control de versiones y flujos de trabajo colaborativos
-6. Integrar frontend con backends y APIs (en fases posteriores)
+6. **Desarrollar backends con PHP y bases de datos MySQL**
+7. **Containerizar aplicaciones con Docker**
+8. Integrar frontend con backends y APIs
 
 ---
 

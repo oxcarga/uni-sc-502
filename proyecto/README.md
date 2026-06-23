@@ -45,35 +45,55 @@ Control del inventario de sangre:
 
 ### Prerequisitos
 
-- Navegador web moderno (Chrome, Firefox, Safari, Edge)
-- Conexión a internet (para cargar Bootstrap y fuentes desde CDN)
-- (Opcional) Servidor HTTP local para desarrollo
+- **Docker Desktop** instalado y corriendo ([Descargar](https://www.docker.com/products/docker-desktop))
+- Docker Compose (incluido en Docker Desktop)
 
-### Visualizar el Proyecto
+### Iniciar el Proyecto con Docker
 
-#### Opción 1: Abrir directamente en el navegador
+La forma más rápida y recomendada es usar Docker Compose:
+
 ```bash
-# Navega a la carpeta del proyecto
-cd proyecto/
+# Navega a la carpeta src/
+cd proyecto/src/
 
-# Abre index.html en tu navegador
-# Windows/Mac: doble clic en index.html
-# O arrastra el archivo al navegador
+# Inicia todos los servicios (backend PHP, MySQL, phpMyAdmin)
+docker-compose up -d
 ```
 
-#### Opción 2: Usar un servidor HTTP local (recomendado)
+Listo! Tu proyecto está corriendo en:
+- 🌐 **Frontend/Backend**: http://localhost:8000
+- 🗄️ **phpMyAdmin**: http://localhost:8080 (User: `pulso_user` / Pass: `pulso_password`)
+- 🔌 **MySQL**: localhost:3306
+
+### Para Detener los Servicios
+
 ```bash
-# Desde la carpeta proyecto/
+cd proyecto/src/
+docker-compose down
+```
+
+### Documentación Completa de Docker
+
+Para guías detalladas, comandos útiles y troubleshooting, consulta:
+- **[src/QUICKSTART.md](src/QUICKSTART.md)** - Inicio rápido
+- **[src/DOCKER.md](src/DOCKER.md)** - Documentación completa
+
+### Alternativa: Desarrollo Local sin Docker (Deprecated)
+
+Si prefieres ejecutar sin Docker (requiere PHP y MySQL instalados localmente):
+
+```bash
+# Opción 1: Abrir directamente en el navegador
+# Navega a proyecto/ y abre index.html
+
+# Opción 2: Usar servidor HTTP local
 python3 -m http.server 8000
 
-# Luego abre en tu navegador
-# http://localhost:8000
-```
-
-O si tienes Node.js instalado:
-```bash
+# O con Node.js:
 npx http-server .
 ```
+
+**Nota**: Se recomienda usar Docker para asegurar consistencia en todos los entornos.
 
 ---
 
@@ -119,33 +139,39 @@ npx http-server .
 
 ```
 proyecto/
-├── index.html                           # Hub de navegación (página de inicio)
-├── pages/
-│   ├── donor.html                       # Panel del Donante
-│   ├── admin.html                       # Panel de Administración General
-│   └── bank.html                        # Administración de Banco de Sangre
-├── assets/
-│   ├── css/
-│   │   ├── custom.css                   # Estilos personalizados y marca
-│   │   └── (otros estilos)
-│   ├── img/
-│   │   ├── logo.svg                     # Logo de Pulso Solidario
-│   │   ├── worldmap.svg                 # Mapa mundial decorativo
-│   │   ├── streetmap.svg                # Mapa de calles
-│   │   └── (otros SVGs)
-│   ├── js/
-│   │   └── (scripts de interacción)
-│   └── fonts/
-│       └── (tipografías personalizadas)
-├── screenshots/
-│   ├── screen-donor.png                 # Screenshot del panel donante
-│   ├── screen-admin.png                 # Screenshot del panel admin
-│   └── screen-bank.png                  # Screenshot del banco de sangre
+├── README.md                            # Documentación del proyecto
+├── DESIGN.md                            # Sistema de diseño completo
+├── estaticos/                           # Archivos estáticos de la maqueta
+│   ├── index.html                       # Hub de navegación (página de inicio)
+│   ├── pages/
+│   │   ├── donor.html                   # Panel del Donante
+│   │   ├── admin.html                   # Panel de Administración General
+│   │   └── bank.html                    # Administración de Banco de Sangre
+│   ├── assets/
+│   │   ├── css/                         # Estilos
+│   │   ├── img/                         # Imágenes y SVGs
+│   │   ├── js/                          # Scripts de interacción
+│   │   └── fonts/                       # Tipografías
+│   └── screenshots/                     # Capturas de pantalla
 ├── presentacion/
-│   └── pulso-solidario_v2.pptx          # Presentación multimedia del proyecto
-├── README.md                            # Este archivo
-└── DESIGN.md                            # Sistema de diseño completo
+│   └── pulso-solidario_v2.pptx          # Presentación multimedia
+└── src/                                 # 🚀 RAÍZ DEL PROYECTO (Docker)
+    ├── docker-compose.yml               # Orquestación de servicios
+    ├── Dockerfile                       # Configuración PHP
+    ├── docker-entrypoint.sh             # Script de inicialización
+    ├── .env.example                     # Variables de entorno (template)
+    ├── .dockerignore                    # Archivos a ignorar en Docker
+    ├── DOCKER.md                        # Documentación Docker completa
+    ├── QUICKSTART.md                    # Guía de inicio rápido
+    ├── frontend/                        # 🌐 HTML, CSS, JavaScript
+    │   └── README.md                    # Instrucciones frontend
+    ├── backend/                         # 🔧 Archivos PHP
+    │   └── README.md                    # Instrucciones backend
+    └── database/                        # 🗄️ Scripts SQL
+        └── README.md                    # Instrucciones base de datos
 ```
+
+**Importante**: El desarrollo del proyecto ocurre dentro de la carpeta `src/`, que es la raíz de la aplicación Docker.
 
 ---
 
@@ -242,14 +268,22 @@ El proyecto implementa estándares de accesibilidad web:
 - **Bootstrap 5.3**: Framework responsive cargado desde CDN
 - **Google Fonts**: Tipografías Manrope (titulares) e Inter (cuerpo)
 
-### Desarrollo y Herramientas
-- **Versionamiento**: Git para control de cambios
-- **Repositorio**: GitHub para colaboración
-- **Servidor de desarrollo**: Python HTTP Server o http-server (Node.js)
-- **Navegadores soportados**: Chrome, Firefox, Safari, Edge (últimas 2 versiones)
+### Backend (Desarrollando)
+- **PHP 8.2**: Lenguaje backend (corriendo en Docker)
+- **Apache 2.4**: Servidor web (corriendo en Docker)
+- **MySQL 8.0**: Base de datos (corriendo en Docker)
 
-### No requiere compilación
-El proyecto está diseñado para ejecutarse directamente en el navegador sin pasos de compilación o build.
+### DevOps & Herramientas
+- **Docker & Docker Compose**: Containerización y orquestación de servicios
+- **Git**: Control de versiones
+- **GitHub**: Repositorio y colaboración
+- **phpMyAdmin**: Interface gráfica para gestión de MySQL
+
+### Navegadores soportados
+- Chrome (últimas 2 versiones)
+- Firefox (últimas 2 versiones)
+- Safari (últimas 2 versiones)
+- Edge (últimas 2 versiones)
 
 ---
 
@@ -363,8 +397,8 @@ Administrador
 ## 🚧 Fases Futuras
 
 ### Fase 2: Backend y API
-- Desarrollo de API REST con Node.js/Express o Python/Django
-- Base de datos PostgreSQL o MongoDB
+- Desarrollo de API REST con PHP (actualmente corriendo en Docker)
+- Base de datos MySQL (actualmente corriendo en Docker)
 - Autenticación y autorización
 - Integración de notificaciones por email/SMS
 
@@ -375,7 +409,7 @@ Administrador
 - Dashboard analítico avanzado con BI
 
 ### Fase 4: Despliegue y Escalado
-- Containerización (Docker)
+- Despliegue en producción usando Docker
 - Orquestación (Kubernetes)
 - CI/CD pipeline (GitHub Actions)
 - Monitoreo y logging (ELK Stack)
