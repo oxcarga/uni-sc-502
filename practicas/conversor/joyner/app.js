@@ -29,7 +29,6 @@
         if (!resultado) {
             return updateError("Error desconocido");
         }
-        const resultadoEl = document.getElementById("resultado");
         resultadoEl.innerHTML = resultado;
     }
 
