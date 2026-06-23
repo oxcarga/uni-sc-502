@@ -1,0 +1,20 @@
+/* estilos.css */
+
+/* Estilo para el encabezado h1 */
+h1 {
+  color: #ff5733; /* Color del texto en naranja */
+  text-align: center; /* Alineación centrada del texto */
+}
+
+/* Estilo para el párrafo */
+p {
+  font-size: 16px; /* Tamaño de fuente de 16 píxeles */
+  line-height: 1.5; /* Espaciado entre líneas de 1.5 veces el tamaño de fuente */
+  margin: 20px; /* Márgenes de 20 píxeles en todos los lados */
+}
+
+/* Estilo para el cuerpo de la página */
+body {
+  background-color: #f5f5f5; /* Color de fondo gris claro */
+  font-family: Arial, sans-serif; /* Tipo de fuente predeterminado */
+}

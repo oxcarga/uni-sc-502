@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Conversor de Monedas</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+    <div class="contenedor">
+        <h1>Conversor de Monedas</h1>
+
+        <label>Monto:</label>
+        <input type="number" id="monto" placeholder="Ingrese el monto">
+
+        <label>Moneda de origen:</label>
+        <select id="origen">
+            <option value="USD">Dólar - USD</option>
+            <option value="CRC">Colón - CRC</option>
+            <option value="EUR">Euro - EUR</option>
+            <option value="MXN">Peso Mexicano - MXN</option>
+            <option value="JPY">Yen Japonés - JPY</option>
+        </select>
+
+        <label>Moneda de destino:</label>
+        <select id="destino">
+            <option value="CRC">Colón - CRC</option>
+            <option value="USD">Dólar - USD</option>
+            <option value="EUR">Euro - EUR</option>
+            <option value="MXN">Peso Mexicano - MXN</option>
+            <option value="JPY">Yen Japonés - JPY</option>
+        </select>
+
+        <button onclick="convertirMoneda()">Convertir</button>
+
+        <h2 id="resultado"></h2>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
