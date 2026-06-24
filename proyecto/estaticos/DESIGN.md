@@ -114,45 +114,45 @@ spacing:
   container-max: 1280px
 ---
 
-## Brand & Style
+## Marca y estilo
 
-The design system is engineered to evoke a sense of urgent empathy and clinical precision. It balances the warmth of humanitarian solidarity with the rigorous reliability of a professional health platform. The target audience includes medical professionals, volunteers, and donors who require immediate clarity and a feeling of grounded optimism.
+El sistema de diseño está pensado para transmitir empatía urgente y precisión clínica. Equilibra la calidez de la solidaridad humanitaria con la fiabilidad rigurosa de una plataforma de salud profesional. El público objetivo incluye profesionales médicos, voluntarios y donantes que necesitan claridad inmediata y una sensación de optimismo fundamentado.
 
-The aesthetic follows a **Modern Corporate** style with subtle **Glassmorphism** accents. This approach ensures high legibility and a systematic feel while using translucent layers and soft background blurs to prevent the interface from feeling sterile or detached. Whitespace is used aggressively to reduce cognitive load during high-stress interactions, maintaining a focus on "vitality" and "action."
+La estética sigue un estilo **corporativo moderno** con acentos sutiles de **glasmorfismo**. Este enfoque garantiza alta legibilidad y una sensación sistemática, usando capas translúcidas y desenfoques suaves de fondo para evitar que la interfaz se sienta estéril o distante. El espacio en blanco se usa de forma generosa para reducir la carga cognitiva en interacciones de alto estrés, manteniendo el foco en la "vitalidad" y la "acción".
 
-## Colors
+## Colores
 
-The palette is anchored by a primary Teal, chosen for its association with health, calmness, and professional stability. The secondary Navy provides a grounding force, used for deep hierarchy and structural elements. A tertiary Rose is reserved exclusively for high-priority "pulse" actions or critical alerts, ensuring they stand out without causing unnecessary alarm.
+La paleta se ancla en un teal primario, elegido por su asociación con salud, calma y estabilidad profesional. El navy secundario aporta solidez y se usa para jerarquía profunda y elementos estructurales. Un rosa terciario se reserva exclusivamente para acciones de alto impacto del "pulso" o alertas críticas, de modo que destaquen sin generar alarma innecesaria.
 
-The default mode is light, utilizing a refined scale of cool greys to maintain a clean, airy environment that emphasizes the vibrant primary accents.
+El modo predeterminado es claro, con una escala refinada de grises fríos que mantiene un entorno limpio y aireado y resalta los acentos primarios vibrantes.
 
-## Typography
+## Tipografía
 
-This design system utilizes a dual-font strategy to balance character with utility. Headlines use **Manrope** for its modern, balanced, and trustworthy geometric qualities. Its slightly condensed nature allows for high-impact titles that remain approachable.
+Este sistema de diseño utiliza una estrategia de doble tipografía para equilibrar carácter y utilidad. Los titulares usan **Manrope** por sus cualidades geométricas modernas, equilibradas y confiables. Su naturaleza ligeramente condensada permite títulos de alto impacto que siguen siendo cercanos.
 
-For body copy and functional data, **Inter** is employed. Its systematic and utilitarian design ensures maximum readability across varied screen densities, particularly in data-heavy health dashboards. On mobile devices, headline scales are aggressively reduced to ensure content remains above the fold without sacrificing the bold typographic hierarchy.
+Para el cuerpo de texto y los datos funcionales se emplea **Inter**. Su diseño sistemático y utilitario garantiza máxima legibilidad en distintas densidades de pantalla, especialmente en paneles de salud con muchos datos. En dispositivos móviles, las escalas de titulares se reducen de forma notable para mantener el contenido visible sin sacrificar la jerarquía tipográfica.
 
-## Layout & Spacing
+## Diseño y espaciado
 
-The layout is built upon a **12-column fluid grid** for desktop, transitioning to a **4-column grid** for mobile devices. All spacing is derived from a strict 8px baseline to maintain mathematical harmony and visual rhythm.
+El diseño se basa en una **rejilla fluida de 12 columnas** en escritorio, que pasa a una **rejilla de 4 columnas** en móvil. Todo el espaciado deriva de una línea base estricta de 8px para mantener armonía matemática y ritmo visual.
 
-Margins are generous to reflect the brand's emphasis on clarity and "breathing room." Content is generally centered in a max-width container on larger displays to prevent line lengths from becoming unreadable. Components within the grid should use consistent internal padding (e.g., 16px or 24px) to align with the external gutter system.
+Los márgenes son generosos para reflejar el énfasis de la marca en claridad y "espacio para respirar". El contenido suele centrarse en un contenedor de ancho máximo en pantallas grandes para evitar líneas demasiado largas. Los componentes dentro de la rejilla deben usar relleno interno consistente (por ejemplo, 16px o 24px) alineado con el canal externo.
 
-## Elevation & Depth
+## Elevación y profundidad
 
-Visual hierarchy in the design system is achieved through **Tonal Layers** and **Glassmorphism**. Rather than traditional heavy shadows, depth is communicated through subtle shifts in surface color and low-opacity backdrop blurs (12px to 20px blur radius).
+La jerarquía visual se logra mediante **capas tonales** y **glasmorfismo**. En lugar de sombras pesadas tradicionales, la profundidad se comunica con cambios sutiles de color de superficie y desenfoques de fondo de baja opacidad (radio de desenfoque de 12px a 20px).
 
-When elevation is required for modal elements or floating action buttons, use "Ambient Shadows"—soft, highly diffused shadows (0.05 to 0.1 opacity) with a slight tint of the secondary navy color to keep the shadows feeling integrated rather than "muddy." This creates a sense of light, stacked surfaces that feel modern and unencumbered.
+Cuando se requiere elevación para modales o botones flotantes, usa "sombras ambientales": sombras suaves y muy difusas (opacidad de 0.05 a 0.1) con un ligero tinte del navy secundario para que se integren en lugar de verse pesadas. Esto crea superficies apiladas ligeras, modernas y despejadas.
 
-## Shapes
+## Formas
 
-The shape language is consistently **Rounded**. This level of corner radius (0.5rem base) strikes a perfect balance: it is softer and more human than sharp edges, yet more professional and structured than pill-shaped elements. Large containers, such as cards or modals, should utilize the `rounded-xl` (1.5rem) token to emphasize the friendly, protective nature of the brand.
+El lenguaje de formas es consistentemente **redondeado**. Este radio de esquina (base de 0.5rem) equilibra suavidad y profesionalismo: más humano que los bordes rectos, pero más estructurado que elementos en forma de píldora. Los contenedores grandes, como tarjetas o modales, deben usar el token `rounded-xl` (1.5rem) para reforzar la naturaleza amable y protectora de la marca.
 
-## Components
+## Componentes
 
-- **Buttons:** Primary buttons use solid fills of the primary teal with white text. Hover states should involve a slight darkening of the fill rather than a shadow increase. Use `rounded-lg` for all buttons to provide a soft but sturdy click target.
-- **Cards:** Utilize a white background with a 1px border in a very light neutral-grey. For featured content, apply a backdrop-blur effect on a semi-transparent white surface to lean into the glassmorphism aesthetic.
-- **Input Fields:** Use a subtle background tint in the neutral-50 range with a clear 1px border. On focus, the border should transition to the primary teal with a soft outer glow.
-- **Chips:** These are used for status and filtering. They should follow a pill-shape (`rounded-full`) to distinguish them from the more structural square-ish buttons.
-- **Pulse Indicators:** A unique component for this design system; a small, animated glowing dot using the tertiary rose color, used to indicate live data feeds or urgent health alerts.
-- **Lists:** High-density lists should remove borders in favor of clean whitespace and subtle zebra-striping to maintain the minimalist feel.
+- **Botones:** Los botones primarios usan relleno sólido del teal primario con texto blanco. Los estados al pasar el cursor deben oscurecer ligeramente el relleno en lugar de aumentar la sombra. Usa `rounded-lg` en todos los botones para un objetivo de clic suave pero firme.
+- **Tarjetas:** Usa fondo blanco con borde de 1px en un gris neutro muy claro. Para contenido destacado, aplica desenfoque de fondo sobre una superficie blanca semitransparente para reforzar la estética de glasmorfismo.
+- **Campos de entrada:** Usa un tinte de fondo sutil en el rango neutral-50 con borde claro de 1px. Al enfocar, el borde debe pasar al teal primario con un resplandor exterior suave.
+- **Chips:** Se usan para estado y filtrado. Deben tener forma de píldora (`rounded-full`) para distinguirse de botones más estructurados.
+- **Indicadores de pulso:** Componente único de este sistema; un punto pequeño animado con brillo en rosa terciario, usado para indicar datos en vivo o alertas de salud urgentes.
+- **Listas:** Las listas de alta densidad deben evitar bordes a favor de espacio en blanco limpio y rayado alternado sutil para mantener la sensación minimalista.

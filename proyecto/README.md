@@ -43,57 +43,7 @@ Control del inventario de sangre:
 
 ## 🚀 Cómo Empezar
 
-### Prerequisitos
-
-- **Docker Desktop** instalado y corriendo ([Descargar](https://www.docker.com/products/docker-desktop))
-- Docker Compose (incluido en Docker Desktop)
-
-### Iniciar el Proyecto con Docker
-
-La forma más rápida y recomendada es usar Docker Compose:
-
-```bash
-# Navega a la carpeta src/
-cd proyecto/src/
-
-# Inicia todos los servicios (backend PHP, MySQL, phpMyAdmin)
-docker-compose up -d
-```
-
-Listo! Tu proyecto está corriendo en:
-- 🌐 **Frontend/Backend**: http://localhost:8000
-- 🗄️ **phpMyAdmin**: http://localhost:8080 (User: `pulso_user` / Pass: `pulso_password`)
-- 🔌 **MySQL**: localhost:3306
-
-### Para Detener los Servicios
-
-```bash
-cd proyecto/src/
-docker-compose down
-```
-
-### Documentación Completa de Docker
-
-Para guías detalladas, comandos útiles y troubleshooting, consulta:
-- **[src/QUICKSTART.md](src/QUICKSTART.md)** - Inicio rápido
-- **[src/DOCKER.md](src/DOCKER.md)** - Documentación completa
-
-### Alternativa: Desarrollo Local sin Docker (Deprecated)
-
-Si prefieres ejecutar sin Docker (requiere PHP y MySQL instalados localmente):
-
-```bash
-# Opción 1: Abrir directamente en el navegador
-# Navega a proyecto/ y abre index.html
-
-# Opción 2: Usar servidor HTTP local
-python3 -m http.server 8000
-
-# O con Node.js:
-npx http-server .
-```
-
-**Nota**: Se recomienda usar Docker para asegurar consistencia en todos los entornos.
+Instrucciones de configuración, inicio con Docker y desarrollo local en **[src/README.md](src/README.md)**.
 
 ---
 
@@ -113,11 +63,11 @@ npx http-server .
 ### 2. **Panel de Administración General** (`pages/admin.html`)
 
 **Secciones principales:**
-- **Dashboard**: KPIs principales (donantes activos, donaciones este mes, tasa de conversión)
+- **Panel principal**: Indicadores clave (donantes activos, donaciones este mes, tasa de conversión)
 - **Gestión de Usuarios**: Tabla de usuarios con filtros y acciones (activar/desactivar, cambiar rol)
 - **Reportes**: Gráficos de donaciones por mes, distribución por tipo de sangre, efectividad por centro
 - **Configuración**: Políticas de donación, intervalos mínimos entre donaciones, criterios de elegibilidad
-- **Audit Log**: Registro de cambios en el sistema con timestamp y usuario responsable
+- **Registro de auditoría**: Registro de cambios en el sistema con marca de tiempo y usuario responsable
 - **Bancos Registrados**: Gestión de centros de donación y coordinación
 
 ### 3. **Gestión de Banco de Sangre** (`pages/bank.html`)
@@ -142,33 +92,11 @@ proyecto/
 ├── README.md                            # Documentación del proyecto
 ├── DESIGN.md                            # Sistema de diseño completo
 ├── estaticos/                           # Archivos estáticos de la maqueta
-│   ├── index.html                       # Hub de navegación (página de inicio)
-│   ├── pages/
-│   │   ├── donor.html                   # Panel del Donante
-│   │   ├── admin.html                   # Panel de Administración General
-│   │   └── bank.html                    # Administración de Banco de Sangre
-│   ├── assets/
-│   │   ├── css/                         # Estilos
-│   │   ├── img/                         # Imágenes y SVGs
-│   │   ├── js/                          # Scripts de interacción
-│   │   └── fonts/                       # Tipografías
+│   ├── pages/                           # Vistas del donante, banco de sangre y admin
+│   ├── assets/                          # Estilos, imágenes, scripts y tipografías
 │   └── screenshots/                     # Capturas de pantalla
-├── presentacion/
-│   └── pulso-solidario_v2.pptx          # Presentación multimedia
+├── entregables/                         # .docx y y .pptx entregables del proyecto
 └── src/                                 # 🚀 RAÍZ DEL PROYECTO (Docker)
-    ├── docker-compose.yml               # Orquestación de servicios
-    ├── Dockerfile                       # Configuración PHP
-    ├── docker-entrypoint.sh             # Script de inicialización
-    ├── .env.example                     # Variables de entorno (template)
-    ├── .dockerignore                    # Archivos a ignorar en Docker
-    ├── DOCKER.md                        # Documentación Docker completa
-    ├── QUICKSTART.md                    # Guía de inicio rápido
-    ├── frontend/                        # 🌐 HTML, CSS, JavaScript
-    │   └── README.md                    # Instrucciones frontend
-    ├── backend/                         # 🔧 Archivos PHP
-    │   └── README.md                    # Instrucciones backend
-    └── database/                        # 🗄️ Scripts SQL
-        └── README.md                    # Instrucciones base de datos
 ```
 
 **Importante**: El desarrollo del proyecto ocurre dentro de la carpeta `src/`, que es la raíz de la aplicación Docker.
@@ -183,7 +111,7 @@ El proyecto implementa un **Sistema de Diseño Completo** definido en [DESIGN.md
 
 | Color | Valor | Uso |
 |-------|-------|-----|
-| **Primario (Teal)** | `#00685f` | Elemento principal, botones de acción, headers |
+| **Primario (Teal)** | `#00685f` | Elemento principal, botones de acción, encabezados |
 | **Secundario (Navy)** | `#545f73` | Elementos secundarios, subtítulos, estructuras |
 | **Terciario (Rosa)** | `#b90538` | Alertas críticas, acciones urgentes, "Pulso" |
 | **Fondo** | `#f8f9ff` | Fondo general de la interfaz |
@@ -193,32 +121,32 @@ El proyecto implementa un **Sistema de Diseño Completo** definido en [DESIGN.md
 ### Tipografía
 
 - **Titulares (Manrope)**: Moderna, equilibrada y confiable
-  - Headline XL: 48px (desktop), 32px (mobile)
-  - Headline LG: 32px (desktop), 24px (mobile)
-  - Headline MD: 24px
+  - Titular XL: 48px (escritorio), 32px (móvil)
+  - Titular LG: 32px (escritorio), 24px (móvil)
+  - Titular MD: 24px
 
 - **Cuerpo (Inter)**: Legible, sistemática y óptima para datos
-  - Body LG: 18px
-  - Body MD: 16px (estándar)
-  - Body SM: 14px
-  - Label MD: 12px
+  - Cuerpo LG: 18px
+  - Cuerpo MD: 16px (estándar)
+  - Cuerpo SM: 14px
+  - Etiqueta MD: 12px
 
 ### Componentes
 
 #### Botones
 - **Primarios**: Relleno sólido teal con texto blanco
 - **Secundarios**: Contorno en teal con fondo transparente
-- **Estados**: Normal, hover (oscurecimiento), activo, deshabilitado
+- **Estados**: Normal, al pasar el cursor (oscurecimiento), activo, deshabilitado
 - **Bordes redondeados**: `0.5rem` (lg)
 
-#### Tarjetas (Cards)
+#### Tarjetas
 - Fondo blanco con borde 1px en gris muy claro
-- Para contenido destacado: efecto glasmorfismo con backdrop-blur
-- Padding interno: 24px
+- Para contenido destacado: efecto de glasmorfismo con desenfoque de fondo
+- Relleno interno: 24px
 
 #### Campos de Entrada
 - Fondo en neutro-50 con borde 1px claro
-- En focus: borde teal con glow suave
+- Al enfocar: borde teal con resplandor suave
 - Radio: `0.5rem`
 
 #### Indicador de Pulso
@@ -229,17 +157,17 @@ El proyecto implementa un **Sistema de Diseño Completo** definido en [DESIGN.md
 #### Listados
 - Alta densidad sin bordes innecesarios
 - Espaciado generoso vertical
-- Zebra-striping sutil para legibilidad
+- Rayado alternado sutil para legibilidad
 
-### Responsive Design
+### Diseño responsivo
 
-- **Desktop-first**: Diseñado primero para pantallas grandes
-- **Grid**: 12 columnas en desktop, 4 en mobile
-- **Barra lateral**: Sidebar en desktop → Topbar horizontal en mobile
-- **Breakpoints**: 
-  - Desktop: >1024px (12 columnas)
-  - Tablet: 768px-1024px (8 columnas)
-  - Mobile: <768px (4 columnas)
+- **Escritorio primero**: Diseñado primero para pantallas grandes
+- **Rejilla**: 12 columnas en escritorio, 4 en móvil
+- **Barra lateral**: Barra lateral en escritorio → Barra superior horizontal en móvil
+- **Puntos de quiebre**: 
+  - Escritorio: >1024px (12 columnas)
+  - Tableta: 768px-1024px (8 columnas)
+  - Móvil: <768px (4 columnas)
 
 ---
 
@@ -256,7 +184,7 @@ El proyecto implementa estándares de accesibilidad web:
 - **Contraste**: Cumple WCAG AA (4.5:1 para texto principal)
 - **Animaciones**: Respeta `prefers-reduced-motion` para indicador de pulso
 - **Navegación por teclado**: Todos los elementos son navegables con Tab/Shift+Tab
-- **Focus visible**: Indicadores claros de foco en todos los elementos interactivos
+- **Foco visible**: Indicadores claros de foco en todos los elementos interactivos
 
 ---
 
@@ -273,11 +201,11 @@ El proyecto implementa estándares de accesibilidad web:
 - **Apache 2.4**: Servidor web (corriendo en Docker)
 - **MySQL 8.0**: Base de datos (corriendo en Docker)
 
-### DevOps & Herramientas
-- **Docker & Docker Compose**: Containerización y orquestación de servicios
+### DevOps y herramientas
+- **Docker y Docker Compose**: Containerización y orquestación de servicios
 - **Git**: Control de versiones
 - **GitHub**: Repositorio y colaboración
-- **phpMyAdmin**: Interface gráfica para gestión de MySQL
+- **phpMyAdmin**: Interfaz gráfica para gestión de MySQL
 
 ### Navegadores soportados
 - Chrome (últimas 2 versiones)
@@ -291,23 +219,23 @@ El proyecto implementa estándares de accesibilidad web:
 
 ### Espaciado (basado en 8px)
 - Base: 8px
-- Gutter: 24px (espacios entre columnas)
-- Margen mobile: 16px
-- Margen desktop: 48px
+- Canal entre columnas: 24px
+- Margen móvil: 16px
+- Margen escritorio: 48px
 - Ancho máximo del contenedor: 1280px
 
-### Bordes Redondeados
-- Small: 0.25rem (4px)
-- Default: 0.5rem (8px)
-- Medium: 0.75rem (12px)
-- Large: 1rem (16px)
-- Extra Large: 1.5rem (24px)
-- Full (pill): 9999px
+### Bordes redondeados
+- Pequeño: 0.25rem (4px)
+- Predeterminado: 0.5rem (8px)
+- Mediano: 0.75rem (12px)
+- Grande: 1rem (16px)
+- Extra grande: 1.5rem (24px)
+- Completo (píldora): 9999px
 
 ### Sombras y Elevación
 - Sombras ambientes: Muy suave, opacidad 0.05-0.1
 - Color de sombra: Ligeramente teñido con secundario navy
-- Blur radius: 12px-20px para efecto glasmorfismo
+- Radio de desenfoque: 12px-20px para efecto de glasmorfismo
 
 ---
 
@@ -358,15 +286,15 @@ Centro de Sangre
   └─ Asigna a hospitales → Trazabilidad
 
 Hospital
-  ├─ Solicita sangre → Queue de solicitudes
+  ├─ Solicita sangre → Cola de solicitudes
   ├─ Recibe asignación → Trazabilidad
   └─ Administra a paciente → Registro médico
 
 Administrador
-  ├─ Monitorea KPIs → Dashboard
+  ├─ Monitorea indicadores → Panel principal
   ├─ Gestiona usuarios → Base de datos
   ├─ Configura políticas → Sistema
-  └─ Revisa reportes → Analytics
+  └─ Revisa reportes → Analítica
 ```
 
 ---
@@ -380,17 +308,17 @@ Administrador
 - Autorización basada en roles (RBAC)
 - Auditoría completa de acciones
 - Cumplimiento de HIPAA (Health Insurance Portability and Accountability Act)
-- GDPR compliance para datos personales
+- Cumplimiento del GDPR para datos personales
 
 ---
 
 ## 📚 Referencias y Documentación
 
 - [DESIGN.md](DESIGN.md) - Sistema de diseño completo con tokens y especificaciones
-- [Bootstrap 5 Documentation](https://getbootstrap.com/docs/5.0/)
-- [MDN Web Docs - Accessibility](https://developer.mozilla.org/en-US/docs/Web/Accessibility)
-- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
-- [Material Design System](https://m3.material.io/)
+- [Documentación de Bootstrap 5](https://getbootstrap.com/docs/5.0/)
+- [MDN Web Docs — Accesibilidad](https://developer.mozilla.org/en-US/docs/Web/Accessibility)
+- [Directrices WCAG 2.1](https://www.w3.org/WAI/WCAG21/quickref/)
+- [Sistema Material Design](https://m3.material.io/)
 
 ---
 
@@ -406,20 +334,20 @@ Administrador
 - Integración con sistemas hospitalarios (HL7/FHIR)
 - App móvil nativa (React Native / Flutter)
 - Mapas interactivos en tiempo real
-- Dashboard analítico avanzado con BI
+- Panel analítico avanzado con inteligencia de negocios
 
 ### Fase 4: Despliegue y Escalado
 - Despliegue en producción usando Docker
 - Orquestación (Kubernetes)
-- CI/CD pipeline (GitHub Actions)
-- Monitoreo y logging (ELK Stack)
+- Pipeline de CI/CD (GitHub Actions)
+- Monitoreo y registro (ELK Stack)
 
 ---
 
 ## 👥 Información del Proyecto
 
 **Proyecto**: Pulso Solidario
-**Versión**: 1.0 (Maqueta Frontend)
+**Versión**: 1.0 (Maqueta del frontend)
 **Estudiante**: Oscar García Valerio
 **Curso**: SC-502 - Ambiente Web - Cliente/Servidor
 **Período**: 2026

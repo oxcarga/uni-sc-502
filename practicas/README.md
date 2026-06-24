@@ -15,7 +15,7 @@ Aplicaciones de conversión de unidades desarrolladas como práctica de desarrol
 
 #### joyner/
 Implementación alternativa del conversor.
-- Stack: HTML5, CSS3, JavaScript vanilla
+- Tecnologías: HTML5, CSS3, JavaScript puro
 - Características: Conversión de unidades, interfaz intuitiva
 
 ---
