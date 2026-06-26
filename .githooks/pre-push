@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Bloquea pushes directos a main en local (complemento; la protección real está en GitHub).
+
+protected_branch="main"
+current_branch="$(git symbolic-ref --short HEAD 2>/dev/null || true)"
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [[ "${remote_ref}" == "refs/heads/${protected_branch}" ]]; then
+    if [[ "${current_branch}" == "${protected_branch}" ]]; then
+      echo "Error: no se permiten pushes directos a '${protected_branch}'."
+      echo "Crea una rama, sube tus cambios y abre un Pull Request."
+      echo
+      echo "  git checkout -b feature/mi-cambio"
+      echo "  git push -u origin feature/mi-cambio"
+      echo "  gh pr create"
+      exit 1
+    fi
+  fi
+done
+
+exit 0
