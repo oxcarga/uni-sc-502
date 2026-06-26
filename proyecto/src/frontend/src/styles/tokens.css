@@ -1,0 +1,28 @@
+/* Design tokens — Pulso Solidario */
+:root {
+  --color-primary: #00685f;
+  --color-primary-dark: #004d47;
+  --color-secondary: #545f73;
+  --color-tertiary: #b90538;
+  --color-bg: #f8f9ff;
+  --color-surface: #ffffff;
+  --color-ink: #0b1c30;
+  --color-muted: #6d7a77;
+  --color-line: #e2e8f0;
+  --color-success: #2e7d52;
+  --color-error: #ba1a1a;
+
+  --font-headline: 'Manrope', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-6: 3rem;
+
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --shadow-card: 0 20px 60px rgba(11, 28, 48, 0.12);
+  --max-width: 960px;
+}

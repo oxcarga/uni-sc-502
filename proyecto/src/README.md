@@ -19,8 +19,9 @@ docker-compose up -d
 ```
 
 ¡Listo! Tu proyecto está corriendo en:
-- 🌐 **Frontend/Backend**: http://localhost:8000
-- 🗄️ **phpMyAdmin**: http://localhost:8080 (Usuario: `pulso_user` / Contraseña: `pulso_password`)
+- 🌐 **Frontend (Vite)**: http://localhost:3000
+- 🔧 **API**: http://localhost:3001/api/
+- 🗄️ **phpMyAdmin**: http://localhost:3002 (Usuario: `pulso_user` / Contraseña: `pulso_password`)
 - 🔌 **MySQL**: localhost:3306
 
 ### Para Detener los Servicios
@@ -44,7 +45,7 @@ Si prefieres ejecutar sin Docker (requiere PHP y MySQL instalados localmente):
 # Navega a ../estaticos/ y abre index.html
 
 # Opción 2: Usar servidor HTTP local
-python3 -m http.server 8000
+python3 -m http.server 8080
 
 # O con Node.js:
 npx http-server .
@@ -62,7 +63,7 @@ src/
 ├── .env.example            # Variables de entorno (plantilla)
 ├── DOCKER.md               # Documentación Docker
 ├── QUICKSTART.md           # Guía de inicio rápido
-├── frontend/               # Interfaz web (raíz en http://localhost:8000/)
+├── frontend/               # Interfaz web (Vite + JavaScript)
 ├── backend/                # API PHP (prefijo /api/)
 └── database/               # Scripts SQL de inicialización
 ```

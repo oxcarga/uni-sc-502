@@ -1,61 +1,87 @@
-# Quick Start - Docker Setup
+# Inicio rápido — Configuración con Docker
 
-## One-Command Setup
+## Configuración en un solo comando
 
-To start your entire development environment:
+Para iniciar todo el entorno de desarrollo:
 
 ```bash
+cd proyecto/src
 docker-compose up -d
 ```
 
-That's it! Your project is now running:
-- 🌐 Frontend: http://localhost:8000
-- 🗄️ phpMyAdmin: http://localhost:8080
+¡Listo! Tu proyecto ya está en ejecución:
+- 🌐 Frontend (Vite): http://localhost:3000
+- 🔧 API: http://localhost:3001/api/
+- 🗄️ phpMyAdmin: http://localhost:3002
 - 🔌 MySQL: localhost:3306
 
-## Stop Everything
+## Detener todo
 
 ```bash
 docker-compose down
 ```
 
-## Before You Start
+## Antes de empezar
 
-1. (Optional) Copy environment file:
+1. (Opcional) Copia y personaliza las variables de entorno:
    ```bash
    cp .env.example .env
    ```
 
-## Project Structure
+2. Los directorios se crean automáticamente. ¡Solo agrega tus archivos!
+
+## Estructura del proyecto
 
 ```
 ./
-├── docker-compose.yml      # Docker configuration
-├── Dockerfile              # PHP container build
-├── docker-entrypoint.sh    # Container startup script
-├── .env.example            # Environment variables template
-├── DOCKER.md              # Full documentation
-├── frontend/              # HTML, CSS, JavaScript
-├── backend/               # PHP files
-└── database/              # SQL initialization scripts
+├── docker-compose.yml      # Configuración de Docker ⭐ Ejecutar desde aquí
+├── Dockerfile              # Construcción del contenedor PHP
+├── docker-entrypoint.sh    # Script de inicio del contenedor
+├── .env.example            # Plantilla de variables de entorno
+├── DOCKER.md               # Documentación completa
+├── frontend/               # 🌐 Interfaz web (Vite + JS) → http://localhost:3000
+├── backend/                # 🔧 API REST (SlimPHP) → http://localhost:3001/api/
+└── database/               # 🗄️ Scripts SQL de inicialización
 ```
 
-## Common Commands
+## Mapeo de URLs
 
-| Command | Purpose |
-|---------|---------|
-| `docker-compose up -d` | Start all services |
-| `docker-compose down` | Stop all services |
-| `docker-compose logs -f` | View live logs |
-| `docker-compose exec web bash` | Access PHP container |
-| `docker-compose exec db mysql -u pulso_user -p pulso_solidario` | Access MySQL |
-| `docker-compose ps` | Show running containers |
+| Ubicación del archivo | URL de acceso |
+|-----------------------|---------------|
+| `frontend/src/` (Vite) | http://localhost:3000 |
+| `backend/public/index.php` | http://localhost:3001/api/ |
 
-## Next Steps
+## Comandos de Docker frecuentes
 
-1. Add HTML files to `frontend/`
-2. Add PHP files to `backend/`
-3. Create SQL scripts in `database/`
-4. Read `DOCKER.md` for detailed documentation
+| Comando | Propósito |
+|---------|-----------|
+| `docker-compose up -d` | Iniciar todos los servicios |
+| `docker-compose down` | Detener todos los servicios |
+| `docker-compose logs -f` | Ver registros en vivo |
+| `docker-compose logs -f backend` | Ver registros del servidor backend PHP |
+| `docker-compose logs -f db` | Ver registros de MySQL |
+| `docker-compose exec backend bash` | Acceder a la shell del contenedor PHP |
+| `docker-compose exec db mysql -u pulso_user -p pulso_solidario` | Acceder a la CLI de MySQL |
+| `docker-compose ps` | Mostrar contenedores en ejecución |
+| `docker-compose up -d --build` | Reconstruir e iniciar los servicios |
 
-For full documentation, see **DOCKER.md**
+## Solución de problemas
+
+**¿Los servicios no inician?**
+```bash
+docker-compose down -v
+docker-compose up -d --build
+```
+
+**Verificar si los contenedores están en ejecución:**
+```bash
+docker-compose ps
+```
+
+**Ver registros detallados:**
+```bash
+docker-compose logs backend
+docker-compose logs db
+```
+
+Para la documentación completa, consulta **DOCKER.md**

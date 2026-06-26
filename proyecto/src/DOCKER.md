@@ -1,225 +1,158 @@
-# Docker Setup for Pulso Solidario
+# Configuración de Docker para Pulso Solidario
 
-This Docker Compose configuration sets up the complete development environment for the Pulso Solidario project with PHP backend, MySQL database, and a web interface.
+Documentación del entorno Docker: servicios, volúmenes, red y archivos de infraestructura.
 
-## Architecture
+Para el día a día, empieza por **[QUICKSTART.md](QUICKSTART.md)**. Para desarrollo de la aplicación, consulta **[frontend/README.md](frontend/README.md)** y **[backend/README.md](backend/README.md)**.
 
-The setup includes three main services:
+## Servicios
 
-- **web**: PHP 8.2 Apache server (port 8000)
-- **db**: MySQL 8.0 database server (port 3306)
-- **phpmyadmin**: MySQL management interface (port 8080)
+| Servicio | Contenedor | Imagen / build | Puerto (host) |
+|----------|------------|----------------|---------------|
+| **backend** | `pulso-solidario-backend` | `Dockerfile` (PHP 8.2 + Apache) | 3001 → 80 (API) |
+| **frontend** | `pulso-solidario-frontend` | `node:20-alpine` | 3000 → 3000 |
+| **db** | `pulso-solidario-db` | `mysql:8.0` | 3306 → 3306 |
+| **phpmyadmin** | `pulso-solidario-phpmyadmin` | `phpmyadmin:latest` | 3002 → 80 |
 
-## Project Structure
+Los tres servicios comparten la red `pulso-network`. El servicio `backend` resuelve la base de datos por el hostname `db` (nombre del servicio en Compose, no `localhost`).
+
+## Archivos de infraestructura
 
 ```
-./
-├── frontend/           # HTML, CSS, JavaScript files
-├── backend/            # PHP application files
-└── database/           # SQL initialization scripts
+src/
+├── docker-compose.yml    # Orquestación de servicios, volúmenes y variables
+├── Dockerfile            # Imagen PHP: extensiones, Composer, Apache
+├── apache-api.conf       # Alias /api → backend/public (copiado al contenedor)
+├── docker-entrypoint.sh  # Permisos y arranque de Apache
+└── .env.example          # Plantilla de credenciales
 ```
 
-## Prerequisites
+### `docker-compose.yml`
 
-- Docker Desktop installed and running
-- Docker Compose (included with Docker Desktop)
+- **backend** se construye desde el `Dockerfile` y monta código fuente como volúmenes.
+- **db** persiste datos en el volumen nombrado `mysql_data` e inicializa la BD con scripts en `./database/`.
+- **phpmyadmin** se conecta a `db` mediante variables `PMA_*`.
 
-## Quick Start
+### `Dockerfile`
 
-### 1. Setup Environment Variables
+Construye la imagen del servicio `backend`:
 
-Copy the example environment file:
+- PHP 8.2 con Apache y `mod_rewrite`
+- Extensiones `mysqli`, `pdo`, `pdo_mysql`
+- Composer
+- Configuración de Apache para la API (`apache-api.conf`)
+
+### Volúmenes del servicio `backend`
+
+| Montaje en el host | Ruta en el contenedor | Rol |
+|-------------------|----------------------|-----|
+| `./backend` | `/var/www/backend` | Código de la API (alias `/api/` → `public/`) |
+| `./frontend` | `/app` (servicio `frontend`) | Código fuente Vite |
+
+El servicio **backend** expone la API en el puerto 3001. El servicio **frontend** ejecuta Vite en el puerto 3000 (mapeado en el host en el puerto 3000) y hace proxy de `/api` hacia `backend`.
+
+## Variables de entorno
+
+Definidas en `.env` (opcional; hay valores por defecto en `docker-compose.yml`):
+
+| Variable | Uso |
+|----------|-----|
+| `DB_ROOT_PASSWORD` | Contraseña root de MySQL |
+| `DB_USER` / `DB_PASSWORD` / `DB_NAME` | Credenciales de la aplicación |
+| `APP_ENV` / `APP_DEBUG` | Configuración de la aplicación |
+
+El servicio `backend` expone al PHP del backend: `MYSQL_HOST`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`.
+
+## Inicio y verificación
 
 ```bash
-cp .env.example .env
-```
-
-Edit `.env` if you want to change default database credentials.
-
-### 2. Start the Services
-
-```bash
-docker-compose up -d
-```
-
-This command will:
-- Build the PHP Apache image
-- Start MySQL database
-- Start phpMyAdmin
-- Create a shared network for all services
-
-### 3. Verify Services are Running
-
-```bash
+cp .env.example .env   # opcional
+docker-compose up -d --build
 docker-compose ps
 ```
 
-## Accessing Services
+| Recurso | URL | Credenciales |
+|---------|-----|--------------|
+| Frontend (Vite) | http://localhost:3000 | — |
+| API | http://localhost:3001/api/ | — |
+| phpMyAdmin | http://localhost:3002 | `pulso_user` / `pulso_password` |
+| MySQL (desde el host) | `localhost:3306` | `pulso_user` / `pulso_password` |
 
-| Service | URL | Default Credentials |
-|---------|-----|-------------------|
-| Web Application | http://localhost:8000 | - |
-| phpMyAdmin | http://localhost:8080 | User: `pulso_user` / Pass: `pulso_password` |
-| MySQL | localhost:3306 | User: `pulso_user` / Pass: `pulso_password` |
+## Flujo de desarrollo
 
-## Useful Commands
+Los volúmenes montan el código fuente directamente: los cambios en `frontend/` y `backend/` se reflejan al instante (HMR en Vite para el frontend).
 
-### Start Services
+| Qué desarrollas | Dónde | Documentación |
+|-----------------|-------|---------------|
+| Interfaz web | `frontend/` | [frontend/README.md](frontend/README.md) |
+| API (SlimPHP) | `backend/` | [backend/README.md](backend/README.md) |
+| Esquema / datos iniciales | `database/*.sql` | `provision.sh` en cada arranque del `backend`; además MySQL ejecuta los `.sql` si el volumen `mysql_data` está vacío |
+
+Dependencias PHP del backend:
+
 ```bash
-docker-compose up -d
+docker exec -it pulso-solidario-backend bash -c "cd /var/www/backend && composer install"
 ```
 
-### Stop Services
-```bash
-docker-compose down
-```
+Reconstruye la imagen (`--build`) cuando cambies `Dockerfile`, `apache-api.conf` o `docker-entrypoint.sh`.
 
-### View Logs
-```bash
-# All services
-docker-compose logs -f
+## Comandos útiles
 
-# Specific service
-docker-compose logs -f web
-docker-compose logs -f db
-```
+Los comandos habituales están en **[QUICKSTART.md](QUICKSTART.md)**. Adicionales:
 
-### Rebuild Services
 ```bash
-docker-compose up -d --build
-```
-
-### Stop and Remove Data
-```bash
+# Eliminar volúmenes (borra datos de MySQL)
 docker-compose down -v
-```
 
-### Access PHP Container Shell
-```bash
-docker-compose exec web bash
-```
+# Shell dentro del contenedor backend
+docker-compose exec backend bash
 
-### Access MySQL Console
-```bash
+# Consola MySQL
 docker-compose exec db mysql -u pulso_user -p pulso_solidario
 ```
 
-## Development Workflow
+## Solución de problemas
 
-### Adding Frontend Files
+### La API devuelve 404 o Apache no encuentra `/api`
 
-Place your HTML, CSS, and JavaScript files in `./frontend/`. They will be accessible at `http://localhost:8000/`.
+- Verifica que la imagen incluya `apache-api.conf`: `docker-compose up -d --build`
+- Revisa logs: `docker-compose logs -f backend`
 
-Example structure:
-```
-frontend/
-├── index.html
-├── css/
-│   └── style.css
-└── js/
-    └── app.js
-```
+### PHP no conecta a MySQL
 
-### Adding Backend PHP Files
+- Usa `MYSQL_HOST=db` dentro del contenedor `backend`, no `localhost`
+- Comprueba que credenciales en `.env` coincidan con las del servicio `db`
+- MySQL tarda unos segundos en iniciar; revisa: `docker-compose logs db`
 
-Place your PHP files in `./backend/`. The backend is configured to handle PHP files directly.
+### Puerto en uso (3000, 3001, 3002, 3306 u 8080)
 
-Example structure:
-```
-backend/
-├── index.php
-├── api/
-│   └── endpoint.php
-└── config/
-    └── database.php
-```
+Edita el mapeo en `docker-compose.yml` y vuelve a levantar los servicios.
 
-### Database Initialization
-
-Place SQL initialization scripts in `./database/`. These will be automatically executed when the database container starts for the first time.
-
-Example:
-```
-database/
-└── init.sql
-```
-
-### Sample Database Connection (PHP)
-
-```php
-<?php
-$host = getenv('MYSQL_HOST') ?: 'db';
-$user = getenv('MYSQL_USER') ?: 'pulso_user';
-$pass = getenv('MYSQL_PASSWORD') ?: 'pulso_password';
-$dbname = getenv('MYSQL_DATABASE') ?: 'pulso_solidario';
-
-try {
-    $pdo = new PDO(
-        "mysql:host=$host;dbname=$dbname",
-        $user,
-        $pass
-    );
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
-}
-?>
-```
-
-## Troubleshooting
-
-### Database Connection Issues
-
-If your PHP application can't connect to the database:
-- Make sure the `MYSQL_HOST` is set to `db` (the service name)
-- Verify credentials match in `.env` and your PHP configuration
-- Check logs: `docker-compose logs db`
-
-### Port Already in Use
-
-If ports 8000, 3306, or 8080 are already in use:
-1. Change the port mappings in `docker-compose.yml`
-2. Rebuild: `docker-compose up -d --build`
-
-### Container Won't Start
-
-Check the logs:
-```bash
-docker-compose logs
-```
-
-Common issues:
-- MySQL initialization takes time - give it 10-15 seconds
-- Permission issues - try: `docker-compose down -v && docker-compose up -d`
-
-### Clear Everything and Start Fresh
+### Reinicio limpio
 
 ```bash
 docker-compose down -v
-docker system prune -a
-docker-compose up -d
+docker-compose up -d --build
 ```
 
-## Advanced Configuration
+## Configuración avanzada
 
-### Using Custom MySQL Image
+### Otra versión de MySQL
 
-To use a different MySQL version, edit `docker-compose.yml`:
 ```yaml
 db:
-  image: mysql:5.7  # or any other version
+  image: mysql:5.7
 ```
 
-### Persistent PHP Configuration
+### PHP personalizado
 
-To add custom PHP configuration, create a `php.ini` file and add to the Dockerfile:
+Añade al `Dockerfile`:
+
 ```dockerfile
 COPY php.ini /usr/local/etc/php/conf.d/
 ```
 
-### Using Redis for Caching
+### Servicios adicionales (ej. Redis)
 
-Add to `docker-compose.yml`:
 ```yaml
 redis:
   image: redis:7-alpine
@@ -229,20 +162,13 @@ redis:
     - pulso-network
 ```
 
-## Production Considerations
+## Producción
 
-This setup is designed for **development**. For production:
-- Use environment-specific configurations
-- Implement proper backup strategies for MySQL volumes
-- Use a production-grade web server configuration
-- Add security headers and SSL/TLS
-- Implement proper logging and monitoring
-- Consider using container registries for image management
+Esta configuración es para **desarrollo**. En producción considera: variables por entorno, backups del volumen `mysql_data`, HTTPS, endurecimiento de Apache/PHP y no exponer phpMyAdmin ni MySQL al exterior sin necesidad.
 
-## Support
+## Referencias externas
 
-For issues or questions about this Docker setup, refer to:
-- [Docker Documentation](https://docs.docker.com/)
-- [Docker Compose Documentation](https://docs.docker.com/compose/)
-- [PHP Docker Official Image](https://hub.docker.com/_/php)
-- [MySQL Docker Official Image](https://hub.docker.com/_/mysql)
+- [Docker Docs](https://docs.docker.com/)
+- [Docker Compose Docs](https://docs.docker.com/compose/)
+- [Imagen PHP](https://hub.docker.com/_/php)
+- [Imagen MySQL](https://hub.docker.com/_/mysql)

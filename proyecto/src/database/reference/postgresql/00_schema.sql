@@ -1,6 +1,7 @@
 -- Pulso Solidario — esquema de base de datos (PostgreSQL / Supabase)
 -- Tabla: usuarios
 -- Cuentas de la plataforma. Cada usuario tiene un rol: donante, banco o admin.
+-- Este archivo NO se ejecuta en Docker (MySQL). Solo referencia para Supabase.
 
 create table if not exists public.usuarios (
     id            bigint generated always as identity primary key,

@@ -1,45 +1,74 @@
-# Database - SQL Scripts
+# Base de datos — Scripts de inicialización (MySQL / Docker)
 
-Place your database initialization scripts here. These will be automatically executed when the database container starts for the first time.
+Scripts SQL para el entorno local con Docker. El servicio `db` en `docker-compose.yml` ya está configurado así:
 
-## Structure
+```yaml
+db:
+  volumes:
+    - ./database:/docker-entrypoint-initdb.d
+```
+
+MySQL crea la base de datos `pulso_solidario` (variable `MYSQL_DATABASE`) y, si el volumen `mysql_data` está vacío, ejecuta también los `.sql` de esta carpeta **en orden alfabético** (solo la primera vez).
+
+En **cada** `docker-compose up`, el contenedor `backend` ejecuta `provision.sh` antes de arrancar Apache (vía `docker-entrypoint.sh`), de modo que esquema y datos de ejemplo quedan siempre aplicados de forma idempotente.
+
+## Archivos
 
 ```
 database/
-├── 01_init.sql         # Initial schema
-├── 02_seed.sql         # Sample data
-└── 03_procedures.sql   # Stored procedures
+├── 01_init.sql                        # Tablas (esquema MySQL)
+├── 02_seed.sql                        # Datos de ejemplo
+├── provision.sh                       # Reaplicar esquema/datos sin borrar volumen
+└── reference/postgresql/00_schema.sql # Esquema Supabase (no se ejecuta en Docker)
 ```
 
-## Naming Convention
+## Flujo automático
 
-Files are executed in alphabetical order. Use numbered prefixes for clear execution order:
-- `01_` - Schema creation
-- `02_` - Data seeding
-- `03_` - Procedures, functions, triggers
-
-## Example Script
-
-```sql
--- 01_init.sql
-CREATE TABLE users (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(100) NOT NULL,
-  email VARCHAR(100) UNIQUE NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE donations (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  user_id INT NOT NULL,
-  amount DECIMAL(10, 2) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-);
+```
+docker-compose up
+    → db (MySQL healthy)
+    → backend/docker-entrypoint.sh
+        → /database/provision.sh   ← 01_init.sql + 02_seed.sql
+        → Apache
 ```
 
-## Important Notes
+No hace falta ejecutar `provision.sh` a mano salvo depuración.
 
-- Scripts are only executed on first database creation
-- To re-run scripts, use: `docker-compose down -v && docker-compose up -d`
-- Use `if not exists` clauses to make scripts idempotent
+## Reinicio limpio (borrar todos los datos)
+
+```bash
+cd src
+docker-compose down -v
+docker-compose up -d --build
+```
+
+## Convención de nombres
+
+Usa prefijos numéricos para controlar el orden de ejecución:
+
+| Archivo        | Contenido              |
+|----------------|------------------------|
+| `01_init.sql`  | `CREATE TABLE IF NOT EXISTS` |
+| `02_seed.sql`  | `INSERT IGNORE` (idempotente) |
+| `03_*.sql`     | Procedimientos, vistas, etc. |
+
+Solo deben quedar en la raíz de `database/` los `.sql` que MySQL deba ejecutar. El esquema PostgreSQL/Supabase vive en `reference/postgresql/`.
+
+## Verificar
+
+```bash
+docker-compose exec db mysql -u pulso_user -ppulso_password pulso_solidario -e "SELECT * FROM users;"
+```
+
+O en phpMyAdmin: http://localhost:3002 (`pulso_user` / `pulso_password`).
+
+## Solución de problemas
+
+**La tabla `users` no existe**
+
+- El volumen ya existía antes de añadir los scripts → ejecuta `./database/provision.sh` o `docker-compose down -v`.
+- Revisa logs: `docker-compose logs db`
+
+**Error de sintaxis al iniciar**
+
+- No coloques SQL de PostgreSQL en la raíz de `database/` (usa `reference/postgresql/`).
