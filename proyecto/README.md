@@ -369,4 +369,4 @@ Todos los derechos reservados © 2026
 
 ---
 
-**Última actualización**: 23 de junio de 2026
+**Última actualización**: 24 de junio de 2026
