@@ -1,6 +1,6 @@
 /**
  * Cliente HTTP para la API REST del backend (prefijo /api).
- * En desarrollo, Vite hace proxy de /api hacia el contenedor backend.
+ * Nginx hace proxy de /api hacia el contenedor backend.
  */
 
 const API_BASE = '/api';
