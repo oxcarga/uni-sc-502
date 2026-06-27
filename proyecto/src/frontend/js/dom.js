@@ -24,7 +24,3 @@ export function createElement(tag, attrs = {}, children = []) {
 
   return el;
 }
-
-export function mount(container, node) {
-  container.replaceChildren(node);
-}
