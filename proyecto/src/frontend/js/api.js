@@ -4,6 +4,7 @@
  */
 
 const API_BASE = '/api';
+const SESSION_KEY = 'pulso_sesion';
 
 export async function apiFetch(path, options = {}) {
   const url = path.startsWith('http') ? path : `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
@@ -43,3 +44,44 @@ export const usersApi = {
       body: JSON.stringify(data),
     }),
 };
+
+export const authApi = {
+  login: (data) =>
+    apiFetch('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
+};
+
+export function saveSession(user) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+}
+
+export function getSession() {
+  const raw = sessionStorage.getItem(SESSION_KEY);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function clearSession() {
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
+/** Destinos placeholder hasta que existan los paneles reales. */
+export function panelPathForRole(rol) {
+  switch (rol) {
+    case 'banco':
+      return '/panel/banco/';
+    case 'admin':
+      return '/panel/admin/';
+    case 'donante':
+    default:
+      return '/panel/donante/';
+  }
+}

@@ -19,11 +19,12 @@ async function handleSubmit(event) {
 
   try {
     await usersApi.create({
-      nombre: [data.firstName, data.lastName].filter(Boolean).join(' ').trim(),
-      email: data.email,
+      nombre: String(data.firstName ?? '').trim(),
+      apellido: String(data.lastName ?? '').trim(),
+      email: String(data.email ?? '').trim(),
+      password: String(data.password ?? ''),
     });
-    // TODO: redirigir al login o panel cuando el flujo de auth esté listo
-    form.reset();
+    window.location.href = '/login/';
   } catch (error) {
     showError(error.message || 'No se pudo completar el registro.');
   }

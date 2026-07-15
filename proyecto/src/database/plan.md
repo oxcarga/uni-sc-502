@@ -36,7 +36,7 @@ Ya existe y se parte de aquí:
 | Backend | CRUD `/api/users` (`UserRepository`, `UserController`) |
 | Frontend | `login/` (stub) y `registro/` (POST create parcial) |
 
-La siguiente fase es **P0**.
+La siguiente fase es **P1**.
 
 ---
 
@@ -82,11 +82,11 @@ Ampliar `usuarios` a:
 
 ### Listo cuando
 
-- [ ] Registro crea fila con hash y `rol = donante`
-- [ ] Login ok con seed; login con password mala → 401
-- [ ] Usuario `activo = 0` no puede entrar
-- [ ] Email duplicado → 409 en el primer intento
-- [ ] JSON de usuario no incluye `password_hash`
+- [x] Registro crea fila con hash y `rol = donante`
+- [x] Login ok con seed; login con password mala → 401
+- [x] Usuario `activo = 0` no puede entrar
+- [x] Email duplicado → 409 en el primer intento
+- [x] JSON de usuario no incluye `password_hash`
 
 **Desbloquea:** CU0 login, CU1 registro (cuenta).
 

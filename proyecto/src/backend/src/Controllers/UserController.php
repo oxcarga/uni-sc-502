@@ -16,16 +16,11 @@ class UserController
     // SQLSTATE de violación de restricción (UNIQUE). PDO lo devuelve como string.
     private const ERROR_CODE_EMAIL_DUPLICATED = '23000';
     private const ERROR_MESSAGE_EMAIL_DUPLICATED = 'El correo electrónico ya está registrado.';
-    private const ERROR_MESSAGE_USER_NOT_FOUND = 'Usuario no encontrado.';
-    private const ERROR_MESSAGE_USER_CREATED = 'Usuario creado.';
-    private const ERROR_MESSAGE_USER_UPDATED = 'Usuario actualizado.';
-    private const ERROR_MESSAGE_USER_DELETED = 'Usuario eliminado.';
-    private const ERROR_MESSAGE_USER_VALIDATION = 'Datos de usuario inválidos.';
     private const ERROR_MESSAGE_USER_ERROR = 'Error al crear el usuario.';
-    private const ERROR_MESSAGE_USER_ERROR_UPDATE = 'Error al actualizar el usuario.';
-    private const ERROR_MESSAGE_USER_ERROR_DELETE = 'Error al eliminar el usuario.';
+    private const MIN_PASSWORD_LENGTH = 8;
+
     public function __construct(
-        private readonly UserRepository $users, 
+        private readonly UserRepository $users,
         private Logger $logger
     ) {
         $this->logger->info('UserController constructor');
@@ -34,7 +29,12 @@ class UserController
     public function index(Request $request, Response $response): Response
     {
         try {
-            return JsonResponse::success($response, $this->users->findAll());
+            $users = array_map(
+                static fn (array $user): array => UserRepository::toPublic($user),
+                $this->users->findAll()
+            );
+
+            return JsonResponse::success($response, $users);
         } catch (PDOException $error) {
             $this->logger->error('Error al consultar usuarios.', ['error' => $error->getMessage()]);
             return JsonResponse::error($response, 'Error al consultar usuarios.', 500);
@@ -51,13 +51,13 @@ class UserController
             return JsonResponse::error($response, 'Usuario no encontrado.', 404);
         }
 
-        return JsonResponse::success($response, $user);
+        return JsonResponse::success($response, UserRepository::toPublic($user));
     }
 
     public function create(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $validation = $this->validateUserData($body);
+        $validation = $this->validateUserData($body, requirePassword: true);
 
         if ($validation !== null) {
             $this->logger->warning('Datos de usuario inválidos.', ['validation' => $validation]);
@@ -67,11 +67,14 @@ class UserController
         try {
             $user = $this->users->create([
                 'nombre' => trim((string) $body['nombre']),
+                'apellido' => trim((string) $body['apellido']),
                 'email' => strtolower(trim((string) $body['email'])),
+                'password_hash' => password_hash((string) $body['password'], PASSWORD_DEFAULT),
+                'rol' => 'donante',
                 'tipo_sangre' => isset($body['tipo_sangre']) ? trim((string) $body['tipo_sangre']) : null,
             ]);
 
-            return JsonResponse::success($response, $user, 'Usuario creado.', 201);
+            return JsonResponse::success($response, UserRepository::toPublic($user), 'Usuario creado.', 201);
         } catch (PDOException $error) {
             if ($this->isDuplicateEmailError($error)) {
                 $this->logger->warning(self::ERROR_MESSAGE_EMAIL_DUPLICATED, ['email' => $body['email']]);
@@ -96,7 +99,8 @@ class UserController
         }
 
         $body = (array) $request->getParsedBody();
-        $validation = $this->validateUserData($body);
+        $requirePassword = array_key_exists('password', $body) && (string) $body['password'] !== '';
+        $validation = $this->validateUserData($body, requirePassword: $requirePassword);
 
         if ($validation !== null) {
             $this->logger->warning('Datos de usuario inválidos.', ['validation' => $validation]);
@@ -104,13 +108,20 @@ class UserController
         }
 
         try {
-            $user = $this->users->update($id, [
+            $payload = [
                 'nombre' => trim((string) $body['nombre']),
+                'apellido' => trim((string) $body['apellido']),
                 'email' => strtolower(trim((string) $body['email'])),
                 'tipo_sangre' => isset($body['tipo_sangre']) ? trim((string) $body['tipo_sangre']) : null,
-            ]);
+            ];
 
-            return JsonResponse::success($response, $user, 'Usuario actualizado.');
+            if ($requirePassword) {
+                $payload['password_hash'] = password_hash((string) $body['password'], PASSWORD_DEFAULT);
+            }
+
+            $user = $this->users->update($id, $payload);
+
+            return JsonResponse::success($response, UserRepository::toPublic($user ?? []), 'Usuario actualizado.');
         } catch (PDOException $error) {
             if ($this->isDuplicateEmailError($error)) {
                 $this->logger->warning(self::ERROR_MESSAGE_EMAIL_DUPLICATED, ['email' => $body['email']]);
@@ -143,18 +154,34 @@ class UserController
         }
     }
 
-    private function validateUserData(array $body): ?string
+    private function validateUserData(array $body, bool $requirePassword): ?string
     {
         $nombre = trim((string) ($body['nombre'] ?? ''));
+        $apellido = trim((string) ($body['apellido'] ?? ''));
         $email = trim((string) ($body['email'] ?? ''));
+        $password = (string) ($body['password'] ?? '');
         $tipoSangre = isset($body['tipo_sangre']) ? trim((string) $body['tipo_sangre']) : null;
 
         if ($nombre === '') {
             return 'El nombre es obligatorio.';
         }
 
+        if ($apellido === '') {
+            return 'El apellido es obligatorio.';
+        }
+
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return 'El correo electrónico no es válido.';
+        }
+
+        if ($requirePassword) {
+            if ($password === '') {
+                return 'La contraseña es obligatoria.';
+            }
+
+            if (strlen($password) < self::MIN_PASSWORD_LENGTH) {
+                return 'La contraseña debe tener al menos ' . self::MIN_PASSWORD_LENGTH . ' caracteres.';
+            }
         }
 
         if (!UserRepository::isValidBloodType($tipoSangre)) {
