@@ -1,4 +1,4 @@
-const { authApi, configApi, isLocalEnvironment, saveSession, panelPathForRole } = await import(
+const { authApi, configApi, isLocalEnvironment, cacheSession, panelPathForRole } = await import(
   `../js/api.js?t=${Date.now()}`
 );
 
@@ -46,7 +46,7 @@ async function handleSubmit(event) {
       throw new Error('Respuesta de login inválida.');
     }
 
-    saveSession(user);
+    cacheSession(user);
     window.location.href = panelPathForRole(user.role);
   } catch (error) {
     showError(error.message || 'No se pudo iniciar sesión.');

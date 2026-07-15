@@ -59,7 +59,7 @@ Definidas en `.env` (opcional; hay valores por defecto en `docker-compose.yml`):
 |----------|-----|
 | `DB_ROOT_PASSWORD` | Contraseña root de MySQL |
 | `DB_USER` / `DB_PASSWORD` / `DB_NAME` | Credenciales de la aplicación |
-| `APP_ENV` / `APP_DEBUG` | Ambiente (`local` por defecto) y debug. El FE consulta `GET /api/config` y solo en `local`/`development` muestra tips de Mailhog |
+| `APP_ENV` / `APP_DEBUG` | Ambiente (`local` por defecto) y debug. El FE consulta `GET /api/config` y solo en `local`/`development` muestra tips de Mailhog. En `production` la cookie de sesión `PULSOSESSID` usa `Secure` |
 | `APP_URL` | Base del frontend para enlaces de confirmación (default `http://localhost:3000`) |
 | `SMTP_HOST` / `SMTP_PORT` | SMTP (default Mailhog: `mailhog:1025`) |
 | `MAIL_FROM` | Remitente de correos de confirmación |
@@ -85,6 +85,10 @@ docker-compose ps
 ### Correo de confirmación (local)
 
 Tras registrarte, el backend envía el enlace por SMTP a **Mailhog**. Ábrelo en http://localhost:8025, entra al mensaje y usa el enlace (`/confirm-email/?token=…`). Si SMTP falla, el mismo enlace queda en los logs del backend (`docker compose logs backend`).
+
+### Sesión (cookie HttpOnly)
+
+Login y confirmación de correo crean una sesión PHP (`PULSOSESSID`, HttpOnly, `SameSite=Lax`, path `/`). El FE llama a la API con `credentials: 'include'` vía el proxy Nginx de `/api/`. Las rutas `/panel/*` usan un auth guard que consulta `GET /api/auth/me`.
 
 ## Flujo de desarrollo
 

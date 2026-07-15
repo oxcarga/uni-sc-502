@@ -1,4 +1,4 @@
-const { authApi, saveSession, panelPathForRole } = await import(`../js/api.js?t=${Date.now()}`);
+const { authApi, cacheSession, panelPathForRole } = await import(`../js/api.js?t=${Date.now()}`);
 
 const statusEl = document.getElementById('confirm-status');
 const errorBox = document.getElementById('confirm-error');
@@ -20,7 +20,7 @@ async function confirmToken(value) {
       throw new Error('Respuesta de confirmación inválida.');
     }
 
-    saveSession(user);
+    cacheSession(user);
     if (statusEl) {
       statusEl.textContent = 'Correo confirmado. Entrando a tu panel…';
     }

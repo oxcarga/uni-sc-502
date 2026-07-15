@@ -22,7 +22,7 @@ Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./
 
 ## Cómo usar este plan
 
-1. Implementar **una fase a la vez**, en orden (P0 → P0b → P1 → … → P6).
+1. Implementar **una fase a la vez**, en orden (P0 → P0b → P0c → P1 → … → P6).
 2. En cada fase cubrir los **4 pilares** (DB, BE, FE, Config). Si un pilar no aplica, dejar la subsección con `Sin cambios` y una línea de por qué.
 3. Tras cambios de esquema: re-provisionar (`database/provision.sh` o `docker compose down -v && up -d`).
 4. Al cerrar una fase: marcar checklist, poner ✅ al inicio del título `## Px` y en el mapa, y pasar a la siguiente.
@@ -151,6 +151,51 @@ Ampliar `users` en `01_init.sql`:
 - [x] En local se puede ver/abrir el correo de prueba vía Config documentada
 
 **Desbloquea:** registro con propiedad del correo verificada.
+
+---
+
+## ✅ P0c — Sesión de usuario y auth guard
+
+**Objetivo:** tener sesión de usuario real (no solo `sessionStorage` en el cliente) y proteger rutas internas `/panel/*`.
+
+**Hueco actual:** tras login/confirm el FE guarda un objeto en `sessionStorage` (`pulso_session`), pero no hay sesión de servidor ni cookie/token verificable. Cualquiera puede abrir `/panel/donor|bank|admin/` sin autenticarse.
+
+### DB
+
+Sin cambios de esquema en P0c (sesión vía cookie de servidor o token firmado, sin tabla `sessions`). Si más adelante se necesitan refresh tokens persistidos, documentarlo en una fase posterior.
+
+### BE
+
+1. Tras login y confirm-email exitosos: emitir sesión de servidor (preferido: cookie HttpOnly de sesión PHP; alternativa: token firmado simple).
+2. `GET /api/auth/me`: devolver el usuario de la sesión activa o 401.
+3. `POST /api/auth/logout`: invalidar sesión/cookie.
+4. Introducir middleware/patrón de auth reutilizable para endpoints protegidos (en P0c al menos para `/auth/me`; el resto de APIs de panel lo usarán desde P1).
+5. Login/confirm-email deben establecer la misma forma de sesión (no solo devolver JSON de usuario).
+
+### FE
+
+1. Dejar de tratar `sessionStorage` como única fuente de verdad: la sesión válida es la del servidor (`/api/auth/me`); cache local del perfil es opcional.
+2. Módulo guard (p. ej. `frontend/js/auth-guard.js`) cargado en todas las páginas `/panel/*`:
+   - Sin sesión → redirect a `/login/`
+   - Con sesión pero `role` distinto al panel visitado → redirect al panel correcto (o mensaje 403 UX)
+3. Logout visible en los placeholders de panel (llama a `/api/auth/logout` y limpia cache local).
+4. Alinear `login.js` y `confirm-email.js` con la nueva sesión (credentials/cookies en `fetch` si aplica).
+
+### Config
+
+1. Documentar cookie: `SameSite`, `Secure` (local vs production) en `.env.example` / `DOCKER.md` si hace falta.
+2. Asegurar que el proxy Nginx reenvía cookies al backend (`/api/`).
+3. Nota: el FE estático no puede ocultar el HTML; el guard es UX + la API exige sesión. No bloquear `/panel/*` solo en Nginx.
+
+### Listo cuando
+
+- [x] Login/confirm crean sesión verificable con `GET /api/auth/me`
+- [x] Logout cierra la sesión
+- [x] Visitar `/panel/*` sin sesión redirige a `/login/`
+- [x] Usuario `donor` no permanece en `/panel/admin` (y análogo por rol)
+- [x] Sin sesión no se puede “usar” la app como autenticado vía API protegida
+
+**Desbloquea:** paneles internos seguros antes de P1+.
 
 ---
 
@@ -401,6 +446,7 @@ Evaluar al completar `donations`.
 |------|---------|-------|----|----|----|--------|
 | ✅ P0 | Cuentas + login/registro | CU0, CU1 (cuenta) | ✅ | ✅ | ✅ | ✅ |
 | ✅ P0b | Confirmación de correo | CU1 (cuenta verificada) | ✅ | ✅ | ✅ | ✅ |
+| ✅ P0c | Sesión servidor + auth guard `/panel/*` | CU0 (sesión) | ✅ | ✅ | ✅ | ✅ |
 | P1 | Perfil donante + centros | CU1 (perfil) | ☐ | ☐ | ☐ | ☐ |
 | P2 | Citas + donaciones | CU1 (agenda/historial) | ☐ | ☐ | ☐ | ☐ |
 | P3 | Inventario + movimientos | Base CU2/CU3 | ☐ | ☐ | ☐ | ☐ |

@@ -6,9 +6,11 @@ declare(strict_types=1);
 use App\Controllers\AuthController;
 use App\Controllers\UserController;
 use App\Database\Connection;
+use App\Middleware\AuthMiddleware;
 use App\Repositories\EmailVerificationTokenRepository;
 use App\Repositories\UserRepository;
 use App\Services\EmailVerificationService;
+use App\Support\Session;
 use App\Support\SmtpMailer;
 use DI\Container;
 use Slim\Factory\AppFactory;
@@ -16,6 +18,9 @@ use Psr\Log\LoggerInterface;
 
 // Carga las dependencias
 require __DIR__ . '/../vendor/autoload.php';
+
+// Sesión de servidor (cookie HttpOnly) antes de atender la request
+Session::start();
 
 // Crea el contenedor de dependencias
 $container = new Container();
@@ -66,6 +71,10 @@ $container->set(
         $c->get(EmailVerificationService::class),
         $c->get(LoggerInterface::class)
     )
+);
+$container->set(
+    AuthMiddleware::class,
+    fn ($c) => new AuthMiddleware($c->get(UserRepository::class))
 );
 
 (require __DIR__ . '/../src/Support/Logger.php')($container);

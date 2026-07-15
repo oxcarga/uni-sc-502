@@ -1,20 +1,23 @@
 /**
  * Cliente HTTP para la API REST del backend (prefijo /api).
  * Nginx hace proxy de /api hacia el contenedor backend.
+ * credentials: 'include' envía/recibe la cookie de sesión HttpOnly.
  */
 
 const API_BASE = '/api';
-const SESSION_KEY = 'pulso_session';
+const SESSION_CACHE_KEY = 'pulso_session_cache';
 
 export async function apiFetch(path, options = {}) {
   const url = path.startsWith('http') ? path : `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
+  const { headers: optionHeaders, ...rest } = options;
 
   const response = await fetch(url, {
+    ...rest,
+    credentials: 'include',
     headers: {
       Accept: 'application/json',
-      ...options.headers,
+      ...optionHeaders,
     },
-    ...options,
   });
 
   const contentType = response.headers.get('content-type') ?? '';
@@ -74,14 +77,20 @@ export const authApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
     }),
+  me: () => apiFetch('/auth/me'),
+  logout: () =>
+    apiFetch('/auth/logout', {
+      method: 'POST',
+    }),
 };
 
-export function saveSession(user) {
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+/** Cache opcional del perfil; la sesión real vive en cookie de servidor. */
+export function cacheSession(user) {
+  sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(user));
 }
 
-export function getSession() {
-  const raw = sessionStorage.getItem(SESSION_KEY);
+export function getCachedSession() {
+  const raw = sessionStorage.getItem(SESSION_CACHE_KEY);
   if (!raw) return null;
 
   try {
@@ -91,8 +100,23 @@ export function getSession() {
   }
 }
 
+export function clearSessionCache() {
+  sessionStorage.removeItem(SESSION_CACHE_KEY);
+}
+
+/** @deprecated usar cacheSession — se mantiene por compatibilidad temporal */
+export function saveSession(user) {
+  cacheSession(user);
+}
+
+/** @deprecated usar getCachedSession */
+export function getSession() {
+  return getCachedSession();
+}
+
+/** @deprecated usar clearSessionCache */
 export function clearSession() {
-  sessionStorage.removeItem(SESSION_KEY);
+  clearSessionCache();
 }
 
 /** Destinos placeholder hasta que existan los paneles reales. */

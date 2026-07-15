@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Repositories\UserRepository;
 use App\Services\EmailVerificationService;
 use App\Support\JsonResponse;
+use App\Support\Session;
 use Monolog\Logger;
 use PDOException;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -57,6 +58,8 @@ class AuthController
                 return JsonResponse::error($response, self::ERROR_MESSAGE_EMAIL_NOT_CONFIRMED, 403);
             }
 
+            Session::login((int) $user['id']);
+
             return JsonResponse::success(
                 $response,
                 UserRepository::toSession($user),
@@ -79,9 +82,10 @@ class AuthController
         }
 
         try {
-            $session = $this->emailVerification->confirm($token);
+            $sessionUser = $this->emailVerification->confirm($token);
+            Session::login((int) $sessionUser['id']);
 
-            return JsonResponse::success($response, $session, 'Correo confirmado. Sesión iniciada.');
+            return JsonResponse::success($response, $sessionUser, 'Correo confirmado. Sesión iniciada.');
         } catch (RuntimeException $error) {
             $code = $error->getMessage();
             if ($code === 'TOKEN_EXPIRED') {
@@ -112,5 +116,22 @@ class AuthController
         }
 
         return JsonResponse::success($response, null, self::ERROR_MESSAGE_RESEND_GENERIC);
+    }
+
+    public function me(Request $request, Response $response): Response
+    {
+        $user = $request->getAttribute('auth_user');
+        if (!is_array($user)) {
+            return JsonResponse::error($response, 'No autenticado.', 401);
+        }
+
+        return JsonResponse::success($response, $user);
+    }
+
+    public function logout(Request $request, Response $response): Response
+    {
+        Session::logout();
+
+        return JsonResponse::success($response, null, 'Sesión cerrada.');
     }
 }
