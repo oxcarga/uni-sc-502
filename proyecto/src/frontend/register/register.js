@@ -1,13 +1,28 @@
-const { usersApi, authApi } = await import(`../js/api.js?t=${Date.now()}`);
+const { 
+  usersApi, 
+  authApi, 
+  configApi, 
+  isLocalEnvironment 
+} = await import(`../js/api.js?t=${Date.now()}`);
 
 const form = document.getElementById('register-form');
 const errorBox = document.getElementById('register-error');
 const successBox = document.getElementById('register-success');
 const successEmail = document.getElementById('register-success-email');
+const mailhogTip = document.getElementById('register-mailhog-tip');
 const resendBtn = document.getElementById('register-resend');
 const resendStatus = document.getElementById('register-resend-status');
 
 let registeredEmail = '';
+let isLocal = false;
+
+try {
+  const config = await configApi.get();
+  isLocal = isLocalEnvironment(config?.data?.environment);
+} catch {
+  // Si no hay config, no mostrar tips de desarrollo.
+  isLocal = false;
+}
 
 if (form) {
   form.addEventListener('submit', handleSubmit);
@@ -50,8 +65,9 @@ async function handleResend() {
   try {
     await authApi.resendConfirmation(registeredEmail);
     if (resendStatus) {
-      resendStatus.textContent =
-        'Si el correo está pendiente, reenviamos el enlace. Revisa tu bandeja o Mailhog.';
+      resendStatus.textContent = isLocal
+        ? 'Si el correo está pendiente, reenviamos el enlace. Revisa tu bandeja o Mailhog.'
+        : 'Si el correo está pendiente, reenviamos el enlace. Revisa tu bandeja.';
       resendStatus.classList.remove('d-none');
     }
   } catch (error) {
@@ -66,6 +82,10 @@ function showSuccess(email) {
 
   if (successEmail) {
     successEmail.textContent = email;
+  }
+
+  if (mailhogTip) {
+    mailhogTip.classList.toggle('d-none', !isLocal);
   }
 
   if (successBox) {

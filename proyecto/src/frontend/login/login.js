@@ -1,9 +1,20 @@
-const { authApi, saveSession, panelPathForRole } = await import(`../js/api.js?t=${Date.now()}`);
+const { authApi, configApi, isLocalEnvironment, saveSession, panelPathForRole } = await import(
+  `../js/api.js?t=${Date.now()}`
+);
 
 const form = document.getElementById('login-form');
 const errorBox = document.getElementById('login-error');
 const resendWrap = document.getElementById('login-resend-wrap');
 const resendBtn = document.getElementById('login-resend');
+
+let isLocal = false;
+
+try {
+  const config = await configApi.get();
+  isLocal = isLocalEnvironment(config?.data?.environment);
+} catch {
+  isLocal = false;
+}
 
 if (form) {
   form.addEventListener('submit', handleSubmit);
@@ -56,7 +67,9 @@ async function handleResend() {
   try {
     await authApi.resendConfirmation(email);
     showError(
-      'Si el correo está pendiente de confirmación, enviamos un nuevo enlace. Revisa tu bandeja o Mailhog (http://localhost:8025).'
+      isLocal
+        ? 'Si el correo está pendiente de confirmación, enviamos un nuevo enlace. Revisa tu bandeja o Mailhog (http://localhost:8025).'
+        : 'Si el correo está pendiente de confirmación, enviamos un nuevo enlace. Revisa tu bandeja.'
     );
     errorBox?.classList.remove('alert-danger');
     errorBox?.classList.add('alert-info');

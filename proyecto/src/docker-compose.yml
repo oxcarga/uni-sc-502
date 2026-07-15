@@ -16,6 +16,7 @@ services:
       - MYSQL_USER=${DB_USER:-pulso_user}
       - MYSQL_PASSWORD=${DB_PASSWORD:-pulso_password}
       - MYSQL_DATABASE=${DB_NAME:-pulso_solidario}
+      - APP_ENV=${APP_ENV:-local}
       - APP_URL=${APP_URL:-http://localhost:3000}
       - SMTP_HOST=${SMTP_HOST:-mailhog}
       - SMTP_PORT=${SMTP_PORT:-1025}

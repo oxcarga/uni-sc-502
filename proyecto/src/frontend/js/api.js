@@ -34,6 +34,16 @@ export async function apiFetch(path, options = {}) {
   return payload;
 }
 
+export const configApi = {
+  get: () => apiFetch('/config'),
+};
+
+/** Ambientes donde se muestran tips de desarrollo (p. ej. Mailhog). */
+export function isLocalEnvironment(environment) {
+  const value = String(environment ?? '').toLowerCase().trim();
+  return value === 'local' || value === 'development';
+}
+
 export const usersApi = {
   list: () => apiFetch('/users'),
   get: (id) => apiFetch(`/users/${id}`),

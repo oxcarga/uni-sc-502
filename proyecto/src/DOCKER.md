@@ -59,7 +59,7 @@ Definidas en `.env` (opcional; hay valores por defecto en `docker-compose.yml`):
 |----------|-----|
 | `DB_ROOT_PASSWORD` | Contraseña root de MySQL |
 | `DB_USER` / `DB_PASSWORD` / `DB_NAME` | Credenciales de la aplicación |
-| `APP_ENV` / `APP_DEBUG` | Configuración de la aplicación |
+| `APP_ENV` / `APP_DEBUG` | Ambiente (`local` por defecto) y debug. El FE consulta `GET /api/config` y solo en `local`/`development` muestra tips de Mailhog |
 | `APP_URL` | Base del frontend para enlaces de confirmación (default `http://localhost:3000`) |
 | `SMTP_HOST` / `SMTP_PORT` | SMTP (default Mailhog: `mailhog:1025`) |
 | `MAIL_FROM` | Remitente de correos de confirmación |
