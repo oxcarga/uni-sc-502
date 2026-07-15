@@ -12,37 +12,37 @@ class EmailVerificationTokenRepository
     {
     }
 
-    public function invalidatePendingForUser(int $usuarioId): void
+    public function invalidatePendingForUser(int $userId): void
     {
         $query = $this->pdo->prepare(
-            'UPDATE tokens_verificacion_correo
-             SET usado_el = CURRENT_TIMESTAMP
-             WHERE usuario_id = :usuario_id AND usado_el IS NULL'
+            'UPDATE email_verification_tokens
+             SET used_at = CURRENT_TIMESTAMP
+             WHERE user_id = :user_id AND used_at IS NULL'
         );
-        $query->execute(['usuario_id' => $usuarioId]);
+        $query->execute(['user_id' => $userId]);
     }
 
-    public function create(int $usuarioId, string $tokenHash, string $expiraEl): void
+    public function create(int $userId, string $tokenHash, string $expiresAt): void
     {
         $query = $this->pdo->prepare(
-            'INSERT INTO tokens_verificacion_correo (usuario_id, token_hash, expira_el)
-             VALUES (:usuario_id, :token_hash, :expira_el)'
+            'INSERT INTO email_verification_tokens (user_id, token_hash, expires_at)
+             VALUES (:user_id, :token_hash, :expires_at)'
         );
         $query->execute([
-            'usuario_id' => $usuarioId,
+            'user_id' => $userId,
             'token_hash' => $tokenHash,
-            'expira_el' => $expiraEl,
+            'expires_at' => $expiresAt,
         ]);
     }
 
     /**
-     * @return array{id:int,usuario_id:int,token_hash:string,expira_el:string,usado_el:?string}|null
+     * @return array{id:int,user_id:int,token_hash:string,expires_at:string,used_at:?string}|null
      */
     public function findByTokenHash(string $tokenHash): ?array
     {
         $query = $this->pdo->prepare(
-            'SELECT id, usuario_id, token_hash, expira_el, usado_el
-             FROM tokens_verificacion_correo
+            'SELECT id, user_id, token_hash, expires_at, used_at
+             FROM email_verification_tokens
              WHERE token_hash = :token_hash'
         );
         $query->execute(['token_hash' => $tokenHash]);
@@ -54,9 +54,9 @@ class EmailVerificationTokenRepository
     public function markUsed(int $tokenId): void
     {
         $query = $this->pdo->prepare(
-            'UPDATE tokens_verificacion_correo
-             SET usado_el = CURRENT_TIMESTAMP
-             WHERE id = :id AND usado_el IS NULL'
+            'UPDATE email_verification_tokens
+             SET used_at = CURRENT_TIMESTAMP
+             WHERE id = :id AND used_at IS NULL'
         );
         $query->execute(['id' => $tokenId]);
     }

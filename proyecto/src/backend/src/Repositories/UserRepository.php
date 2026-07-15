@@ -9,10 +9,10 @@ use PDOException;
 
 class UserRepository
 {
-    private const TIPOS_SANGRE = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
-    private const ROLES = ['donante', 'banco', 'admin'];
+    private const BLOOD_TYPES = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
+    private const ROLES = ['donor', 'bank', 'admin'];
     private const SELECT_PUBLIC =
-        'id, nombre, apellido, email, rol, activo, correo_confirmado, correo_confirmado_el, tipo_sangre, creado_el, actualizado_el';
+        'id, first_name, last_name, email, role, active, email_confirmed, email_confirmed_at, blood_type, created_at, updated_at';
 
     public function __construct(private readonly PDO $pdo)
     {
@@ -21,7 +21,7 @@ class UserRepository
     public function findAll(): array
     {
         $query = $this->pdo->query(
-            'SELECT ' . self::SELECT_PUBLIC . ' FROM usuarios ORDER BY id ASC'
+            'SELECT ' . self::SELECT_PUBLIC . ' FROM users ORDER BY id ASC'
         );
 
         return $query->fetchAll();
@@ -30,7 +30,7 @@ class UserRepository
     public function findById(int $id): ?array
     {
         $query = $this->pdo->prepare(
-            'SELECT ' . self::SELECT_PUBLIC . ' FROM usuarios WHERE id = :id'
+            'SELECT ' . self::SELECT_PUBLIC . ' FROM users WHERE id = :id'
         );
         $query->execute(['id' => $id]);
         $user = $query->fetch();
@@ -42,7 +42,7 @@ class UserRepository
     {
         $query = $this->pdo->prepare(
             'SELECT ' . self::SELECT_PUBLIC . ', password_hash
-             FROM usuarios WHERE email = :email'
+             FROM users WHERE email = :email'
         );
         $query->execute(['email' => $email]);
         $user = $query->fetch();
@@ -53,18 +53,18 @@ class UserRepository
     public function create(array $data): array
     {
         $query = $this->pdo->prepare(
-            'INSERT INTO usuarios (nombre, apellido, email, password_hash, rol, tipo_sangre, correo_confirmado)
-             VALUES (:nombre, :apellido, :email, :password_hash, :rol, :tipo_sangre, :correo_confirmado)'
+            'INSERT INTO users (first_name, last_name, email, password_hash, role, blood_type, email_confirmed)
+             VALUES (:first_name, :last_name, :email, :password_hash, :role, :blood_type, :email_confirmed)'
         );
         $query->execute([
-            'nombre' => $data['nombre'],
-            'apellido' => $data['apellido'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
             'email' => $data['email'],
             'password_hash' => $data['password_hash'],
-            'rol' => $data['rol'] ?? 'donante',
-            'tipo_sangre' => $data['tipo_sangre'] ?? null,
-            'correo_confirmado' => array_key_exists('correo_confirmado', $data)
-                ? ((int) (bool) $data['correo_confirmado'])
+            'role' => $data['role'] ?? 'donor',
+            'blood_type' => $data['blood_type'] ?? null,
+            'email_confirmed' => array_key_exists('email_confirmed', $data)
+                ? ((int) (bool) $data['email_confirmed'])
                 : 0,
         ]);
 
@@ -79,17 +79,17 @@ class UserRepository
     public function update(int $id, array $data): ?array
     {
         $fields = [
-            'nombre = :nombre',
-            'apellido = :apellido',
+            'first_name = :first_name',
+            'last_name = :last_name',
             'email = :email',
-            'tipo_sangre = :tipo_sangre',
+            'blood_type = :blood_type',
         ];
         $params = [
             'id' => $id,
-            'nombre' => $data['nombre'],
-            'apellido' => $data['apellido'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
             'email' => $data['email'],
-            'tipo_sangre' => $data['tipo_sangre'] ?? null,
+            'blood_type' => $data['blood_type'] ?? null,
         ];
 
         if (isset($data['password_hash'])) {
@@ -97,18 +97,18 @@ class UserRepository
             $params['password_hash'] = $data['password_hash'];
         }
 
-        if (isset($data['rol'])) {
-            $fields[] = 'rol = :rol';
-            $params['rol'] = $data['rol'];
+        if (isset($data['role'])) {
+            $fields[] = 'role = :role';
+            $params['role'] = $data['role'];
         }
 
-        if (array_key_exists('activo', $data)) {
-            $fields[] = 'activo = :activo';
-            $params['activo'] = $data['activo'] ? 1 : 0;
+        if (array_key_exists('active', $data)) {
+            $fields[] = 'active = :active';
+            $params['active'] = $data['active'] ? 1 : 0;
         }
 
         $query = $this->pdo->prepare(
-            'UPDATE usuarios SET ' . implode(', ', $fields) . ' WHERE id = :id'
+            'UPDATE users SET ' . implode(', ', $fields) . ' WHERE id = :id'
         );
         $query->execute($params);
 
@@ -122,9 +122,9 @@ class UserRepository
     public function markEmailConfirmed(int $id): ?array
     {
         $query = $this->pdo->prepare(
-            'UPDATE usuarios
-             SET correo_confirmado = 1,
-                 correo_confirmado_el = CURRENT_TIMESTAMP
+            'UPDATE users
+             SET email_confirmed = 1,
+                 email_confirmed_at = CURRENT_TIMESTAMP
              WHERE id = :id'
         );
         $query->execute(['id' => $id]);
@@ -134,7 +134,7 @@ class UserRepository
 
     public function delete(int $id): bool
     {
-        $query = $this->pdo->prepare('DELETE FROM usuarios WHERE id = :id');
+        $query = $this->pdo->prepare('DELETE FROM users WHERE id = :id');
         $query->execute(['id' => $id]);
 
         return $query->rowCount() > 0;
@@ -144,12 +144,12 @@ class UserRepository
     {
         unset($user['password_hash']);
 
-        if (array_key_exists('activo', $user)) {
-            $user['activo'] = (bool) $user['activo'];
+        if (array_key_exists('active', $user)) {
+            $user['active'] = (bool) $user['active'];
         }
 
-        if (array_key_exists('correo_confirmado', $user)) {
-            $user['correo_confirmado'] = (bool) $user['correo_confirmado'];
+        if (array_key_exists('email_confirmed', $user)) {
+            $user['email_confirmed'] = (bool) $user['email_confirmed'];
         }
 
         return $user;
@@ -161,10 +161,10 @@ class UserRepository
 
         return [
             'id' => $public['id'],
-            'nombre' => $public['nombre'],
-            'apellido' => $public['apellido'],
+            'first_name' => $public['first_name'],
+            'last_name' => $public['last_name'],
             'email' => $public['email'],
-            'rol' => $public['rol'],
+            'role' => $public['role'],
         ];
     }
 
@@ -174,7 +174,7 @@ class UserRepository
             return true;
         }
 
-        return in_array($bloodType, self::TIPOS_SANGRE, true);
+        return in_array($bloodType, self::BLOOD_TYPES, true);
     }
 
     public static function isValidRole(?string $role): bool

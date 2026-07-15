@@ -16,7 +16,7 @@ async function confirmToken(value) {
     const payload = await authApi.confirmEmail(value);
     const user = payload?.data;
 
-    if (!user?.rol) {
+    if (!user?.role) {
       throw new Error('Respuesta de confirmación inválida.');
     }
 
@@ -24,7 +24,7 @@ async function confirmToken(value) {
     if (statusEl) {
       statusEl.textContent = 'Correo confirmado. Entrando a tu panel…';
     }
-    window.location.href = panelPathForRole(user.rol);
+    window.location.href = panelPathForRole(user.role);
   } catch (error) {
     showError(error.message || 'No se pudo confirmar el correo.');
   }

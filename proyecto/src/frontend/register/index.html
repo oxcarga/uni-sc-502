@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="/css/custom.css" />
     <script type="module">
       // Timestamp por carga: evita módulos ES cacheados por el navegador en local.
-      import(`./registro.js?t=${Date.now()}`);
+      import(`./register.js?t=${Date.now()}`);
     </script>
   </head>
   <body>
@@ -37,25 +37,25 @@
                   </div>
                 </div>
                 <div
-                  id="registro-success"
+                  id="register-success"
                   class="alert alert-success d-none"
                   role="status"
                   aria-live="polite"
                 >
                   <p class="mb-2">
                     Te enviamos un enlace de confirmación a
-                    <strong id="registro-success-email"></strong>.
+                    <strong id="register-success-email"></strong>.
                   </p>
                   <p class="mb-3">
                     Confirma tu cuenta desde el correo antes de iniciar sesión. En local puedes ver el
                     mensaje en Mailhog
                     (<a href="http://localhost:8025" target="_blank" rel="noopener noreferrer">http://localhost:8025</a>).
                   </p>
-                  <p id="registro-resend-status" class="small text-secondary d-none mb-3" role="status"></p>
+                  <p id="register-resend-status" class="small text-secondary d-none mb-3" role="status"></p>
                   <div class="d-flex flex-wrap gap-2">
                     <button
                       type="button"
-                      id="registro-resend"
+                      id="register-resend"
                       class="btn btn-outline-success btn-sm"
                     >
                       Reenviar correo
@@ -63,9 +63,9 @@
                     <a href="/login/" class="btn btn-link btn-sm">Ir a iniciar sesión</a>
                   </div>
                 </div>
-                <form id="registro-form">
+                <form id="register-form">
                   <div
-                    id="registro-error"
+                    id="register-error"
                     class="alert alert-danger d-none"
                     role="alert"
                     aria-live="polite"

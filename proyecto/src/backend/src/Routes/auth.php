@@ -7,7 +7,7 @@ use Slim\App;
 
 return function (App $app) {
     $app->post('/auth/login', [AuthController::class, 'login']);
-    $app->post('/auth/confirmar-correo', [AuthController::class, 'confirmEmail']);
-    $app->get('/auth/confirmar-correo', [AuthController::class, 'confirmEmail']);
-    $app->post('/auth/reenviar-confirmacion', [AuthController::class, 'resendConfirmation']);
+    $app->post('/auth/confirm-email', [AuthController::class, 'confirmEmail']);
+    $app->get('/auth/confirm-email', [AuthController::class, 'confirmEmail']);
+    $app->post('/auth/resend-confirmation', [AuthController::class, 'resendConfirmation']);
 };

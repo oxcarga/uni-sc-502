@@ -4,7 +4,7 @@
  */
 
 const API_BASE = '/api';
-const SESSION_KEY = 'pulso_sesion';
+const SESSION_KEY = 'pulso_session';
 
 export async function apiFetch(path, options = {}) {
   const url = path.startsWith('http') ? path : `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
@@ -53,13 +53,13 @@ export const authApi = {
       body: JSON.stringify(data),
     }),
   confirmEmail: (token) =>
-    apiFetch('/auth/confirmar-correo', {
+    apiFetch('/auth/confirm-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token }),
     }),
   resendConfirmation: (email) =>
-    apiFetch('/auth/reenviar-confirmacion', {
+    apiFetch('/auth/resend-confirmation', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -86,14 +86,14 @@ export function clearSession() {
 }
 
 /** Destinos placeholder hasta que existan los paneles reales. */
-export function panelPathForRole(rol) {
-  switch (rol) {
-    case 'banco':
-      return '/panel/banco/';
+export function panelPathForRole(role) {
+  switch (role) {
+    case 'bank':
+      return '/panel/bank/';
     case 'admin':
       return '/panel/admin/';
-    case 'donante':
+    case 'donor':
     default:
-      return '/panel/donante/';
+      return '/panel/donor/';
   }
 }

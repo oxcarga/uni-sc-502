@@ -1,11 +1,11 @@
 const { usersApi, authApi } = await import(`../js/api.js?t=${Date.now()}`);
 
-const form = document.getElementById('registro-form');
-const errorBox = document.getElementById('registro-error');
-const successBox = document.getElementById('registro-success');
-const successEmail = document.getElementById('registro-success-email');
-const resendBtn = document.getElementById('registro-resend');
-const resendStatus = document.getElementById('registro-resend-status');
+const form = document.getElementById('register-form');
+const errorBox = document.getElementById('register-error');
+const successBox = document.getElementById('register-success');
+const successEmail = document.getElementById('register-success-email');
+const resendBtn = document.getElementById('register-resend');
+const resendStatus = document.getElementById('register-resend-status');
 
 let registeredEmail = '';
 
@@ -30,8 +30,8 @@ async function handleSubmit(event) {
 
   try {
     await usersApi.create({
-      nombre: String(data.firstName ?? '').trim(),
-      apellido: String(data.lastName ?? '').trim(),
+      first_name: String(data.firstName ?? '').trim(),
+      last_name: String(data.lastName ?? '').trim(),
       email,
       password: String(data.password ?? ''),
     });

@@ -46,7 +46,7 @@ docker-compose up -d --build
 
 ## Convención de nombres
 
-Usa prefijos numéricos para controlar el orden de ejecución:
+Tablas y columnas en **inglés**. Usa prefijos numéricos para controlar el orden de ejecución:
 
 | Archivo        | Contenido              |
 |----------------|------------------------|
@@ -59,14 +59,14 @@ Solo deben quedar en esta carpeta los `.sql` que MySQL deba ejecutar (más `prov
 ## Verificar
 
 ```bash
-docker-compose exec db mysql -u pulso_user -ppulso_password pulso_solidario -e "SELECT * FROM usuarios;"
+docker-compose exec db mysql -u pulso_user -ppulso_password pulso_solidario -e "SELECT * FROM users;"
 ```
 
 O en phpMyAdmin: http://localhost:3002 (`pulso_user` / `pulso_password`).
 
 ## Solución de problemas
 
-**La tabla `usuarios` no existe**
+**La tabla `users` no existe**
 
 - El volumen ya existía antes de añadir los scripts → ejecuta `./database/provision.sh` o `docker-compose down -v`.
 - Revisa logs: `docker-compose logs db`

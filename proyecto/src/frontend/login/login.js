@@ -31,12 +31,12 @@ async function handleSubmit(event) {
     });
 
     const user = payload?.data;
-    if (!user?.rol) {
+    if (!user?.role) {
       throw new Error('Respuesta de login inválida.');
     }
 
     saveSession(user);
-    window.location.href = panelPathForRole(user.rol);
+    window.location.href = panelPathForRole(user.role);
   } catch (error) {
     showError(error.message || 'No se pudo iniciar sesión.');
     if (error.status === 403) {

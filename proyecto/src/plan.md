@@ -13,7 +13,7 @@
 | **Config** | Docker, Nginx, Apache, env, docs de arranque | `docker-compose.yml`, `Dockerfile`, `nginx-frontend.conf`, `apache-api.conf`, `.env.example`, `DOCKER.md`, `docker-entrypoint.sh` |
 
 **Motor:** MySQL 8.0 · BD `pulso_solidario`  
-**Convención:** tablas/columnas y claves JSON en español. Rutas HTTP pueden seguir en inglés (`/api/users`) hasta renombrarlas a propósito.  
+**Convención:** tablas/columnas, claves JSON, roles y rutas HTTP en inglés (p. ej. `users`, `first_name`, `/api/auth/confirm-email`).  
 **Última actualización:** 2026-07-15
 
 Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./database/README.md).
@@ -30,7 +30,7 @@ Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./
 
 | Concepto | Valores |
 |----------|---------|
-| Roles | `donante`, `banco`, `admin` |
+| Roles | `donor`, `bank`, `admin` |
 | Tipos de sangre | `O+`, `O-`, `A+`, `A-`, `B+`, `B-`, `AB+`, `AB-` |
 | Umbrales inventario | saludable `>100`, moderado `50–100`, crítico `<50` (por tipo y centro) |
 | Confirmación de correo | token de un solo uso, caduca en 24 h; sin confirmar no hay login |
@@ -43,7 +43,7 @@ Estado previo a P0 (referencia histórica):
 
 | Pilar | Contenido |
 |-------|-----------|
-| DB | `usuarios` básico; seed de 4 correos del equipo |
+| DB | `users` básico; seed de 4 correos del equipo |
 | BE | CRUD `/api/users` |
 | FE | `login/` stub y `registro/` parcial |
 | Config | Compose (backend/frontend/db/phpmyadmin), Nginx proxy `/api` → backend |
@@ -58,36 +58,36 @@ La siguiente fase es **P1**.
 
 ### DB
 
-Ampliar `usuarios` en `01_init.sql`:
+Ampliar `users` en `01_init.sql`:
 
 | Columna | Acción |
 |---------|--------|
-| `apellido` | `VARCHAR` NOT NULL |
+| `last_name` | `VARCHAR` NOT NULL |
 | `password_hash` | `VARCHAR(255)` NOT NULL |
-| `rol` | `VARCHAR` NOT NULL DEFAULT `'donante'` + CHECK (`donante`\|`banco`\|`admin`) |
-| `activo` | `TINYINT(1)` NOT NULL DEFAULT 1 |
-| `actualizado_el` | `TIMESTAMP` DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP |
-| `nombre`, `email`, `creado_el` | mantener |
-| `tipo_sangre` | **mantener por ahora** (se mueve en P1) |
+| `role` | `VARCHAR` NOT NULL DEFAULT `'donor'` + CHECK (`donor`|`bank`|`admin`) |
+| `active` | `TINYINT(1)` NOT NULL DEFAULT 1 |
+| `updated_at` | `TIMESTAMP` DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP |
+| `first_name`, `email`, `created_at` | mantener |
+| `blood_type` | **mantener por ahora** (se mueve en P1) |
 
-Índices: UNIQUE `email`; índice en `rol`.
+Índices: UNIQUE `email`; índice en `role`.
 
-**Seed:** 3 roles con `password_hash` real; separar `nombre`/`apellido`; documentar contraseña demo; al menos un usuario `activo = 0` para pruebas.
+**Seed:** 3 roles con `password_hash` real; separar `first_name`/`last_name`; documentar contraseña demo; al menos un usuario `active = 0` para pruebas.
 
 ### BE
 
 1. `UserRepository`: columnas nuevas; `findByEmail`; nunca exponer `password_hash`.
-2. `UserController` create/update: `nombre`, `apellido`, `email`, `password`, `tipo_sangre` opcional; hash; `rol = donante` en registro público.
+2. `UserController` create/update: `first_name`, `last_name`, `email`, `password`, `blood_type` opcional; hash; `role = donor` en registro público.
 3. Email duplicado → 409 (`23000` / MySQL `1062`).
-4. `POST /api/auth/login`: email + password → `password_verify` + `activo` → sesión (`id`, `nombre`, `apellido`, `email`, `rol`).
+4. `POST /api/auth/login`: email + password → `password_verify` + `active` → sesión (`id`, `first_name`, `last_name`, `email`, `role`).
 5. Login fallido / inactivo → 401 genérico.
 
 ### FE
 
-1. `registro.js` + HTML: enviar `nombre`, `apellido`, `email`, `password` por separado.
-2. `login.js`: llamar login; guardar sesión; redirigir según `rol` (paneles placeholder ok).
+1. `register.js` + HTML: enviar `first_name`, `last_name`, `email`, `password` por separado.
+2. `login.js`: llamar login; guardar sesión; redirigir según `role` (paneles placeholder ok).
 3. Errores de API visibles en ambos formularios.
-4. Placeholders `frontend/panel/{donante,banco,admin}/`.
+4. Placeholders `frontend/panel/{donor,bank,admin}/`.
 
 ### Config
 
@@ -97,9 +97,9 @@ Ampliar `usuarios` en `01_init.sql`:
 
 ### Listo cuando
 
-- [x] Registro crea fila con hash y `rol = donante`
+- [x] Registro crea fila con hash y `role = donor`
 - [x] Login ok con seed; login con password mala → 401
-- [x] Usuario `activo = 0` no puede entrar
+- [x] Usuario `active = 0` no puede entrar
 - [x] Email duplicado → 409 en el primer intento
 - [x] JSON de usuario no incluye `password_hash`
 
@@ -113,15 +113,15 @@ Ampliar `usuarios` en `01_init.sql`:
 
 ### DB
 
-1. En `usuarios`: `correo_confirmado` `TINYINT(1)` NOT NULL DEFAULT `0`; opcional `correo_confirmado_el`.
-2. Tabla `tokens_verificacion_correo`: `usuario_id` FK, `token_hash` UNIQUE, `expira_el`, `usado_el`, `creado_el`.
-3. Distinguir: `activo = 0` = deshabilitada (admin); `correo_confirmado = 0` = pendiente. Login exige `activo = 1` **y** `correo_confirmado = 1`.
+1. En `users`: `email_confirmed` `TINYINT(1)` NOT NULL DEFAULT `0`; opcional `email_confirmed_at`.
+2. Tabla `email_verification_tokens`: `user_id` FK, `token_hash` UNIQUE, `expires_at`, `used_at`, `created_at`.
+3. Distinguir: `active = 0` = deshabilitada (admin); `email_confirmed = 0` = pendiente. Login exige `active = 1` **y** `email_confirmed = 1`.
 
-**Seed:** demos con `correo_confirmado = 1`. Sin seed de tokens.
+**Seed:** demos con `email_confirmed = 1`. Sin seed de tokens.
 
 ### BE
 
-1. Registro: `correo_confirmado = 0`; generar token (hash + 24 h); enviar email con enlace; 201 sin sesión automática.
+1. Registro: `email_confirmed = 0`; generar token (hash + 24 h); enviar email con enlace; 201 sin sesión automática.
 2. Confirmar correo: primer uso válido → confirmar + devolver payload de sesión (como login). Reuso → error sin sesión.
 3. Reenviar confirmación (respuesta genérica).
 4. Login: sin confirmar → 403 específico; credenciales malas → 401.
@@ -130,7 +130,7 @@ Ampliar `usuarios` en `01_init.sql`:
 ### FE
 
 1. Tras registro: **no** redirect a `/login/`; mensaje de “correo de confirmación enviado” en la misma página.
-2. `confirmar-correo/`: consumir token → `saveSession` → redirect al panel por `rol`.
+2. `confirm-email/`: consumir token → `saveSession` → redirect al panel por `role`.
 3. Login: mostrar 403 de correo no confirmado (+ CTA reenviar opcional).
 
 ### Config
@@ -138,11 +138,11 @@ Ampliar `usuarios` en `01_init.sql`:
 1. Añadir servicio de correo local (p. ej. **Mailhog** o similar) en `docker-compose.yml`, o documentar alternativa (log del enlace en logs del backend).
 2. Variables en `.env.example`: host SMTP, puerto, `APP_URL` / base del enlace de confirmación, from.
 3. Pasar esas vars al contenedor `backend`; actualizar `DOCKER.md` / `QUICKSTART.md` (cómo ver el mail en local, URL típica Mailhog).
-4. Nginx: servir `frontend/confirmar-correo/` (try_files ya cubre rutas estáticas; verificar).
+4. Nginx: servir `frontend/confirm-email/` (try_files ya cubre rutas estáticas; verificar).
 
 ### Listo cuando
 
-- [x] Registro deja `correo_confirmado = 0` y genera token (+ envío o log del enlace)
+- [x] Registro deja `email_confirmed = 0` y genera token (+ envío o log del enlace)
 - [x] Tras el form de registro **no** hay redirect a `/login/`; se muestra el mensaje de correo enviado
 - [x] Primer clic del enlace confirma, inicia sesión y redirige al panel; segundo uso falla sin loguear
 - [x] Login sin confirmar → 403; confirmada → ok
@@ -160,23 +160,23 @@ Ampliar `usuarios` en `01_init.sql`:
 
 ### DB
 
-1. `perfiles_donante`: `usuario_id` PK/FK, `tipo_sangre`, `fecha_nacimiento`, `antecedentes_medicos`, `elegible`, `ultima_donacion_en`.
-2. `centros_donacion`: `nombre`, `direccion`, `region`, `lat`, `lng`, `contacto`, `activo`.
-3. Opcional: `perfiles_banco` (`usuario_id`, `centro_id`).
-4. **Quitar** `tipo_sangre` de `usuarios`.
-5. Al registrar donante: insertar fila vacía en `perfiles_donante` (misma transacción).
+1. `donor_profiles`: `user_id` PK/FK, `blood_type`, `birth_date`, `medical_history`, `eligible`, `last_donation_at`.
+2. `donation_centers`: `name`, `address`, `region`, `lat`, `lng`, `contact`, `active`.
+3. Opcional: `bank_profiles` (`user_id`, `center_id`).
+4. **Quitar** `blood_type` de `users`.
+5. Al registrar donante: insertar fila vacía en `donor_profiles` (misma transacción).
 
-**Seed:** ≥1 centro activo; perfiles donante con al menos un `tipo_sangre`; usuario `banco` ligado si hay `perfiles_banco`.
+**Seed:** ≥1 centro activo; perfiles donante con al menos un `blood_type`; usuario `bank` ligado si hay `bank_profiles`.
 
 ### BE
 
 - Endpoints perfil donante (GET/PUT propio) y listado de centros.
-- Dejar de leer/escribir `tipo_sangre` en `usuarios`.
+- Dejar de leer/escribir `blood_type` en `users`.
 - Registro crea perfil vacío en la misma transacción.
 
 ### FE
 
-- UI “completar perfil” o campos en registro para tipo de sangre → `perfiles_donante`.
+- UI “completar perfil” o campos en registro para tipo de sangre → `donor_profiles`.
 - Listado/mapa básico de centros (puede ser lista simple primero).
 - Panel donante: sección perfil (aunque sea mínima).
 
@@ -188,8 +188,8 @@ Ampliar `usuarios` en `01_init.sql`:
 
 ### Listo cuando
 
-- [ ] No existe `usuarios.tipo_sangre`
-- [ ] Todo donante tiene fila en `perfiles_donante`
+- [ ] No existe `users.blood_type`
+- [ ] Todo donante tiene fila en `donor_profiles`
 - [ ] Se listan centros desde la API y se ven en FE
 - [ ] Stack Docker vuelve a quedar consistente tras re-provision
 
@@ -203,11 +203,11 @@ Ampliar `usuarios` en `01_init.sql`:
 
 ### DB
 
-**`citas`:** `donante_id`, `centro_id`, `fecha_hora`, `estado` (`pendiente`\|`confirmada`\|`completada`\|`cancelada`\|`no_asistio`), timestamps.
+**`appointments`:** `donor_id`, `center_id`, `scheduled_at`, `status` (`pending`\|`confirmed`\|`completed`\|`cancelled`\|`no_show`), timestamps.
 
-**`donaciones`:** `donante_id`, `centro_id`, `cita_id` NULL, `tipo_sangre`, `unidades` DEFAULT 1, `fecha`, `certificado_codigo` NULL.
+**`donations`:** `donor_id`, `center_id`, `appointment_id` NULL, `blood_type`, `units` DEFAULT 1, `donated_at`, `certificate_code` NULL.
 
-Al completar cita → crear `donaciones` + actualizar `perfiles_donante.ultima_donacion_en` (y `elegible` si hay regla simple).
+Al completar cita → crear `donations` + actualizar `donor_profiles.last_donation_at` (y `elegible` si hay regla simple).
 
 **Seed:** citas en distintos estados; ≥1 donación completada.
 
@@ -231,7 +231,7 @@ Al completar cita → crear `donaciones` + actualizar `perfiles_donante.ultima_d
 ### Listo cuando
 
 - [ ] Donante agenda cita en un centro (FE → BE → DB)
-- [ ] Completar cita crea `donaciones` y actualiza perfil
+- [ ] Completar cita crea `donations` y actualiza perfil
 - [ ] Seed reproducible en Docker
 
 **Desbloquea:** agenda + historial (base CU1 citas).
@@ -244,11 +244,11 @@ Al completar cita → crear `donaciones` + actualizar `perfiles_donante.ultima_d
 
 ### DB
 
-**`inventario`:** `centro_id`, `tipo_sangre`, `unidades`, UNIQUE(`centro_id`, `tipo_sangre`).
+**`inventory`:** `center_id`, `blood_type`, `units`, UNIQUE(`center_id`, `blood_type`).
 
-**`movimientos_inventario`:** append-only — `centro_id`, `tipo` (`recepcion`\|`asignacion`\|`ajuste`\|`descarte`), `cantidad`, FKs opcionales, `usuario_id`, `detalle`, `creado_el`.
+**`inventory_movements`:** append-only — `center_id`, `type` (`receipt`\|`assignment`\|`adjustment`\|`discard`), `quantity`, FKs opcionales, `user_id`, `detail`, `created_at`.
 
-**`unidades_sangre`** (recomendado ya en P3): `codigo` UNIQUE, `donacion_id`, `centro_id`, `tipo_sangre`, `estado`, fechas.
+**`blood_units`** (recomendado ya en P3): `code` UNIQUE, `donation_id`, `center_id`, `blood_type`, `status`, fechas.
 
 **Regla:** toda variación de stock = una transacción (movimiento + update inventario [+ estado unidad]).  
 Saludable/moderado/crítico = **calculado** (hardcode P3 o políticas en P5); no guardar color en BD.
@@ -286,15 +286,15 @@ Saludable/moderado/crítico = **calculado** (hardcode P3 o políticas en P5); no
 
 ### DB
 
-**`instituciones_medicas`**, **`solicitudes`**, **`alertas`** (campos y estados en español según diseño previo del plan).
+**`medical_institutions`**, **`requests`**, **`alerts`** (campos y estados en inglés en JSON/BD).
 
 **Flujos:**
 
-1. Solicitud → asignar centro → stock → asignar unidades + movimiento `asignacion` → estado.
+1. Solicitud → asignar centro → stock → asignar unidades + movimiento `assignment` → estado.
 2. Alerta al cruzar umbral; resolver al recuperar stock.
-3. Donantes compatibles vía perfil (`tipo_sangre` + `elegible`); notificaciones en P5.
+3. Donantes compatibles vía perfil (`blood_type` + `eligible`); notificaciones en P5.
 
-**Seed:** 1 institución, 1 solicitud `pendiente`, 1 alerta `activa` sobre el tipo crítico de P3.
+**Seed:** 1 institución, 1 solicitud `pending`, 1 alerta `active` sobre el tipo crítico de P3.
 
 ### BE
 
@@ -328,7 +328,7 @@ Saludable/moderado/crítico = **calculado** (hardcode P3 o políticas en P5); no
 
 ### DB
 
-**`politicas_donacion`**, **`notificaciones`**, **`auditoria`** (append-only).
+**`donation_policies`**, **`notifications`**, **`audit_log`** (append-only).
 
 Dejar de hardcodear umbrales en código de app.
 
@@ -351,9 +351,9 @@ Dejar de hardcodear umbrales en código de app.
 
 ### Listo cuando
 
-- [ ] Umbrales salen de `politicas_donacion`
+- [ ] Umbrales salen de `donation_policies`
 - [ ] Alerta crítica genera notificaciones a donantes compatibles
-- [ ] Acciones admin relevantes quedan en `auditoria`
+- [ ] Acciones admin relevantes quedan en `audit_log`
 - [ ] UI de notificaciones usable en al menos un rol
 
 **Desbloquea:** paneles + CU2 con aviso a donantes.
@@ -366,9 +366,9 @@ Dejar de hardcodear umbrales en código de app.
 
 ### DB
 
-**`logros`** (catálogo) + **`donante_logros`** (`usuario_id`, `logro_id`, `progreso`, `desbloqueado_en`).
+**`achievements`** (catálogo) + **`donor_achievements`** (`user_id`, `achievement_id`, `progress`, `unlocked_at`).
 
-Evaluar al completar `donaciones`.
+Evaluar al completar `donations`.
 
 **Seed:** catálogo básico (1ª donación, N donaciones, etc.).
 
@@ -415,20 +415,20 @@ Al cerrar una fase, marcar ✅ en el título y en las celdas de pilares del mapa
 ## Relaciones (referencia al implementar FKs)
 
 ```
-usuarios 1──* tokens_verificacion_correo
-usuarios 1──1 perfiles_donante
-usuarios 1──1 perfiles_banco ──> centros_donacion
-centros_donacion 1──* citas *──1 usuarios(donante)
-citas 0..1──1 donaciones
-donaciones 1──* unidades_sangre
-centros_donacion 1──* inventario
-centros_donacion 1──* movimientos_inventario
-instituciones_medicas 1──* solicitudes *──0..1 centros_donacion
-alertas → centros (+ solicitud opcional)
-notificaciones → usuarios
-auditoria → usuarios
-logros ←→ donante_logros → usuarios
-politicas_donacion (global o por centro)
+users 1──* email_verification_tokens
+users 1──1 donor_profiles
+users 1──1 bank_profiles ──> donation_centers
+donation_centers 1──* appointments *──1 users(donor)
+appointments 0..1──1 donations
+donations 1──* blood_units
+donation_centers 1──* inventory
+donation_centers 1──* inventory_movements
+medical_institutions 1──* requests *──0..1 donation_centers
+alerts → centros (+ solicitud opcional)
+notifications → users
+audit_log → users
+achievements ←→ donor_achievements → users
+donation_policies (global o por center)
 ```
 
 Orden en `database/01_init.sql`: DROP hijos → padres; CREATE padres → hijos.
@@ -440,7 +440,7 @@ Orden en `database/01_init.sql`: DROP hijos → padres; CREATE padres → hijos.
 1. MySQL solo en `database/` (`01_init.sql`, `02_seed.sql`, futuros `03_*.sql`).
 2. `DROP`/`CREATE` + seeds idempotentes (`INSERT IGNORE` / upserts) para `provision.sh`.
 3. InnoDB, utf8mb4, FKs en tablas nuevas.
-4. Estados en español (VARCHAR + CHECK o validación en app) = mismos valores en API JSON.
+4. Estados e identificadores en inglés (VARCHAR + CHECK o validación en app) = mismos valores en API JSON. Textos/UI al usuario pueden seguir en español.
 5. No persistir derivados de UI (color de stock, “vidas salvadas” si es fórmula).
 6. PII/médicos: no loguear en claro; solo hash de passwords y de tokens de verificación.
 7. Inventario siempre en transacción con su movimiento.
@@ -463,8 +463,8 @@ Orden en `database/01_init.sql`: DROP hijos → padres; CREATE padres → hijos.
 | Plan (este archivo) | `proyecto/src/plan.md` |
 | Funcionalidades producto | `proyecto/README.md` |
 | Pantallas objetivo (estáticos) | `proyecto/estaticos/pages/{donor,admin,bank}.html` |
-| FE auth en vivo | `proyecto/src/frontend/{login,registro}/` |
-| FE confirmación (P0b) | `proyecto/src/frontend/confirmar-correo/` |
+| FE auth en vivo | `proyecto/src/frontend/{login,register}/` |
+| FE confirmación (P0b) | `proyecto/src/frontend/confirm-email/` |
 | DB / provision | `proyecto/src/database/README.md` |
 | Docker | `proyecto/src/DOCKER.md`, `QUICKSTART.md` |
 | Compose / Nginx / Apache | `docker-compose.yml`, `nginx-frontend.conf`, `apache-api.conf` |

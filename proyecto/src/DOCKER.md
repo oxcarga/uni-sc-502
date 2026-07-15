@@ -84,7 +84,7 @@ docker-compose ps
 
 ### Correo de confirmación (local)
 
-Tras registrarte, el backend envía el enlace por SMTP a **Mailhog**. Ábrelo en http://localhost:8025, entra al mensaje y usa el enlace (`/confirmar-correo/?token=…`). Si SMTP falla, el mismo enlace queda en los logs del backend (`docker compose logs backend`).
+Tras registrarte, el backend envía el enlace por SMTP a **Mailhog**. Ábrelo en http://localhost:8025, entra al mensaje y usa el enlace (`/confirm-email/?token=…`). Si SMTP falla, el mismo enlace queda en los logs del backend (`docker compose logs backend`).
 
 ## Flujo de desarrollo
 

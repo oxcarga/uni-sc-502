@@ -47,12 +47,12 @@ class AuthController
                 return JsonResponse::error($response, self::ERROR_MESSAGE_LOGIN_FAILED, 401);
             }
 
-            if (!(bool) $user['activo']) {
+            if (!(bool) $user['active']) {
                 $this->logger->warning('Intento de login con cuenta inactiva.', ['email' => $email]);
                 return JsonResponse::error($response, self::ERROR_MESSAGE_LOGIN_FAILED, 401);
             }
 
-            if (!(bool) $user['correo_confirmado']) {
+            if (!(bool) $user['email_confirmed']) {
                 $this->logger->warning('Intento de login sin correo confirmado.', ['email' => $email]);
                 return JsonResponse::error($response, self::ERROR_MESSAGE_EMAIL_NOT_CONFIRMED, 403);
             }

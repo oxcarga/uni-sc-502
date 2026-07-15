@@ -32,18 +32,18 @@ class EmailVerificationService
     /**
      * Emite un token nuevo, invalida pendientes y envía el correo (o deja el enlace en logs).
      */
-    public function createAndSendToken(array $user): void
+    public function issueAndSend(array $user): void
     {
         $plainToken = bin2hex(random_bytes(32));
         $tokenHash = hash('sha256', $plainToken);
-        $expiraEl = (new DateTimeImmutable('now'))
+        $expiresAt = (new DateTimeImmutable('now'))
             ->add(new DateInterval('PT' . self::TOKEN_TTL_HOURS . 'H'))
             ->format('Y-m-d H:i:s');
 
         $this->pdo->beginTransaction();
         try {
             $this->tokens->invalidatePendingForUser((int) $user['id']);
-            $this->tokens->create((int) $user['id'], $tokenHash, $expiraEl);
+            $this->tokens->create((int) $user['id'], $tokenHash, $expiresAt);
             $this->pdo->commit();
         } catch (PDOException $error) {
             if ($this->pdo->inTransaction()) {
@@ -52,9 +52,9 @@ class EmailVerificationService
             throw $error;
         }
 
-        $confirmUrl = rtrim($this->appUrl, '/') . '/confirmar-correo/?token=' . urlencode($plainToken);
+        $confirmUrl = rtrim($this->appUrl, '/') . '/confirm-email/?token=' . urlencode($plainToken);
         $subject = 'Confirma tu cuenta en Pulso Solidario';
-        $body = "Hola {$user['nombre']},\n\n"
+        $body = "Hola {$user['first_name']},\n\n"
             . "Confirma tu correo abriendo este enlace (válido "
             . self::TOKEN_TTL_HOURS
             . " horas):\n\n"
@@ -62,7 +62,7 @@ class EmailVerificationService
             . "\n\nSi no creaste esta cuenta, ignora este mensaje.\n";
 
         $this->logger->info('Enlace de confirmación de correo generado.', [
-            'usuario_id' => $user['id'],
+            'user_id' => $user['id'],
             'email' => $user['email'],
             'confirm_url' => $confirmUrl,
         ]);
@@ -82,7 +82,7 @@ class EmailVerificationService
     /**
      * Confirma el correo con el token en claro. Devuelve el usuario público de sesión.
      *
-     * @return array{id:mixed,nombre:mixed,apellido:mixed,email:mixed,rol:mixed}
+     * @return array{id:mixed,first_name:mixed,last_name:mixed,email:mixed,role:mixed}
      */
     public function confirm(string $plainToken): array
     {
@@ -93,17 +93,17 @@ class EmailVerificationService
         $tokenHash = hash('sha256', $plainToken);
         $token = $this->tokens->findByTokenHash($tokenHash);
 
-        if ($token === null || $token['usado_el'] !== null) {
+        if ($token === null || $token['used_at'] !== null) {
             throw new RuntimeException('TOKEN_INVALID');
         }
 
-        $expira = new DateTimeImmutable((string) $token['expira_el']);
-        if ($expira < new DateTimeImmutable('now')) {
+        $expiresAt = new DateTimeImmutable((string) $token['expires_at']);
+        if ($expiresAt < new DateTimeImmutable('now')) {
             throw new RuntimeException('TOKEN_EXPIRED');
         }
 
-        $user = $this->users->findById((int) $token['usuario_id']);
-        if ($user === null || !(bool) $user['activo']) {
+        $user = $this->users->findById((int) $token['user_id']);
+        if ($user === null || !(bool) $user['active']) {
             throw new RuntimeException('TOKEN_INVALID');
         }
 
@@ -122,15 +122,7 @@ class EmailVerificationService
             throw $error;
         }
 
-        $public = UserRepository::toPublic($confirmed);
-
-        return [
-            'id' => $public['id'],
-            'nombre' => $public['nombre'],
-            'apellido' => $public['apellido'],
-            'email' => $public['email'],
-            'rol' => $public['rol'],
-        ];
+        return UserRepository::toSession($confirmed);
     }
 
     /**
@@ -141,12 +133,12 @@ class EmailVerificationService
         $user = $this->users->findByEmail($email);
         if (
             $user === null
-            || !(bool) $user['activo']
-            || (bool) $user['correo_confirmado']
+            || !(bool) $user['active']
+            || (bool) $user['email_confirmed']
         ) {
             return;
         }
 
-        $this->createAndSendToken($user);
+        $this->issueAndSend($user);
     }
 }

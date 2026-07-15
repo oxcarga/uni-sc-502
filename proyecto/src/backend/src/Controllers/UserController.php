@@ -70,16 +70,16 @@ class UserController
 
         try {
             $user = $this->users->create([
-                'nombre' => trim((string) $body['nombre']),
-                'apellido' => trim((string) $body['apellido']),
+                'first_name' => trim((string) $body['first_name']),
+                'last_name' => trim((string) $body['last_name']),
                 'email' => strtolower(trim((string) $body['email'])),
                 'password_hash' => password_hash((string) $body['password'], PASSWORD_DEFAULT),
-                'rol' => 'donante',
-                'correo_confirmado' => false,
-                'tipo_sangre' => isset($body['tipo_sangre']) ? trim((string) $body['tipo_sangre']) : null,
+                'role' => 'donor',
+                'email_confirmed' => false,
+                'blood_type' => isset($body['blood_type']) ? trim((string) $body['blood_type']) : null,
             ]);
 
-            $this->emailVerification->createAndSendToken($user);
+            $this->emailVerification->issueAndSend($user);
 
             return JsonResponse::success(
                 $response,
@@ -121,10 +121,10 @@ class UserController
 
         try {
             $payload = [
-                'nombre' => trim((string) $body['nombre']),
-                'apellido' => trim((string) $body['apellido']),
+                'first_name' => trim((string) $body['first_name']),
+                'last_name' => trim((string) $body['last_name']),
                 'email' => strtolower(trim((string) $body['email'])),
-                'tipo_sangre' => isset($body['tipo_sangre']) ? trim((string) $body['tipo_sangre']) : null,
+                'blood_type' => isset($body['blood_type']) ? trim((string) $body['blood_type']) : null,
             ];
 
             if ($requirePassword) {
@@ -168,17 +168,17 @@ class UserController
 
     private function validateUserData(array $body, bool $requirePassword): ?string
     {
-        $nombre = trim((string) ($body['nombre'] ?? ''));
-        $apellido = trim((string) ($body['apellido'] ?? ''));
+        $firstName = trim((string) ($body['first_name'] ?? ''));
+        $lastName = trim((string) ($body['last_name'] ?? ''));
         $email = trim((string) ($body['email'] ?? ''));
         $password = (string) ($body['password'] ?? '');
-        $tipoSangre = isset($body['tipo_sangre']) ? trim((string) $body['tipo_sangre']) : null;
+        $bloodType = isset($body['blood_type']) ? trim((string) $body['blood_type']) : null;
 
-        if ($nombre === '') {
+        if ($firstName === '') {
             return 'El nombre es obligatorio.';
         }
 
-        if ($apellido === '') {
+        if ($lastName === '') {
             return 'El apellido es obligatorio.';
         }
 
@@ -196,7 +196,7 @@ class UserController
             }
         }
 
-        if (!UserRepository::isValidBloodType($tipoSangre)) {
+        if (!UserRepository::isValidBloodType($bloodType)) {
             return 'El tipo de sangre no es válido.';
         }
 
