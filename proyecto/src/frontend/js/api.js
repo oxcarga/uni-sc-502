@@ -52,6 +52,18 @@ export const authApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     }),
+  confirmEmail: (token) =>
+    apiFetch('/auth/confirmar-correo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    }),
+  resendConfirmation: (email) =>
+    apiFetch('/auth/reenviar-confirmacion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    }),
 };
 
 export function saveSession(user) {

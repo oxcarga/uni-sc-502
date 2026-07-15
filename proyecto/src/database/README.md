@@ -19,9 +19,10 @@ database/
 ├── 01_init.sql     # Tablas (esquema MySQL)
 ├── 02_seed.sql     # Datos de ejemplo
 ├── provision.sh    # Reaplicar esquema/datos sin borrar volumen
-├── plan.md         # Plan de diseño del esquema (agentes)
 └── README.md       # Esta guía operativa
 ```
+
+Plan de implementación de **toda la app** (DB + BE + FE + Config): [../plan.md](../plan.md).
 
 ## Flujo automático
 
@@ -53,7 +54,7 @@ Usa prefijos numéricos para controlar el orden de ejecución:
 | `02_seed.sql`  | `INSERT IGNORE` (idempotente) |
 | `03_*.sql`     | Procedimientos, vistas, etc. |
 
-Solo deben quedar en esta carpeta los `.sql` que MySQL deba ejecutar (más docs como `plan.md` / este README).
+Solo deben quedar en esta carpeta los `.sql` que MySQL deba ejecutar (más `provision.sh` y este README). El plan del proyecto vive en `../plan.md`.
 
 ## Verificar
 

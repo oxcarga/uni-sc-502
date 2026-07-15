@@ -1,10 +1,20 @@
-const { usersApi } = await import(`../js/api.js?t=${Date.now()}`);
+const { usersApi, authApi } = await import(`../js/api.js?t=${Date.now()}`);
 
 const form = document.getElementById('registro-form');
 const errorBox = document.getElementById('registro-error');
+const successBox = document.getElementById('registro-success');
+const successEmail = document.getElementById('registro-success-email');
+const resendBtn = document.getElementById('registro-resend');
+const resendStatus = document.getElementById('registro-resend-status');
+
+let registeredEmail = '';
 
 if (form) {
   form.addEventListener('submit', handleSubmit);
+}
+
+if (resendBtn) {
+  resendBtn.addEventListener('click', handleResend);
 }
 
 /**
@@ -16,17 +26,50 @@ async function handleSubmit(event) {
   clearError();
 
   const data = Object.fromEntries(new FormData(form).entries());
+  const email = String(data.email ?? '').trim();
 
   try {
     await usersApi.create({
       nombre: String(data.firstName ?? '').trim(),
       apellido: String(data.lastName ?? '').trim(),
-      email: String(data.email ?? '').trim(),
+      email,
       password: String(data.password ?? ''),
     });
-    window.location.href = '/login/';
+
+    registeredEmail = email;
+    showSuccess(email);
   } catch (error) {
     showError(error.message || 'No se pudo completar el registro.');
+  }
+}
+
+async function handleResend() {
+  if (!registeredEmail) return;
+  clearError();
+
+  try {
+    await authApi.resendConfirmation(registeredEmail);
+    if (resendStatus) {
+      resendStatus.textContent =
+        'Si el correo está pendiente, reenviamos el enlace. Revisa tu bandeja o Mailhog.';
+      resendStatus.classList.remove('d-none');
+    }
+  } catch (error) {
+    showError(error.message || 'No se pudo reenviar la confirmación.');
+  }
+}
+
+function showSuccess(email) {
+  if (form) {
+    form.classList.add('d-none');
+  }
+
+  if (successEmail) {
+    successEmail.textContent = email;
+  }
+
+  if (successBox) {
+    successBox.classList.remove('d-none');
   }
 }
 

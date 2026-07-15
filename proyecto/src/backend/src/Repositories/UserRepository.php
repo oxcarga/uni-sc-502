@@ -12,7 +12,7 @@ class UserRepository
     private const TIPOS_SANGRE = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
     private const ROLES = ['donante', 'banco', 'admin'];
     private const SELECT_PUBLIC =
-        'id, nombre, apellido, email, rol, activo, tipo_sangre, creado_el, actualizado_el';
+        'id, nombre, apellido, email, rol, activo, correo_confirmado, correo_confirmado_el, tipo_sangre, creado_el, actualizado_el';
 
     public function __construct(private readonly PDO $pdo)
     {
@@ -53,8 +53,8 @@ class UserRepository
     public function create(array $data): array
     {
         $query = $this->pdo->prepare(
-            'INSERT INTO usuarios (nombre, apellido, email, password_hash, rol, tipo_sangre)
-             VALUES (:nombre, :apellido, :email, :password_hash, :rol, :tipo_sangre)'
+            'INSERT INTO usuarios (nombre, apellido, email, password_hash, rol, tipo_sangre, correo_confirmado)
+             VALUES (:nombre, :apellido, :email, :password_hash, :rol, :tipo_sangre, :correo_confirmado)'
         );
         $query->execute([
             'nombre' => $data['nombre'],
@@ -63,6 +63,9 @@ class UserRepository
             'password_hash' => $data['password_hash'],
             'rol' => $data['rol'] ?? 'donante',
             'tipo_sangre' => $data['tipo_sangre'] ?? null,
+            'correo_confirmado' => array_key_exists('correo_confirmado', $data)
+                ? ((int) (bool) $data['correo_confirmado'])
+                : 0,
         ]);
 
         $user = $this->findById((int) $this->pdo->lastInsertId());
@@ -116,6 +119,19 @@ class UserRepository
         return $this->findById($id);
     }
 
+    public function markEmailConfirmed(int $id): ?array
+    {
+        $query = $this->pdo->prepare(
+            'UPDATE usuarios
+             SET correo_confirmado = 1,
+                 correo_confirmado_el = CURRENT_TIMESTAMP
+             WHERE id = :id'
+        );
+        $query->execute(['id' => $id]);
+
+        return $this->findById($id);
+    }
+
     public function delete(int $id): bool
     {
         $query = $this->pdo->prepare('DELETE FROM usuarios WHERE id = :id');
@@ -132,7 +148,24 @@ class UserRepository
             $user['activo'] = (bool) $user['activo'];
         }
 
+        if (array_key_exists('correo_confirmado', $user)) {
+            $user['correo_confirmado'] = (bool) $user['correo_confirmado'];
+        }
+
         return $user;
+    }
+
+    public static function toSession(array $user): array
+    {
+        $public = self::toPublic($user);
+
+        return [
+            'id' => $public['id'],
+            'nombre' => $public['nombre'],
+            'apellido' => $public['apellido'],
+            'email' => $public['email'],
+            'rol' => $public['rol'],
+        ];
     }
 
     public static function isValidBloodType(?string $bloodType): bool

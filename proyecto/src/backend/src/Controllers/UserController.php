@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Repositories\UserRepository;
+use App\Services\EmailVerificationService;
 use App\Support\JsonResponse;
 use Monolog\Logger;
 use PDOException;
@@ -17,10 +18,13 @@ class UserController
     private const ERROR_CODE_EMAIL_DUPLICATED = '23000';
     private const ERROR_MESSAGE_EMAIL_DUPLICATED = 'El correo electrónico ya está registrado.';
     private const ERROR_MESSAGE_USER_ERROR = 'Error al crear el usuario.';
+    private const ERROR_MESSAGE_USER_CREATED =
+        'Revisa tu correo para confirmar la cuenta antes de iniciar sesión.';
     private const MIN_PASSWORD_LENGTH = 8;
 
     public function __construct(
         private readonly UserRepository $users,
+        private readonly EmailVerificationService $emailVerification,
         private Logger $logger
     ) {
         $this->logger->info('UserController constructor');
@@ -71,10 +75,18 @@ class UserController
                 'email' => strtolower(trim((string) $body['email'])),
                 'password_hash' => password_hash((string) $body['password'], PASSWORD_DEFAULT),
                 'rol' => 'donante',
+                'correo_confirmado' => false,
                 'tipo_sangre' => isset($body['tipo_sangre']) ? trim((string) $body['tipo_sangre']) : null,
             ]);
 
-            return JsonResponse::success($response, UserRepository::toPublic($user), 'Usuario creado.', 201);
+            $this->emailVerification->createAndSendToken($user);
+
+            return JsonResponse::success(
+                $response,
+                UserRepository::toPublic($user),
+                self::ERROR_MESSAGE_USER_CREATED,
+                201
+            );
         } catch (PDOException $error) {
             if ($this->isDuplicateEmailError($error)) {
                 $this->logger->warning(self::ERROR_MESSAGE_EMAIL_DUPLICATED, ['email' => $body['email']]);

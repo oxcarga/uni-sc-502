@@ -10,8 +10,9 @@ docker-compose up -d
 ```
 
 ¡Listo! Tu proyecto ya está en ejecución:
-- 🌐 Frontend (Vite): http://localhost:3000
+- 🌐 Frontend: http://localhost:3000
 - 🔧 API: http://localhost:3001/api/
+- 📧 Mailhog (correos de prueba): http://localhost:8025
 - 🗄️ phpMyAdmin: http://localhost:3002
 - 🔌 MySQL: localhost:3306
 

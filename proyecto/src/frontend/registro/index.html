@@ -36,6 +36,33 @@
                     </div>
                   </div>
                 </div>
+                <div
+                  id="registro-success"
+                  class="alert alert-success d-none"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <p class="mb-2">
+                    Te enviamos un enlace de confirmación a
+                    <strong id="registro-success-email"></strong>.
+                  </p>
+                  <p class="mb-3">
+                    Confirma tu cuenta desde el correo antes de iniciar sesión. En local puedes ver el
+                    mensaje en Mailhog
+                    (<a href="http://localhost:8025" target="_blank" rel="noopener noreferrer">http://localhost:8025</a>).
+                  </p>
+                  <p id="registro-resend-status" class="small text-secondary d-none mb-3" role="status"></p>
+                  <div class="d-flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      id="registro-resend"
+                      class="btn btn-outline-success btn-sm"
+                    >
+                      Reenviar correo
+                    </button>
+                    <a href="/login/" class="btn btn-link btn-sm">Ir a iniciar sesión</a>
+                  </div>
+                </div>
                 <form id="registro-form">
                   <div
                     id="registro-error"
