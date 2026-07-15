@@ -24,10 +24,10 @@ class JsonResponse
             $payload['message'] = $message;
         }
 
-        $response->getBody()->write((string) json_encode($payload));
+        $response->getBody()->write((string) json_encode($payload, JSON_UNESCAPED_UNICODE));
 
         return $response
-            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('Content-Type', 'application/json; charset=utf-8')
             ->withStatus($status);
     }
 
@@ -36,10 +36,10 @@ class JsonResponse
         $response->getBody()->write((string) json_encode([
             'success' => false,
             'error' => $error,
-        ]));
+        ], JSON_UNESCAPED_UNICODE));
 
         return $response
-            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('Content-Type', 'application/json; charset=utf-8')
             ->withStatus($status);
     }
 }

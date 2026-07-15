@@ -16,18 +16,21 @@ export async function apiFetch(path, options = {}) {
     ...options,
   });
 
+  const contentType = response.headers.get('content-type') ?? '';
+  const isJson = contentType.includes('application/json');
+  const payload = isJson ? await response.json() : await response.text();
+
   if (!response.ok) {
-    const error = new Error(`API error: ${response.status} ${response.statusText}`);
+    const message =
+      (isJson && typeof payload === 'object' && payload?.error) ||
+      `API error: ${response.status} ${response.statusText}`;
+    const error = new Error(message);
     error.status = response.status;
+    error.payload = payload;
     throw error;
   }
 
-  const contentType = response.headers.get('content-type') ?? '';
-  if (contentType.includes('application/json')) {
-    return response.json();
-  }
-
-  return response.text();
+  return payload;
 }
 
 export const usersApi = {

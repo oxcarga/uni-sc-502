@@ -9,7 +9,7 @@ use PDOException;
 
 class UserRepository
 {
-    private const BLOOD_TYPES = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
+    private const TIPOS_SANGRE = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
 
     public function __construct(private readonly PDO $pdo)
     {
@@ -18,7 +18,7 @@ class UserRepository
     public function findAll(): array
     {
         $query = $this->pdo->query(
-            'SELECT id, name, email, blood_type, created_at FROM users ORDER BY id ASC'
+            'SELECT id, nombre, email, tipo_sangre, creado_el, actualizado_el FROM usuarios ORDER BY id ASC'
         );
 
         return $query->fetchAll();
@@ -27,7 +27,7 @@ class UserRepository
     public function findById(int $id): ?array
     {
         $query = $this->pdo->prepare(
-            'SELECT id, name, email, blood_type, created_at FROM users WHERE id = :id'
+            'SELECT id, nombre, email, tipo_sangre, creado_el, actualizado_el FROM usuarios WHERE id = :id'
         );
         $query->execute(['id' => $id]);
         $user = $query->fetch();
@@ -38,12 +38,12 @@ class UserRepository
     public function create(array $data): array
     {
         $query = $this->pdo->prepare(
-            'INSERT INTO users (name, email, blood_type) VALUES (:name, :email, :blood_type)'
+            'INSERT INTO usuarios (nombre, email, tipo_sangre) VALUES (:nombre, :email, :tipo_sangre)'
         );
         $query->execute([
-            'name' => $data['name'],
+            'nombre' => $data['nombre'],
             'email' => $data['email'],
-            'blood_type' => $data['blood_type'] ?? null,
+            'tipo_sangre' => $data['tipo_sangre'] ?? null,
         ]);
 
         $user = $this->findById((int) $this->pdo->lastInsertId());
@@ -57,13 +57,13 @@ class UserRepository
     public function update(int $id, array $data): ?array
     {
         $query = $this->pdo->prepare(
-            'UPDATE users SET name = :name, email = :email, blood_type = :blood_type WHERE id = :id'
+            'UPDATE usuarios SET nombre = :nombre, email = :email, tipo_sangre = :tipo_sangre WHERE id = :id'
         );
         $query->execute([
             'id' => $id,
-            'name' => $data['name'],
+            'nombre' => $data['nombre'],
             'email' => $data['email'],
-            'blood_type' => $data['blood_type'] ?? null,
+            'tipo_sangre' => $data['tipo_sangre'] ?? null,
         ]);
 
         if ($query->rowCount() === 0 && $this->findById($id) === null) {
@@ -75,7 +75,7 @@ class UserRepository
 
     public function delete(int $id): bool
     {
-        $query = $this->pdo->prepare('DELETE FROM users WHERE id = :id');
+        $query = $this->pdo->prepare('DELETE FROM usuarios WHERE id = :id');
         $query->execute(['id' => $id]);
 
         return $query->rowCount() > 0;
@@ -87,6 +87,6 @@ class UserRepository
             return true;
         }
 
-        return in_array($bloodType, self::BLOOD_TYPES, true);
+        return in_array($bloodType, self::TIPOS_SANGRE, true);
     }
 }

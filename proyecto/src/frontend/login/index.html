@@ -16,7 +16,9 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="/css/custom.css" />
-    <script type="module" src="login.js" defer></script>
+    <script type="module">
+      import(`./login.js?t=${Date.now()}`);
+    </script>
   </head>
   <body>
     <section class="py-3 py-md-5 py-xl-8 min-vh-100" style="background-color: #eff4ff">
