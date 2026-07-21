@@ -15,4 +15,13 @@ return function (App $app) {
             'timestamp' => date('Y-m-d H:i:s'),
         ]);
     });
+
+    // Config pública para el FE (sin secretos). APP_ENV viene del contenedor / .env
+    $app->get('/config', function (Request $request, Response $response) {
+        $environment = strtolower(trim((string) (getenv('APP_ENV') ?: 'local')));
+
+        return JsonResponse::success($response, [
+            'environment' => $environment,
+        ]);
+    });
 };

@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pulso Solidario — Inventario del Banco</title>
+  <meta name="description"
+    content="Inventario de hemoderivados por tipo de sangre: niveles en vivo, movimientos y alertas críticas." />
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="stylesheet" href="../../assets/css/custom.css" />
+  <script type="module">
+    import(`/js/auth-guard.js?t=${Date.now()}`);
+  </script>
+</head>
+
+<body class="d-none" data-required-role="bank">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="d-flex align-items-center gap-2 mb-4 px-1">
+        <span class="avatar-initials avatar-initials-lg" style="background-color: #b90538">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path
+              d="M12 21s-7-4.35-9.5-8.5C.5 9 2 5 5.5 5 7.5 5 9 6.5 12 9c3-2.5 4.5-4 6.5-4C22 5 23.5 9 21.5 12.5 19 16.65 12 21 12 21Z" />
+          </svg>
+        </span>
+        <div>
+          <div class="sidebar-brand-name">Pulso Solidario</div>
+          <div class="sidebar-brand-sub">Panel del banco</div>
+        </div>
+      </div>
+
+      <nav class="nav flex-column gap-1" aria-label="Navegación principal">
+        <a class="nav-link" href="/dashboard/bank/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+          Panel
+        </a>
+        <a class="nav-link active" href="/dashboard/bank/inventory/" aria-current="page">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <path d="M12 3s6 5.5 6 10a6 6 0 0 1-12 0c0-4.5 6-10 6-10Z" />
+          </svg>
+          Inventario
+        </a>
+        <a class="nav-link" href="/dashboard/bank/appointments/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <path d="M16 2v4M8 2v4M3 10h18" />
+          </svg>
+          Citas
+        </a>
+        <a class="nav-link" href="/dashboard/bank/donors/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          </svg>
+          Donantes
+        </a>
+        <a class="nav-link mt-2" href="/dashboard/bank/settings/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.6 15H3.5a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 5.2 8.6l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 5.6V3.5a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 2.79 1.17l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 20.4 9H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+          </svg>
+          Configuración
+        </a>
+      </nav>
+    </aside>
+
+        <div class="app-main">
+            <header class="topbar">
+        <span class="topbar-title">Hola, <span id="dashboard-greeting-name">…</span></span>
+        <div class="d-flex align-items-center gap-3">
+          <div class="dropdown">
+            <button
+              type="button"
+              id="dashboard-user-initials"
+              class="avatar-initials avatar-initials-lg border-0 user-menu-toggle"
+              style="background-color: #b90538"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              aria-label="Menú de usuario"
+            >…</button>
+            <div class="dropdown-menu dropdown-menu-end user-menu shadow border-0 p-0" aria-labelledby="dashboard-user-initials">
+              <div class="user-menu__header">
+                <div id="dashboard-user-name" class="fw-semibold text-truncate">…</div>
+                <div id="dashboard-user-role" class="text-muted" style="font-size: 0.75rem">…</div>
+              </div>
+              <div class="dropdown-divider m-0"></div>
+              <button type="button" id="dashboard-logout" class="dropdown-item user-menu__logout">
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-grow-1" style="padding: 2rem 2.5rem">
+        <div class="page-sticky-bar">
+          <div>
+            <h1 class="headline fw-bold mb-1" style="font-size: 2rem">
+              Inventario
+            </h1>
+            <p class="text-muted mb-0">
+              Stock por tipo de sangre, movimientos y alertas de escasez.
+            </p>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-outline-secondary rounded-3 fw-semibold d-flex align-items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <path d="M7 10l5 5 5-5M12 15V3" />
+              </svg>
+              Exportar
+            </button>
+            <button class="btn btn-primary rounded-3 fw-semibold d-flex align-items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Registrar entrada
+            </button>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <h2 class="section-title mb-0">Stock por tipo</h2>
+          <span class="tag-realtime">Tiempo real</span>
+        </div>
+        <p class="text-muted mb-3" style="font-size: 0.8125rem">
+          Umbrales: saludable &gt;100 · moderado 50–100 · crítico &lt;50
+        </p>
+
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6 col-xl-3">
+            <div class="inv-card">
+              <div class="d-flex align-items-start justify-content-between">
+                <span class="inv-card__type">O+</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#00685f" aria-hidden="true">
+                  <path d="M12 3s6 5.5 6 10a6 6 0 0 1-12 0c0-4.5 6-10 6-10Z" />
+                </svg>
+              </div>
+              <div class="inv-bar"><span style="width: 85%"></span></div>
+              <span class="inv-card__count">142 Unidades</span>
+              <span class="inv-card__status inv-status--ok">(Saludable)</span>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="inv-card">
+              <div class="d-flex align-items-start justify-content-between">
+                <span class="inv-card__type">O-</span>
+                <span class="pulse-dot"></span>
+              </div>
+              <div class="inv-bar"><span style="width: 22%"></span></div>
+              <span class="inv-card__count">28 Unidades</span>
+              <span class="inv-card__status inv-status--crit">(Crítico)</span>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="inv-card">
+              <div class="d-flex align-items-start justify-content-between">
+                <span class="inv-card__type">A+</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#00685f" aria-hidden="true">
+                  <path d="M12 3s6 5.5 6 10a6 6 0 0 1-12 0c0-4.5 6-10 6-10Z" />
+                </svg>
+              </div>
+              <div class="inv-bar"><span style="width: 72%"></span></div>
+              <span class="inv-card__count">118 Unidades</span>
+              <span class="inv-card__status inv-status--ok">(Saludable)</span>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="inv-card inv-card--critical">
+              <div class="d-flex align-items-start justify-content-between">
+                <span class="inv-card__type">A-</span>
+                <span class="pulse-dot"></span>
+              </div>
+              <div class="inv-bar"><span style="width: 18%"></span></div>
+              <span class="inv-card__count">31 Unidades</span>
+              <span class="inv-card__status inv-status--crit">(Crítico)</span>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="inv-card">
+              <div class="d-flex align-items-start justify-content-between">
+                <span class="inv-card__type">B+</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#c79a18" aria-hidden="true">
+                  <path d="M12 3s6 5.5 6 10a6 6 0 0 1-12 0c0-4.5 6-10 6-10Z" />
+                </svg>
+              </div>
+              <div class="inv-bar">
+                <span style="width: 55%; background-color: #c79a18"></span>
+              </div>
+              <span class="inv-card__count">74 Unidades</span>
+              <span class="inv-card__status inv-status--warn">(Moderado)</span>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="inv-card inv-card--critical">
+              <div class="d-flex align-items-start justify-content-between">
+                <span class="inv-card__type">B-</span>
+                <span class="pulse-dot"></span>
+              </div>
+              <div class="inv-bar"><span style="width: 12%"></span></div>
+              <span class="inv-card__count">12 Unidades</span>
+              <span class="inv-card__status inv-status--crit">(Crítico)</span>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="inv-card">
+              <div class="d-flex align-items-start justify-content-between">
+                <span class="inv-card__type">AB+</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#c79a18" aria-hidden="true">
+                  <path d="M12 3s6 5.5 6 10a6 6 0 0 1-12 0c0-4.5 6-10 6-10Z" />
+                </svg>
+              </div>
+              <div class="inv-bar">
+                <span style="width: 48%; background-color: #c79a18"></span>
+              </div>
+              <span class="inv-card__count">56 Unidades</span>
+              <span class="inv-card__status inv-status--warn">(Moderado)</span>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="inv-card">
+              <div class="d-flex align-items-start justify-content-between">
+                <span class="inv-card__type">AB-</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#c79a18" aria-hidden="true">
+                  <path d="M12 3s6 5.5 6 10a6 6 0 0 1-12 0c0-4.5 6-10 6-10Z" />
+                </svg>
+              </div>
+              <div class="inv-bar">
+                <span style="width: 42%; background-color: #c79a18"></span>
+              </div>
+              <span class="inv-card__count">41 Unidades</span>
+              <span class="inv-card__status inv-status--crit">(Crítico)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+          <div class="col-lg-4">
+            <section class="card shortage-card h-100 p-3" aria-labelledby="shortage">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <h2 class="shortage-title mb-0" id="shortage">Escasez crítica</h2>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b90538" stroke-width="2"
+                  aria-hidden="true">
+                  <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
+              <p class="text-muted mb-3" style="font-size: 0.875rem">
+                Tipos por debajo del umbral. Prioriza campañas o transferencias.
+              </p>
+              <div class="d-flex flex-column gap-2 mb-3">
+                <div class="shortage-row">
+                  <div class="shortage-info">
+                    <div class="name">B-</div>
+                    <div class="place">12 unidades</div>
+                  </div>
+                  <span class="priority-tag">Prioridad<br />1</span>
+                </div>
+                <div class="shortage-row">
+                  <div class="shortage-info">
+                    <div class="name">O-</div>
+                    <div class="place">28 unidades</div>
+                  </div>
+                  <span class="priority-tag">Prioridad<br />2</span>
+                </div>
+                <div class="shortage-row">
+                  <div class="shortage-info">
+                    <div class="name">A-</div>
+                    <div class="place">31 unidades</div>
+                  </div>
+                  <span class="priority-tag">Prioridad<br />3</span>
+                </div>
+              </div>
+              <button class="btn btn-primary rounded-3 fw-semibold w-100">
+                Lanzar alerta de donación
+              </button>
+            </section>
+          </div>
+
+          <div class="col-lg-8">
+            <div class="row g-3 h-100">
+              <div class="col-md-4">
+                <article class="card p-3 h-100">
+                  <span class="card-eyebrow mb-2">Total unidades</span>
+                  <div class="headline fw-bold" style="font-size: 1.75rem">502</div>
+                  <div class="text-muted mt-1" style="font-size: 0.8125rem">Suma de los 8 tipos</div>
+                </article>
+              </div>
+              <div class="col-md-4">
+                <article class="card p-3 h-100">
+                  <span class="card-eyebrow mb-2">Tipos críticos</span>
+                  <div class="headline fw-bold" style="font-size: 1.75rem; color: #b90538">4</div>
+                  <div class="text-muted mt-1" style="font-size: 0.8125rem">Por debajo de 50</div>
+                </article>
+              </div>
+              <div class="col-md-4">
+                <article class="card p-3 h-100">
+                  <span class="card-eyebrow mb-2">Entradas hoy</span>
+                  <div class="headline fw-bold" style="font-size: 1.75rem; color: #2e7d52">+18</div>
+                  <div class="text-muted mt-1" style="font-size: 0.8125rem">Recepciones registradas</div>
+                </article>
+              </div>
+              <div class="col-12">
+                <section class="card p-3" aria-labelledby="quick-actions">
+                  <h2 class="section-title mb-3" id="quick-actions">Acciones rápidas</h2>
+                  <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-primary rounded-3 fw-semibold">Registrar entrada</button>
+                    <button class="btn btn-outline-secondary rounded-3 fw-semibold">Ajuste de stock</button>
+                    <button class="btn btn-outline-secondary rounded-3 fw-semibold">Registrar descarte</button>
+                    <button class="btn btn-outline-secondary rounded-3 fw-semibold">Asignar a solicitud</button>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <section class="card p-3" aria-labelledby="movements">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <h2 class="section-title mb-0" id="movements">Movimientos recientes</h2>
+            <span class="tag-realtime">Libro de stock</span>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-borderless align-middle mb-0">
+              <thead>
+                <tr>
+                  <th scope="col">Fecha</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col">Movimiento</th>
+                  <th scope="col">Cantidad</th>
+                  <th scope="col">Detalle</th>
+                  <th scope="col">Usuario</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="fw-semibold" style="font-size: 0.875rem">Hoy, 10:42</td>
+                  <td><span class="blood-badge blood-badge--teal">O+</span></td>
+                  <td><span class="badge-soft badge-soft--green"><span class="dot"></span>Recepción</span></td>
+                  <td class="fw-semibold" style="color: #2e7d52">+2</td>
+                  <td class="text-muted" style="font-size: 0.875rem">Donación completada #DN-4412</td>
+                  <td class="text-muted" style="font-size: 0.875rem">M. Solano</td>
+                </tr>
+                <tr>
+                  <td class="fw-semibold" style="font-size: 0.875rem">Hoy, 09:15</td>
+                  <td><span class="blood-badge blood-badge--rose">B-</span></td>
+                  <td><span class="badge-soft badge-soft--blue"><span class="dot"></span>Asignación</span></td>
+                  <td class="fw-semibold" style="color: #b90538">−3</td>
+                  <td class="text-muted" style="font-size: 0.875rem">Solicitud Hospital Central #RE-9082</td>
+                  <td class="text-muted" style="font-size: 0.875rem">M. Solano</td>
+                </tr>
+                <tr>
+                  <td class="fw-semibold" style="font-size: 0.875rem">Ayer, 16:20</td>
+                  <td><span class="blood-badge">A+</span></td>
+                  <td><span class="badge-soft badge-soft--slate"><span class="dot"></span>Ajuste</span></td>
+                  <td class="fw-semibold">−1</td>
+                  <td class="text-muted" style="font-size: 0.875rem">Corrección de conteo físico</td>
+                  <td class="text-muted" style="font-size: 0.875rem">Sistema</td>
+                </tr>
+                <tr>
+                  <td class="fw-semibold" style="font-size: 0.875rem">Ayer, 14:05</td>
+                  <td><span class="blood-badge blood-badge--teal">AB+</span></td>
+                  <td><span class="badge-soft badge-soft--amber"><span class="dot"></span>Descarte</span></td>
+                  <td class="fw-semibold" style="color: #b90538">−2</td>
+                  <td class="text-muted" style="font-size: 0.875rem">Caducidad lote #BU-7781</td>
+                  <td class="text-muted" style="font-size: 0.875rem">M. Solano</td>
+                </tr>
+                <tr>
+                  <td class="fw-semibold" style="font-size: 0.875rem">Ayer, 11:30</td>
+                  <td><span class="blood-badge blood-badge--rose">O-</span></td>
+                  <td><span class="badge-soft badge-soft--green"><span class="dot"></span>Recepción</span></td>
+                  <td class="fw-semibold" style="color: #2e7d52">+1</td>
+                  <td class="text-muted" style="font-size: 0.875rem">Donación completada #DN-4398</td>
+                  <td class="text-muted" style="font-size: 0.875rem">M. Solano</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9bIOgUxi8T/jzmcgIwJ1j23KP4W96JxA4fzpLDo" crossorigin="anonymous"></script>
+</body>
+
+</html>

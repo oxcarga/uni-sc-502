@@ -16,10 +16,14 @@ services:
       - MYSQL_USER=${DB_USER:-pulso_user}
       - MYSQL_PASSWORD=${DB_PASSWORD:-pulso_password}
       - MYSQL_DATABASE=${DB_NAME:-pulso_solidario}
+      - APP_ENV=${APP_ENV:-local}
+      - APP_URL=${APP_URL:-http://localhost:3000}
+      - SMTP_HOST=${SMTP_HOST:-mailhog}
+      - SMTP_PORT=${SMTP_PORT:-1025}
+      - MAIL_FROM=${MAIL_FROM:-noreply@pulso-solidario.local}
     depends_on:
       - db
-      #db:
-        #condition: service_healthy
+      - mailhog
     networks:
       - pulso-network
     restart: unless-stopped
@@ -54,10 +58,16 @@ services:
     networks:
       - pulso-network
     restart: unless-stopped
-    #healthcheck:
-      #test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      #timeout: 20s
-      #retries: 10
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: pulso-solidario-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - pulso-network
+    restart: unless-stopped
 
   phpmyadmin:
     image: phpmyadmin:latest

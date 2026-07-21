@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pulso Solidario — Donantes (Admin)</title>
+  <meta name="description"
+    content="Administra donantes del sistema: activar o desactivar cuentas, revisar elegibilidad y datos de perfil." />
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="stylesheet" href="../../assets/css/custom.css" />
+  <script type="module">
+    await import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`./donors.js?t=${Date.now()}`);
+  </script>
+</head>
+
+<body class="d-none" data-required-role="admin">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="d-flex align-items-center gap-2 mb-4 px-1">
+        <span class="avatar-initials avatar-initials-lg" style="background-color: #b90538">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path
+              d="M12 21s-7-4.35-9.5-8.5C.5 9 2 5 5.5 5 7.5 5 9 6.5 12 9c3-2.5 4.5-4 6.5-4C22 5 23.5 9 21.5 12.5 19 16.65 12 21 12 21Z" />
+          </svg>
+        </span>
+        <div>
+          <div class="sidebar-brand-name">Pulso Solidario</div>
+          <div class="sidebar-brand-sub">Administración</div>
+        </div>
+      </div>
+
+      <nav class="nav flex-column gap-1" aria-label="Navegación principal">
+        <a class="nav-link" href="/dashboard/admin/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+          Panel
+        </a>
+        <a class="nav-link" href="/dashboard/admin/banks/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6" />
+          </svg>
+          Bancos
+        </a>
+        <a class="nav-link active" href="/dashboard/admin/donors/" aria-current="page">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          </svg>
+          Donantes
+        </a>
+        <a class="nav-link mt-2" href="#">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.6 15H3.5a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 5.2 8.6l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 5.6V3.5a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 2.79 1.17l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 20.4 9H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+          </svg>
+          Configuración
+        </a>
+      </nav>
+    </aside>
+
+    <div class="app-main">
+      <header class="topbar">
+        <span class="topbar-title">Hola, <span id="dashboard-greeting-name">…</span></span>
+        <div class="d-flex align-items-center gap-3">
+          <button class="icon-btn" aria-label="Notificaciones">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              aria-hidden="true">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </button>
+          <div class="dropdown">
+            <button type="button" id="dashboard-user-initials"
+              class="avatar-initials avatar-initials-lg border-0 user-menu-toggle"
+              style="background-color: #00685f" data-bs-toggle="dropdown" aria-expanded="false"
+              aria-label="Menú de usuario">…</button>
+            <div class="dropdown-menu dropdown-menu-end user-menu shadow border-0 p-0"
+              aria-labelledby="dashboard-user-initials">
+              <div class="user-menu__header">
+                <div id="dashboard-user-name" class="fw-semibold text-truncate">…</div>
+                <div id="dashboard-user-role" class="text-muted" style="font-size: 0.75rem">…</div>
+              </div>
+              <div class="dropdown-divider m-0"></div>
+              <button type="button" id="dashboard-logout" class="dropdown-item user-menu__logout">
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-grow-1" style="padding: 2rem 2.5rem">
+        <div class="page-sticky-bar">
+          <div>
+            <h1 class="headline fw-bold mb-1" style="font-size: 2rem">Donantes</h1>
+            <p class="text-muted mb-0">
+              Administra cuentas, elegibilidad y datos de perfil de donantes.
+            </p>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="btn btn-outline-secondary rounded-3 fw-semibold">Exportar</button>
+            <button type="button" class="btn btn-primary rounded-3 fw-semibold d-flex align-items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Nuevo donante
+            </button>
+          </div>
+        </div>
+
+        <div id="donors-status" class="alert d-none mb-4" role="status" aria-live="polite"></div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6 col-xl-3">
+            <article class="card p-3 h-100">
+              <span class="card-eyebrow mb-2">Total donantes</span>
+              <div class="headline fw-bold" style="font-size: 1.75rem" id="kpi-total">8</div>
+              <div class="text-muted mt-1" style="font-size: 0.8125rem">Cuentas registradas</div>
+            </article>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <article class="card p-3 h-100">
+              <span class="card-eyebrow mb-2">Cuentas activas</span>
+              <div class="headline fw-bold" style="font-size: 1.75rem; color: #2e7d52" id="kpi-active">7</div>
+              <div class="text-muted mt-1" style="font-size: 0.8125rem">Pueden iniciar sesión</div>
+            </article>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <article class="card p-3 h-100">
+              <span class="card-eyebrow mb-2">Elegibles</span>
+              <div class="headline fw-bold" style="font-size: 1.75rem; color: #00685f" id="kpi-eligible">5</div>
+              <div class="text-muted mt-1" style="font-size: 0.8125rem">Listos para donar</div>
+            </article>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <article class="card p-3 h-100">
+              <span class="card-eyebrow mb-2">Inactivos</span>
+              <div class="headline fw-bold" style="font-size: 1.75rem; color: #b90538" id="kpi-inactive">1</div>
+              <div class="text-muted mt-1" style="font-size: 0.8125rem">Cuentas deshabilitadas</div>
+            </article>
+          </div>
+        </div>
+
+        <section class="card p-3 mb-4" aria-labelledby="donor-filters">
+          <h2 class="section-title mb-3" id="donor-filters">Filtros</h2>
+          <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label fw-semibold" for="filterSearch">Buscar</label>
+              <input type="search" class="form-control form-control-lg rounded-3" id="filterSearch"
+                placeholder="Nombre, correo o teléfono…" />
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-semibold" for="filterBlood">Tipo</label>
+              <select class="form-select form-select-lg rounded-3" id="filterBlood">
+                <option value="">Todos</option>
+                <option>O+</option>
+                <option>O-</option>
+                <option>A+</option>
+                <option>A-</option>
+                <option>B+</option>
+                <option>B-</option>
+                <option>AB+</option>
+                <option>AB-</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-semibold" for="filterAccount">Cuenta</label>
+              <select class="form-select form-select-lg rounded-3" id="filterAccount">
+                <option value="">Todas</option>
+                <option value="active">Activa</option>
+                <option value="inactive">Inactiva</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label fw-semibold" for="filterEligible">Elegibilidad</label>
+              <select class="form-select form-select-lg rounded-3" id="filterEligible">
+                <option value="">Todas</option>
+                <option value="yes">Elegible</option>
+                <option value="no">No elegible</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button type="button" class="btn btn-outline-secondary rounded-3 fw-semibold w-100" id="filterClear">
+                Limpiar
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card p-3" aria-labelledby="donors-table">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <h2 class="section-title mb-0" id="donors-table">Listado de donantes</h2>
+            <span class="tag-realtime" id="donors-count">8 registros</span>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-borderless align-middle mb-0" id="admin-donors-table">
+              <thead>
+                <tr>
+                  <th scope="col">Donante</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col">Contacto</th>
+                  <th scope="col">Última donación</th>
+                  <th scope="col">Elegibilidad</th>
+                  <th scope="col">Cuenta</th>
+                  <th scope="col" class="text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-active="1" data-eligible="1" data-blood="O+" data-name="miguel angel perez" data-email="miguel@email.com">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="avatar-initials" style="background-color: #b90538">MA</span>
+                      <div>
+                        <div class="fw-semibold">Miguel Ángel Pérez</div>
+                        <div class="text-muted" style="font-size: 0.75rem">ID #DN-001</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="blood-badge blood-badge--teal">O+</span></td>
+                  <td>
+                    <div style="font-size: 0.875rem">8888-1122</div>
+                    <div class="text-muted" style="font-size: 0.75rem">miguel@email.com</div>
+                  </td>
+                  <td class="fw-semibold" style="font-size: 0.875rem">15 Jul 2023</td>
+                  <td><span class="badge-soft badge-soft--green"><span class="dot"></span>Elegible</span></td>
+                  <td><span class="badge-soft badge-soft--teal donor-account-status"><span class="dot"></span>Activa</span></td>
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                      <div class="form-check form-switch m-0">
+                        <input class="form-check-input donor-active-toggle" type="checkbox" role="switch"
+                          aria-label="Activar cuenta Miguel Ángel Pérez" checked />
+                      </div>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold btn-view-donor">Ver</button>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Editar</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr data-active="1" data-eligible="1" data-blood="A-" data-name="elena rodriguez" data-email="elena@email.com">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="avatar-initials" style="background-color: #00685f">ER</span>
+                      <div>
+                        <div class="fw-semibold">Elena Rodríguez</div>
+                        <div class="text-muted" style="font-size: 0.75rem">ID #DN-002 · Nuevo</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="blood-badge blood-badge--rose">A-</span></td>
+                  <td>
+                    <div style="font-size: 0.875rem">8700-3344</div>
+                    <div class="text-muted" style="font-size: 0.75rem">elena@email.com</div>
+                  </td>
+                  <td class="text-muted" style="font-size: 0.875rem">—</td>
+                  <td><span class="badge-soft badge-soft--green"><span class="dot"></span>Elegible</span></td>
+                  <td><span class="badge-soft badge-soft--teal donor-account-status"><span class="dot"></span>Activa</span></td>
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                      <div class="form-check form-switch m-0">
+                        <input class="form-check-input donor-active-toggle" type="checkbox" role="switch"
+                          aria-label="Activar cuenta Elena Rodríguez" checked />
+                      </div>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold btn-view-donor">Ver</button>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Editar</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr data-active="1" data-eligible="0" data-blood="B+" data-name="juan sanchez" data-email="juan@email.com">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="avatar-initials" style="background-color: #545f73">JS</span>
+                      <div>
+                        <div class="fw-semibold">Juan Sánchez</div>
+                        <div class="text-muted" style="font-size: 0.75rem">ID #DN-003</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="blood-badge">B+</span></td>
+                  <td>
+                    <div style="font-size: 0.875rem">8555-7788</div>
+                    <div class="text-muted" style="font-size: 0.75rem">juan@email.com</div>
+                  </td>
+                  <td class="fw-semibold" style="font-size: 0.875rem">24 Oct 2023</td>
+                  <td><span class="badge-soft badge-soft--amber"><span class="dot"></span>No elegible</span></td>
+                  <td><span class="badge-soft badge-soft--teal donor-account-status"><span class="dot"></span>Activa</span></td>
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                      <div class="form-check form-switch m-0">
+                        <input class="form-check-input donor-active-toggle" type="checkbox" role="switch"
+                          aria-label="Activar cuenta Juan Sánchez" checked />
+                      </div>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold btn-view-donor">Ver</button>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Editar</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr data-active="1" data-eligible="1" data-blood="O-" data-name="laura mendez" data-email="laura@email.com">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="avatar-initials" style="background-color: #c79a18">LM</span>
+                      <div>
+                        <div class="fw-semibold">Laura Méndez</div>
+                        <div class="text-muted" style="font-size: 0.75rem">ID #DN-004</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="blood-badge blood-badge--rose">O-</span></td>
+                  <td>
+                    <div style="font-size: 0.875rem">8622-9900</div>
+                    <div class="text-muted" style="font-size: 0.75rem">laura@email.com</div>
+                  </td>
+                  <td class="fw-semibold" style="font-size: 0.875rem">02 Abr 2023</td>
+                  <td><span class="badge-soft badge-soft--green"><span class="dot"></span>Elegible</span></td>
+                  <td><span class="badge-soft badge-soft--teal donor-account-status"><span class="dot"></span>Activa</span></td>
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                      <div class="form-check form-switch m-0">
+                        <input class="form-check-input donor-active-toggle" type="checkbox" role="switch"
+                          aria-label="Activar cuenta Laura Méndez" checked />
+                      </div>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold btn-view-donor">Ver</button>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Editar</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr data-active="1" data-eligible="1" data-blood="A+" data-name="carlos jimenez" data-email="carlos@email.com">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="avatar-initials" style="background-color: #3b6cd4">CJ</span>
+                      <div>
+                        <div class="fw-semibold">Carlos Jiménez</div>
+                        <div class="text-muted" style="font-size: 0.75rem">ID #DN-005</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="blood-badge blood-badge--teal">A+</span></td>
+                  <td>
+                    <div style="font-size: 0.875rem">8444-5566</div>
+                    <div class="text-muted" style="font-size: 0.75rem">carlos@email.com</div>
+                  </td>
+                  <td class="fw-semibold" style="font-size: 0.875rem">18 Ene 2023</td>
+                  <td><span class="badge-soft badge-soft--green"><span class="dot"></span>Elegible</span></td>
+                  <td><span class="badge-soft badge-soft--teal donor-account-status"><span class="dot"></span>Activa</span></td>
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                      <div class="form-check form-switch m-0">
+                        <input class="form-check-input donor-active-toggle" type="checkbox" role="switch"
+                          aria-label="Activar cuenta Carlos Jiménez" checked />
+                      </div>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold btn-view-donor">Ver</button>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Editar</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr data-active="0" data-eligible="0" data-blood="AB+" data-name="ana vargas" data-email="ana@email.com">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="avatar-initials" style="background-color: #b90538">AV</span>
+                      <div>
+                        <div class="fw-semibold">Ana Vargas</div>
+                        <div class="text-muted" style="font-size: 0.75rem">ID #DN-006</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="blood-badge">AB+</span></td>
+                  <td>
+                    <div style="font-size: 0.875rem">8333-2211</div>
+                    <div class="text-muted" style="font-size: 0.75rem">ana@email.com</div>
+                  </td>
+                  <td class="fw-semibold" style="font-size: 0.875rem">10 Sep 2023</td>
+                  <td><span class="badge-soft badge-soft--amber"><span class="dot"></span>No elegible</span></td>
+                  <td><span class="badge-soft badge-soft--slate donor-account-status"><span class="dot"></span>Inactiva</span></td>
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                      <div class="form-check form-switch m-0">
+                        <input class="form-check-input donor-active-toggle" type="checkbox" role="switch"
+                          aria-label="Activar cuenta Ana Vargas" />
+                      </div>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold btn-view-donor">Ver</button>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Editar</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr data-active="1" data-eligible="1" data-blood="O+" data-name="sofia rojas" data-email="sofia@email.com">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="avatar-initials" style="background-color: #00685f">SR</span>
+                      <div>
+                        <div class="fw-semibold">Sofía Rojas</div>
+                        <div class="text-muted" style="font-size: 0.75rem">ID #DN-007 · Nuevo</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="blood-badge blood-badge--teal">O+</span></td>
+                  <td>
+                    <div style="font-size: 0.875rem">8111-4455</div>
+                    <div class="text-muted" style="font-size: 0.75rem">sofia@email.com</div>
+                  </td>
+                  <td class="text-muted" style="font-size: 0.875rem">—</td>
+                  <td><span class="badge-soft badge-soft--green"><span class="dot"></span>Elegible</span></td>
+                  <td><span class="badge-soft badge-soft--teal donor-account-status"><span class="dot"></span>Activa</span></td>
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                      <div class="form-check form-switch m-0">
+                        <input class="form-check-input donor-active-toggle" type="checkbox" role="switch"
+                          aria-label="Activar cuenta Sofía Rojas" checked />
+                      </div>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold btn-view-donor">Ver</button>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Editar</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr data-active="1" data-eligible="0" data-blood="B-" data-name="diego fallas" data-email="diego@email.com">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="avatar-initials" style="background-color: #545f73">DF</span>
+                      <div>
+                        <div class="fw-semibold">Diego Fallas</div>
+                        <div class="text-muted" style="font-size: 0.75rem">ID #DN-008</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="blood-badge blood-badge--rose">B-</span></td>
+                  <td>
+                    <div style="font-size: 0.875rem">8999-0011</div>
+                    <div class="text-muted" style="font-size: 0.75rem">diego@email.com</div>
+                  </td>
+                  <td class="fw-semibold" style="font-size: 0.875rem">01 Dic 2022</td>
+                  <td><span class="badge-soft badge-soft--amber"><span class="dot"></span>No elegible</span></td>
+                  <td><span class="badge-soft badge-soft--teal donor-account-status"><span class="dot"></span>Activa</span></td>
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                      <div class="form-check form-switch m-0">
+                        <input class="form-check-input donor-active-toggle" type="checkbox" role="switch"
+                          aria-label="Activar cuenta Diego Fallas" checked />
+                      </div>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold btn-view-donor">Ver</button>
+                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Editar</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Detail modal -->
+  <div class="modal fade" id="donorDetailModal" tabindex="-1" aria-labelledby="donorDetailTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow">
+        <div class="modal-header border-0 pb-0">
+          <h2 class="modal-title section-title" id="donorDetailTitle">Detalle del donante</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body pt-2">
+          <dl class="row mb-0" style="font-size: 0.9375rem">
+            <dt class="col-4 text-muted">Nombre</dt>
+            <dd class="col-8 fw-semibold" id="detail-name">—</dd>
+            <dt class="col-4 text-muted">Correo</dt>
+            <dd class="col-8" id="detail-email">—</dd>
+            <dt class="col-4 text-muted">Teléfono</dt>
+            <dd class="col-8" id="detail-phone">—</dd>
+            <dt class="col-4 text-muted">Tipo</dt>
+            <dd class="col-8" id="detail-blood">—</dd>
+            <dt class="col-4 text-muted">Última donación</dt>
+            <dd class="col-8" id="detail-last">—</dd>
+            <dt class="col-4 text-muted">Elegibilidad</dt>
+            <dd class="col-8" id="detail-eligible">—</dd>
+            <dt class="col-4 text-muted">Cuenta</dt>
+            <dd class="col-8" id="detail-account">—</dd>
+          </dl>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-outline-secondary rounded-3 fw-semibold" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary rounded-3 fw-semibold">Editar perfil</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9bIOgUxi8T/jzmcgIwJ1j23KP4W96JxA4fzpLDo"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>

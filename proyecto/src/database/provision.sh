@@ -2,8 +2,17 @@
 # Aplica esquema y datos de ejemplo (idempotente).
 # Se ejecuta automáticamente al arrancar el contenedor backend (docker-entrypoint.sh).
 # También se puede lanzar a mano desde el host: ./database/provision.sh
+#
+# Nota: la carpeta database/ también se monta en /docker-entrypoint-initdb.d del
+# contenedor MySQL. Ahí ya corren 01_init.sql y 02_seed.sql; este script no debe
+# reejecutarse (el servidor temporal del init no escucha TCP y bloquearía el arranque).
 
 set -euo pipefail
+
+if [[ "${BASH_SOURCE[0]}" == /docker-entrypoint-initdb.d/* ]]; then
+  echo "Omitiendo provision.sh durante initdb de MySQL (los .sql ya se aplicaron)."
+  exit 0
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 

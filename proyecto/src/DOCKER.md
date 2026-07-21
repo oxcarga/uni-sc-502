@@ -9,8 +9,9 @@ Para el día a día, empieza por **[QUICKSTART.md](QUICKSTART.md)**. Para desarr
 | Servicio | Contenedor | Imagen / build | Puerto (host) |
 |----------|------------|----------------|---------------|
 | **backend** | `pulso-solidario-backend` | `Dockerfile` (PHP 8.2 + Apache) | 3001 → 80 (API) |
-| **frontend** | `pulso-solidario-frontend` | `node:20-alpine` | 3000 → 3000 |
+| **frontend** | `pulso-solidario-frontend` | `nginx:alpine` | 3000 → 80 |
 | **db** | `pulso-solidario-db` | `mysql:8.0` | 3306 → 3306 |
+| **mailhog** | `pulso-solidario-mailhog` | `mailhog/mailhog` | 8025 (UI) · 1025 (SMTP) |
 | **phpmyadmin** | `pulso-solidario-phpmyadmin` | `phpmyadmin:latest` | 3002 → 80 |
 
 Los tres servicios comparten la red `pulso-network`. El servicio `backend` resuelve la base de datos por el hostname `db` (nombre del servicio en Compose, no `localhost`).
@@ -58,9 +59,12 @@ Definidas en `.env` (opcional; hay valores por defecto en `docker-compose.yml`):
 |----------|-----|
 | `DB_ROOT_PASSWORD` | Contraseña root de MySQL |
 | `DB_USER` / `DB_PASSWORD` / `DB_NAME` | Credenciales de la aplicación |
-| `APP_ENV` / `APP_DEBUG` | Configuración de la aplicación |
+| `APP_ENV` / `APP_DEBUG` | Ambiente (`local` por defecto) y debug. El FE consulta `GET /api/config` y solo en `local`/`development` muestra tips de Mailhog. En `production` la cookie de sesión `PULSOSESSID` usa `Secure` |
+| `APP_URL` | Base del frontend para enlaces de confirmación (default `http://localhost:3000`) |
+| `SMTP_HOST` / `SMTP_PORT` | SMTP (default Mailhog: `mailhog:1025`) |
+| `MAIL_FROM` | Remitente de correos de confirmación |
 
-El servicio `backend` expone al PHP del backend: `MYSQL_HOST`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`.
+El servicio `backend` expone al PHP: `MYSQL_*`, `APP_URL`, `SMTP_HOST`, `SMTP_PORT`, `MAIL_FROM`.
 
 ## Inicio y verificación
 
@@ -72,10 +76,21 @@ docker-compose ps
 
 | Recurso | URL | Credenciales |
 |---------|-----|--------------|
-| Frontend (Vite) | http://localhost:3000 | — |
+| Frontend | http://localhost:3000 | — |
 | API | http://localhost:3001/api/ | — |
+| Mailhog (correos de prueba) | http://localhost:8025 | — |
 | phpMyAdmin | http://localhost:3002 | `pulso_user` / `pulso_password` |
 | MySQL (desde el host) | `localhost:3306` | `pulso_user` / `pulso_password` |
+
+### Correo de confirmación (local)
+
+Tras registrarte, el backend envía el enlace por SMTP a **Mailhog**. Ábrelo en http://localhost:8025, entra al mensaje y usa el enlace (`/confirm-email/?token=…`). Si SMTP falla, el mismo enlace queda en los logs del backend (`docker compose logs backend`).
+
+### Sesión (cookie HttpOnly)
+
+Login y confirmación de correo crean una sesión PHP (`PULSOSESSID`, HttpOnly, `SameSite=Lax`, path `/`). El FE llama a la API con `credentials: 'include'` vía el proxy Nginx de `/api/`. Las rutas `/dashboard/*` usan un auth guard que consulta `GET /api/auth/me`.
+
+Las vistas viven en `frontend/pages/` (`login`, `register`, `confirm-email`, `dashboard`, …). Nginx las sirve con las URLs públicas `/login/`, `/register/`, etc.; los assets compartidos siguen en `frontend/{css,js,images}/`.
 
 ## Flujo de desarrollo
 
