@@ -76,7 +76,9 @@ class UserController
                 'password_hash' => password_hash((string) $body['password'], PASSWORD_DEFAULT),
                 'role' => 'donor',
                 'email_confirmed' => false,
-                'blood_type' => isset($body['blood_type']) ? trim((string) $body['blood_type']) : null,
+                'blood_type' => isset($body['blood_type'])
+                    ? trim((string) $body['blood_type'])
+                    : null, // opcional → donor_profiles
             ]);
 
             $this->emailVerification->issueAndSend($user);
@@ -124,7 +126,6 @@ class UserController
                 'first_name' => trim((string) $body['first_name']),
                 'last_name' => trim((string) $body['last_name']),
                 'email' => strtolower(trim((string) $body['email'])),
-                'blood_type' => isset($body['blood_type']) ? trim((string) $body['blood_type']) : null,
             ];
 
             if ($requirePassword) {
