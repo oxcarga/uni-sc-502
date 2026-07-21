@@ -22,7 +22,8 @@ database/
 └── README.md       # Esta guía operativa
 ```
 
-Plan de implementación de **toda la app** (DB + BE + FE + Config): [../plan.md](../plan.md).
+Plan de implementación de **toda la app** (DB + BE + FE + Config): [../plan.md](../plan.md).  
+Diagrama entidad-relación (Mermaid): [ERD.md](./ERD.md).
 
 ## Flujo automático
 
@@ -50,25 +51,55 @@ Tablas y columnas en **inglés**. Usa prefijos numéricos para controlar el orde
 
 | Archivo        | Contenido              |
 |----------------|------------------------|
-| `01_init.sql`  | `CREATE TABLE IF NOT EXISTS` |
+| `01_init.sql`  | `DROP` + `CREATE TABLE` (esquema completo) |
 | `02_seed.sql`  | `INSERT IGNORE` (idempotente) |
 | `03_*.sql`     | Procedimientos, vistas, etc. |
 
 Solo deben quedar en esta carpeta los `.sql` que MySQL deba ejecutar (más `provision.sh` y este README). El plan del proyecto vive en `../plan.md`.
 
+## Tablas
+
+| Tabla | Rol |
+|-------|-----|
+| `users` | Cuentas (`donor` / `bank` / `admin`) |
+| `email_verification_tokens` | Tokens de confirmación de correo |
+| `donation_centers` | Centros / bancos de sangre |
+| `donor_profiles` | Perfil clínico del donante (`blood_type`, elegibilidad, ubicación) |
+| `bank_profiles` | Vincula usuario `bank` → centro |
+| `medical_institutions` | Hospitales que solicitan sangre |
+| `appointments` | Citas de donación |
+| `donations` | Historial de donaciones completadas |
+| `blood_units` | Unidades individuales (trazabilidad) |
+| `inventory` | Stock por centro × tipo de sangre |
+| `inventory_movements` | Libro append-only de movimientos |
+| `requests` | Solicitudes médicas |
+| `alerts` | Alertas de stock crítico |
+| `donation_policies` | Umbrales e intervalos de negocio |
+| `notifications` | Avisos in-app |
+| `audit_log` | Auditoría admin |
+| `achievements` / `donor_achievements` | Logros / gamificación |
+
+`blood_type` vive en `donor_profiles` (ya no en `users`).
+
 ## Verificar
 
 ```bash
-docker-compose exec db mysql -u pulso_user -ppulso_password pulso_solidario -e "SELECT * FROM users;"
+docker-compose exec db mysql -u pulso_user -ppulso_password pulso_solidario -e "
+SHOW TABLES;
+SELECT id, email, role FROM users;
+SELECT user_id, blood_type, eligible FROM donor_profiles;
+SELECT center_id, blood_type, units FROM inventory ORDER BY blood_type;
+"
 ```
 
 O en phpMyAdmin: http://localhost:3002 (`pulso_user` / `pulso_password`).
 
 ## Solución de problemas
 
-**La tabla `users` no existe**
+**La tabla `users` no existe / faltan tablas nuevas**
 
 - El volumen ya existía antes de añadir los scripts → ejecuta `./database/provision.sh` o `docker-compose down -v`.
+- Tras cambios de esquema, `provision.sh` reaplica `01_init.sql` (DROP + CREATE) y el seed.
 - Revisa logs: `docker-compose logs db`
 
 **Error de sintaxis al iniciar**

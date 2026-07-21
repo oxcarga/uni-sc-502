@@ -12,7 +12,7 @@ class UserRepository
     private const BLOOD_TYPES = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
     private const ROLES = ['donor', 'bank', 'admin'];
     private const SELECT_PUBLIC =
-        'id, first_name, last_name, email, role, active, email_confirmed, email_confirmed_at, blood_type, created_at, updated_at';
+        'id, first_name, last_name, email, role, active, email_confirmed, email_confirmed_at, created_at, updated_at';
 
     public function __construct(private readonly PDO $pdo)
     {
@@ -52,23 +52,49 @@ class UserRepository
 
     public function create(array $data): array
     {
-        $query = $this->pdo->prepare(
-            'INSERT INTO users (first_name, last_name, email, password_hash, role, blood_type, email_confirmed)
-             VALUES (:first_name, :last_name, :email, :password_hash, :role, :blood_type, :email_confirmed)'
-        );
-        $query->execute([
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-            'email' => $data['email'],
-            'password_hash' => $data['password_hash'],
-            'role' => $data['role'] ?? 'donor',
-            'blood_type' => $data['blood_type'] ?? null,
-            'email_confirmed' => array_key_exists('email_confirmed', $data)
-                ? ((int) (bool) $data['email_confirmed'])
-                : 0,
-        ]);
+        $role = $data['role'] ?? 'donor';
+        $bloodType = $data['blood_type'] ?? null;
 
-        $user = $this->findById((int) $this->pdo->lastInsertId());
+        $this->pdo->beginTransaction();
+
+        try {
+            $query = $this->pdo->prepare(
+                'INSERT INTO users (first_name, last_name, email, password_hash, role, email_confirmed)
+                 VALUES (:first_name, :last_name, :email, :password_hash, :role, :email_confirmed)'
+            );
+            $query->execute([
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'email' => $data['email'],
+                'password_hash' => $data['password_hash'],
+                'role' => $role,
+                'email_confirmed' => array_key_exists('email_confirmed', $data)
+                    ? ((int) (bool) $data['email_confirmed'])
+                    : 0,
+            ]);
+
+            $userId = (int) $this->pdo->lastInsertId();
+
+            if ($role === 'donor') {
+                $profile = $this->pdo->prepare(
+                    'INSERT INTO donor_profiles (user_id, blood_type)
+                     VALUES (:user_id, :blood_type)'
+                );
+                $profile->execute([
+                    'user_id' => $userId,
+                    'blood_type' => $bloodType !== '' ? $bloodType : null,
+                ]);
+            }
+
+            $this->pdo->commit();
+        } catch (PDOException $error) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $error;
+        }
+
+        $user = $this->findById($userId);
         if ($user === null) {
             throw new PDOException('No se pudo recuperar el usuario creado.');
         }
@@ -82,14 +108,12 @@ class UserRepository
             'first_name = :first_name',
             'last_name = :last_name',
             'email = :email',
-            'blood_type = :blood_type',
         ];
         $params = [
             'id' => $id,
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
             'email' => $data['email'],
-            'blood_type' => $data['blood_type'] ?? null,
         ];
 
         if (isset($data['password_hash'])) {
