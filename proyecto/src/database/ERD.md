@@ -7,32 +7,32 @@ Se renderiza automáticamente en GitHub, GitLab y en la vista previa de Markdown
 
 ```mermaid
 erDiagram
-    users ||--o{ email_verification_tokens : "has"
-    users ||--o| donor_profiles : "has"
-    users ||--o| bank_profiles : "manages"
-    donation_centers ||--o{ bank_profiles : "assigned_to"
-    users ||--o{ appointments : "books"
-    donation_centers ||--o{ appointments : "hosts"
-    appointments ||--o| donations : "produces"
-    users ||--o{ donations : "makes"
-    donation_centers ||--o{ donations : "receives"
-    donations ||--o{ blood_units : "yields"
-    donation_centers ||--o{ blood_units : "stores"
-    donation_centers ||--o{ inventory : "stock"
-    medical_institutions ||--o{ requests : "submits"
-    donation_centers ||--o{ requests : "fulfills"
-    donation_centers ||--o{ inventory_movements : "ledger"
-    donations ||--o{ inventory_movements : "optional"
-    requests ||--o{ inventory_movements : "optional"
-    blood_units ||--o{ inventory_movements : "optional"
-    users ||--o{ inventory_movements : "optional"
-    donation_centers ||--o{ alerts : "raises"
-    requests ||--o{ alerts : "optional"
-    donation_centers ||--o{ donation_policies : "optional"
-    users ||--o{ notifications : "receives"
-    users ||--o{ audit_log : "optional"
-    users ||--o{ donor_achievements : "earns"
-    achievements ||--o{ donor_achievements : "granted_as"
+    users ||--o{ email_verification_tokens : has
+    users ||--o| donor_profiles : has
+    users ||--o| bank_profiles : manages
+    donation_centers ||--o{ bank_profiles : assigned_to
+    users ||--o{ appointments : books
+    donation_centers ||--o{ appointments : hosts
+    appointments ||--o| donations : produces
+    users ||--o{ donations : makes
+    donation_centers ||--o{ donations : receives
+    donations ||--o{ blood_units : yields
+    donation_centers ||--o{ blood_units : stores
+    donation_centers ||--o{ inventory : stock
+    medical_institutions ||--o{ requests : submits
+    donation_centers ||--o{ requests : fulfills
+    donation_centers ||--o{ inventory_movements : ledger
+    donations ||--o{ inventory_movements : via_donation
+    requests ||--o{ inventory_movements : via_request
+    blood_units ||--o{ inventory_movements : via_unit
+    users ||--o{ inventory_movements : via_user
+    donation_centers ||--o{ alerts : raises
+    requests ||--o{ alerts : related
+    donation_centers ||--o{ donation_policies : defines
+    users ||--o{ notifications : receives
+    users ||--o{ audit_log : performs
+    users ||--o{ donor_achievements : earns
+    achievements ||--o{ donor_achievements : granted_as
 
     users {
         int id PK
@@ -40,7 +40,7 @@ erDiagram
         varchar last_name
         varchar email UK
         varchar password_hash
-        varchar role "donor|bank|admin"
+        varchar role
         tinyint active
         tinyint email_confirmed
         timestamp email_confirmed_at
@@ -58,7 +58,7 @@ erDiagram
     }
 
     donor_profiles {
-        int user_id PK_FK
+        int user_id PK,FK
         varchar blood_type
         date birth_date
         varchar phone
@@ -97,7 +97,7 @@ erDiagram
     }
 
     bank_profiles {
-        int user_id PK_FK
+        int user_id PK,FK
         int center_id FK
     }
 
@@ -117,7 +117,7 @@ erDiagram
         int donor_id FK
         int center_id FK
         datetime scheduled_at
-        varchar status "pending|confirmed|completed|cancelled|no_show"
+        varchar status
         text notes
     }
 
@@ -125,7 +125,7 @@ erDiagram
         int id PK
         int donor_id FK
         int center_id FK
-        int appointment_id FK_UK "nullable"
+        int appointment_id FK,UK
         varchar blood_type
         int units
         datetime donated_at
@@ -138,7 +138,7 @@ erDiagram
         int donation_id FK
         int center_id FK
         varchar blood_type
-        varchar status "available|assigned|discarded|expired"
+        varchar status
         datetime collected_at
         date expires_at
     }
@@ -154,11 +154,11 @@ erDiagram
         int id PK
         varchar code UK
         int institution_id FK
-        int center_id FK "nullable"
+        int center_id FK
         varchar blood_type
         int quantity
-        varchar priority "low|normal|critical"
-        varchar status "pending|assigned|in_transit|completed|cancelled"
+        varchar priority
+        varchar status
         datetime requested_at
         datetime completed_at
     }
@@ -166,13 +166,13 @@ erDiagram
     inventory_movements {
         int id PK
         int center_id FK
-        varchar type "receipt|assignment|adjustment|discard"
+        varchar type
         varchar blood_type
         int quantity
-        int donation_id FK "nullable"
-        int request_id FK "nullable"
-        int blood_unit_id FK "nullable"
-        int user_id FK "nullable"
+        int donation_id FK
+        int request_id FK
+        int blood_unit_id FK
+        int user_id FK
         varchar detail
         timestamp created_at
     }
@@ -180,17 +180,17 @@ erDiagram
     alerts {
         int id PK
         int center_id FK
-        int request_id FK "nullable"
+        int request_id FK
         varchar blood_type
         varchar priority
-        varchar status "active|resolved"
+        varchar status
         varchar message
         datetime resolved_at
     }
 
     donation_policies {
         int id PK
-        int center_id FK "nullable = global"
+        int center_id FK
         varchar key_name
         varchar value_text
         varchar description
@@ -210,7 +210,7 @@ erDiagram
 
     audit_log {
         int id PK
-        int user_id FK "nullable"
+        int user_id FK
         varchar action
         varchar entity_type
         int entity_id
@@ -251,8 +251,22 @@ erDiagram
 | `medical_institutions` → `requests` | 1 : N |
 | `achievements` ↔ `users` vía `donor_achievements` | N : M |
 
+## Valores de estado / enums (CHECK)
+
+| Campo | Valores |
+|-------|---------|
+| `users.role` | `donor`, `bank`, `admin` |
+| `appointments.status` | `pending`, `confirmed`, `completed`, `cancelled`, `no_show` |
+| `blood_units.status` | `available`, `assigned`, `discarded`, `expired` |
+| `requests.priority` / `alerts.priority` | `low`, `normal`, `critical` |
+| `requests.status` | `pending`, `assigned`, `in_transit`, `completed`, `cancelled` |
+| `inventory_movements.type` | `receipt`, `assignment`, `adjustment`, `discard` |
+| `alerts.status` | `active`, `resolved` |
+| `*.blood_type` | `O+`, `O-`, `A+`, `A-`, `B+`, `B-`, `AB+`, `AB-` |
+
 **Notas**
 
 - Los tipos de sangre son un enum (`CHECK`), no una entidad.
-- Umbrales de inventario (saludable / moderado / crítico) se calculan o salen de `donation_policies`; no se guardan como color.
+- FKs opcionales en el SQL (`NULL`): `donations.appointment_id`, `requests.center_id`, FKs de `inventory_movements`, `alerts.request_id`, `donation_policies.center_id` (NULL = política global), `audit_log.user_id`.
+- Umbrales de inventario se calculan o salen de `donation_policies`; no se guardan como color.
 - `inventory_movements` es append-only: cada cambio de stock deja un movimiento.
