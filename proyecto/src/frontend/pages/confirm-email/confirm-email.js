@@ -1,4 +1,4 @@
-const { authApi, cacheSession, panelPathForRole } = await import(`../js/api.js?t=${Date.now()}`);
+const { authApi, cacheSession, dashboardPathForRole } = await import(`/js/api.js?t=${Date.now()}`);
 
 const statusEl = document.getElementById('confirm-status');
 const errorBox = document.getElementById('confirm-error');
@@ -24,7 +24,7 @@ async function confirmToken(value) {
     if (statusEl) {
       statusEl.textContent = 'Correo confirmado. Entrando a tu panel…';
     }
-    window.location.href = panelPathForRole(user.role);
+    window.location.href = dashboardPathForRole(user.role);
   } catch (error) {
     showError(error.message || 'No se pudo confirmar el correo.');
   }

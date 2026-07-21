@@ -1,5 +1,5 @@
-const { authApi, configApi, isLocalEnvironment, cacheSession, panelPathForRole } = await import(
-  `../js/api.js?t=${Date.now()}`
+const { authApi, configApi, isLocalEnvironment, cacheSession, dashboardPathForRole } = await import(
+  `/js/api.js?t=${Date.now()}`
 );
 
 const form = document.getElementById('login-form');
@@ -47,7 +47,7 @@ async function handleSubmit(event) {
     }
 
     cacheSession(user);
-    window.location.href = panelPathForRole(user.role);
+    window.location.href = dashboardPathForRole(user.role);
   } catch (error) {
     showError(error.message || 'No se pudo iniciar sesión.');
     if (error.status === 403) {

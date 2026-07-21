@@ -6,7 +6,6 @@
 INSERT IGNORE INTO users (
   first_name, last_name, email, password_hash, role, active, email_confirmed, blood_type
 ) VALUES
-  ('Mariela', 'Suarez', 'marias60679@ufide.ac.cr', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'donor', 1, 1, 'A+'),
-  ('Joyner', 'Gonzalez', 'jarce80641@ufide.ac.cr', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'bank', 1, 1, 'B+'),
-  ('Alex', 'Lopez', 'alopez49218@ufide.ac.cr', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'donor', 0, 1, 'O-'),
-  ('Oscar', 'Garita', 'ogarita60081@ufide.ac.cr', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'admin', 1, 1, 'O+');
+  ('Donante', 'Donante', 'donante@test.com', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'donor', 1, 1, 'A+'),
+  ('Banco', 'Banco', 'banco@test.com', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'bank', 1, 1, 'B+'),
+  ('Admin', 'Admin', 'admin@test.com', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'admin', 1, 1, 'O+');

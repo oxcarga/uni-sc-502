@@ -3,7 +3,7 @@ const {
   authApi, 
   configApi, 
   isLocalEnvironment 
-} = await import(`../js/api.js?t=${Date.now()}`);
+} = await import(`/js/api.js?t=${Date.now()}`);
 
 const form = document.getElementById('register-form');
 const errorBox = document.getElementById('register-error');

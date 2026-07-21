@@ -199,7 +199,16 @@ Sin cambios de esquema en P0c (sesión vía cookie de servidor o token firmado, 
 
 ---
 
-## P1 — Perfil de donante y centros
+## P1 — UI de donante
+
+
+## P2 — UI de banco
+
+
+## P3 — UI de admin
+
+
+## P4 — Perfil de donante y centros
 
 **Objetivo:** separar datos clínicos del donante de la cuenta; listar centros de donación.
 
@@ -242,7 +251,7 @@ Sin cambios de esquema en P0c (sesión vía cookie de servidor o token firmado, 
 
 ---
 
-## P2 — Citas y donaciones
+## P5 — Citas y donaciones
 
 **Objetivo:** agendar donaciones y guardar historial.
 
@@ -283,7 +292,7 @@ Al completar cita → crear `donations` + actualizar `donor_profiles.last_donati
 
 ---
 
-## P3 — Inventario del banco
+## P6 — Inventario del banco
 
 **Objetivo:** stock en vivo y libro de movimientos.
 
@@ -325,7 +334,7 @@ Saludable/moderado/crítico = **calculado** (hardcode P3 o políticas en P5); no
 
 ---
 
-## P4 — Solicitudes médicas y alertas
+## P7 — Solicitudes médicas y alertas
 
 **Objetivo:** CU2 (alerta crítica) y CU3 (solicitud hospitalaria).
 
@@ -367,7 +376,7 @@ Saludable/moderado/crítico = **calculado** (hardcode P3 o políticas en P5); no
 
 ---
 
-## P5 — Notificaciones, auditoría y políticas
+## P8 — Notificaciones, auditoría y políticas
 
 **Objetivo:** cerrar paneles admin/donante con config de negocio y avisos.
 
@@ -405,7 +414,7 @@ Dejar de hardcodear umbrales en código de app.
 
 ---
 
-## P6 — Logros (gamificación)
+## P9 — Logros (gamificación)
 
 **Objetivo:** insignias del panel donante.
 

@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pulso Solidario — Configuración del Banco</title>
+  <meta name="description"
+    content="Configura los datos del centro: ubicación, contacto, horarios, visibilidad y preferencias de alertas." />
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="stylesheet" href="../../assets/css/custom.css" />
+  <script type="module">
+    await import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`./settings.js?t=${Date.now()}`);
+  </script>
+</head>
+
+<body class="d-none" data-required-role="bank">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="d-flex align-items-center gap-2 mb-4 px-1">
+        <span class="avatar-initials avatar-initials-lg" style="background-color: #b90538">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path
+              d="M12 21s-7-4.35-9.5-8.5C.5 9 2 5 5.5 5 7.5 5 9 6.5 12 9c3-2.5 4.5-4 6.5-4C22 5 23.5 9 21.5 12.5 19 16.65 12 21 12 21Z" />
+          </svg>
+        </span>
+        <div>
+          <div class="sidebar-brand-name">Pulso Solidario</div>
+          <div class="sidebar-brand-sub">Panel del banco</div>
+        </div>
+      </div>
+
+      <nav class="nav flex-column gap-1" aria-label="Navegación principal">
+        <a class="nav-link" href="/dashboard/bank/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+          Panel
+        </a>
+        <a class="nav-link" href="/dashboard/bank/inventory/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <path d="M12 3s6 5.5 6 10a6 6 0 0 1-12 0c0-4.5 6-10 6-10Z" />
+          </svg>
+          Inventario
+        </a>
+        <a class="nav-link" href="/dashboard/bank/appointments/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <path d="M16 2v4M8 2v4M3 10h18" />
+          </svg>
+          Citas
+        </a>
+        <a class="nav-link" href="/dashboard/bank/donors/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          </svg>
+          Donantes
+        </a>
+        <a class="nav-link mt-2 active" href="/dashboard/bank/settings/" aria-current="page">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.6 15H3.5a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 5.2 8.6l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 5.6V3.5a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 2.79 1.17l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 20.4 9H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+          </svg>
+          Configuración
+        </a>
+      </nav>
+    </aside>
+
+        <div class="app-main">
+            <header class="topbar">
+        <span class="topbar-title">Hola, <span id="dashboard-greeting-name">…</span></span>
+        <div class="d-flex align-items-center gap-3">
+          <div class="dropdown">
+            <button
+              type="button"
+              id="dashboard-user-initials"
+              class="avatar-initials avatar-initials-lg border-0 user-menu-toggle"
+              style="background-color: #b90538"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              aria-label="Menú de usuario"
+            >…</button>
+            <div class="dropdown-menu dropdown-menu-end user-menu shadow border-0 p-0" aria-labelledby="dashboard-user-initials">
+              <div class="user-menu__header">
+                <div id="dashboard-user-name" class="fw-semibold text-truncate">…</div>
+                <div id="dashboard-user-role" class="text-muted" style="font-size: 0.75rem">…</div>
+              </div>
+              <div class="dropdown-divider m-0"></div>
+              <button type="button" id="dashboard-logout" class="dropdown-item user-menu__logout">
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-grow-1" style="padding: 2rem 2.5rem">
+        <div class="page-sticky-bar">
+          <div>
+            <h1 class="headline fw-bold mb-1" style="font-size: 2rem">
+              Configuración del centro
+            </h1>
+            <p class="text-muted mb-0">
+              Actualiza ubicación, contacto, horarios y visibilidad del banco.
+            </p>
+          </div>
+          <button type="submit" form="bank-settings-form"
+            class="btn btn-primary rounded-3 fw-semibold d-flex align-items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              aria-hidden="true">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
+              <path d="M17 21v-8H7v8M7 3v5h8" />
+            </svg>
+            Guardar cambios
+          </button>
+        </div>
+
+        <div id="settings-status" class="alert d-none mb-4" role="status" aria-live="polite"></div>
+
+        <form id="bank-settings-form">
+          <div class="row g-4">
+            <div class="col-lg-8">
+              <section class="card p-3 mb-4" aria-labelledby="center-data">
+                <h2 class="section-title mb-1" id="center-data">Datos del centro</h2>
+                <p class="text-muted mb-3" style="font-size: 0.875rem">
+                  Información pública que ven los donantes al buscar bancos.
+                </p>
+                <div class="row g-3">
+                  <div class="col-12">
+                    <label class="form-label fw-semibold" for="centerName">Nombre del centro</label>
+                    <input type="text" class="form-control form-control-lg rounded-3" id="centerName" name="centerName"
+                      value="Hospital Regional - Centro de Sangre" required />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="contactName">Persona de contacto</label>
+                    <input type="text" class="form-control form-control-lg rounded-3" id="contactName" name="contactName"
+                      value="María Solano" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="contactPhone">Teléfono</label>
+                    <input type="tel" class="form-control form-control-lg rounded-3" id="contactPhone" name="contactPhone"
+                      value="2257-0000" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="contactEmail">Correo del centro</label>
+                    <input type="email" class="form-control form-control-lg rounded-3" id="contactEmail"
+                      name="contactEmail" value="centro@hospitalregional.cr" />
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label fw-semibold" for="description">Descripción breve</label>
+                    <textarea class="form-control rounded-3" id="description" name="description" rows="3"
+                      placeholder="Cómo llegar, servicios o indicaciones para donantes…">Centro de extracción con estacionamiento y acceso para personas con movilidad reducida.</textarea>
+                  </div>
+                </div>
+              </section>
+
+              <section class="card p-3 mb-4" aria-labelledby="location-data">
+                <h2 class="section-title mb-1" id="location-data">Ubicación</h2>
+                <p class="text-muted mb-3" style="font-size: 0.875rem">
+                  Permite mostrar el centro en el mapa y calcular cercanía.
+                </p>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="province">Provincia</label>
+                    <select class="form-select form-select-lg rounded-3" id="province" name="province">
+                      <option value="San José" selected>San José</option>
+                      <option value="Alajuela">Alajuela</option>
+                      <option value="Cartago">Cartago</option>
+                      <option value="Heredia">Heredia</option>
+                      <option value="Guanacaste">Guanacaste</option>
+                      <option value="Puntarenas">Puntarenas</option>
+                      <option value="Limón">Limón</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="canton">Cantón</label>
+                    <input type="text" class="form-control form-control-lg rounded-3" id="canton" name="canton"
+                      value="San José" />
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label fw-semibold" for="address">Dirección</label>
+                    <input type="text" class="form-control form-control-lg rounded-3" id="address" name="address"
+                      value="Paseo Colón, San José" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="latitude">Latitud</label>
+                    <input type="number" step="any" class="form-control form-control-lg rounded-3" id="latitude"
+                      name="latitude" value="9.9333" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="longitude">Longitud</label>
+                    <input type="number" step="any" class="form-control form-control-lg rounded-3" id="longitude"
+                      name="longitude" value="-84.0833" />
+                  </div>
+                </div>
+              </section>
+
+              <section class="card p-3 mb-4" aria-labelledby="hours-data">
+                <h2 class="section-title mb-1" id="hours-data">Horario de atención</h2>
+                <p class="text-muted mb-3" style="font-size: 0.875rem">
+                  Orientación para donantes al agendar citas.
+                </p>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="openTime">Apertura</label>
+                    <input type="time" class="form-control form-control-lg rounded-3" id="openTime" name="openTime"
+                      value="08:00" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="closeTime">Cierre</label>
+                    <input type="time" class="form-control form-control-lg rounded-3" id="closeTime" name="closeTime"
+                      value="16:00" />
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label fw-semibold" for="openDays">Días de atención</label>
+                    <input type="text" class="form-control form-control-lg rounded-3" id="openDays" name="openDays"
+                      value="Lunes a viernes" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="dailyCapacity">Cupos por día</label>
+                    <input type="number" min="1" class="form-control form-control-lg rounded-3" id="dailyCapacity"
+                      name="dailyCapacity" value="24" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="processMinutes">Tiempo estimado (min)</label>
+                    <input type="number" min="15" class="form-control form-control-lg rounded-3" id="processMinutes"
+                      name="processMinutes" value="45" />
+                  </div>
+                </div>
+              </section>
+
+              <section class="card p-3" aria-labelledby="account-data">
+                <h2 class="section-title mb-1" id="account-data">Cuenta del responsable</h2>
+                <p class="text-muted mb-3" style="font-size: 0.875rem">
+                  Datos de acceso del usuario banco. Déjalo vacío si no cambias la contraseña.
+                </p>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="accountEmail">Correo de acceso</label>
+                    <input type="email" class="form-control form-control-lg rounded-3" id="accountEmail"
+                      name="accountEmail" autocomplete="username" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="accountName">Nombre del responsable</label>
+                    <input type="text" class="form-control form-control-lg rounded-3" id="accountName"
+                      name="accountName" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="newPassword">Nueva contraseña</label>
+                    <input type="password" class="form-control form-control-lg rounded-3" id="newPassword"
+                      name="newPassword" autocomplete="new-password" minlength="8" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="confirmPassword">Confirmar contraseña</label>
+                    <input type="password" class="form-control form-control-lg rounded-3" id="confirmPassword"
+                      name="confirmPassword" autocomplete="new-password" minlength="8" />
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div class="col-lg-4">
+              <section class="card p-3 mb-4" aria-labelledby="visibility">
+                <h2 class="section-title mb-1" id="visibility">Visibilidad</h2>
+                <p class="text-muted mb-3" style="font-size: 0.875rem">
+                  Controla si el centro aparece para donantes.
+                </p>
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" role="switch" id="centerActive" name="centerActive"
+                    checked />
+                  <label class="form-check-label fw-semibold" for="centerActive">
+                    Centro activo
+                  </label>
+                  <div class="text-muted" style="font-size: 0.75rem">
+                    Visible en el listado y mapa de donantes.
+                  </div>
+                </div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="acceptWalkIns"
+                    name="acceptWalkIns" />
+                  <label class="form-check-label fw-semibold" for="acceptWalkIns">
+                    Aceptar walk-ins
+                  </label>
+                  <div class="text-muted" style="font-size: 0.75rem">
+                    Donaciones sin cita previa, según disponibilidad.
+                  </div>
+                </div>
+              </section>
+
+              <section class="card p-3 mb-4" aria-labelledby="alert-prefs">
+                <h2 class="section-title mb-1" id="alert-prefs">Notificaciones</h2>
+                <p class="text-muted mb-3" style="font-size: 0.875rem">
+                  Avisos operativos del centro.
+                </p>
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" role="switch" id="notifyAppointments"
+                    name="notifyAppointments" checked />
+                  <label class="form-check-label fw-semibold" for="notifyAppointments">
+                    Nuevas citas
+                  </label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" role="switch" id="notifyNoShow" name="notifyNoShow"
+                    checked />
+                  <label class="form-check-label fw-semibold" for="notifyNoShow">
+                    Ausencias (no-show)
+                  </label>
+                </div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="notifyCriticalStock"
+                    name="notifyCriticalStock" checked />
+                  <label class="form-check-label fw-semibold" for="notifyCriticalStock">
+                    Stock crítico
+                  </label>
+                </div>
+              </section>
+
+              <section class="card shortage-card p-3" aria-labelledby="settings-tip">
+                <h2 class="shortage-title mb-2" id="settings-tip" style="font-size: 1.125rem">Importante</h2>
+                <p class="mb-0" style="font-size: 0.875rem; color: #3d4947">
+                  Una ubicación y horario actualizados mejoran el agendado
+                  y las alertas por cercanía para donantes.
+                </p>
+              </section>
+            </div>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9bIOgUxi8T/jzmcgIwJ1j23KP4W96JxA4fzpLDo" crossorigin="anonymous"></script>
+</body>
+
+</html>

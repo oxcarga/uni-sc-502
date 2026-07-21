@@ -119,15 +119,15 @@ export function clearSession() {
   clearSessionCache();
 }
 
-/** Destinos placeholder hasta que existan los paneles reales. */
-export function panelPathForRole(role) {
+/** Destinos del dashboard según el rol del usuario. */
+export function dashboardPathForRole(role) {
   switch (role) {
     case 'bank':
-      return '/panel/bank/';
+      return '/dashboard/bank/';
     case 'admin':
-      return '/panel/admin/';
+      return '/dashboard/admin/';
     case 'donor':
     default:
-      return '/panel/donor/';
+      return '/dashboard/donor/';
   }
 }

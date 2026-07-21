@@ -88,7 +88,9 @@ Tras registrarte, el backend envía el enlace por SMTP a **Mailhog**. Ábrelo en
 
 ### Sesión (cookie HttpOnly)
 
-Login y confirmación de correo crean una sesión PHP (`PULSOSESSID`, HttpOnly, `SameSite=Lax`, path `/`). El FE llama a la API con `credentials: 'include'` vía el proxy Nginx de `/api/`. Las rutas `/panel/*` usan un auth guard que consulta `GET /api/auth/me`.
+Login y confirmación de correo crean una sesión PHP (`PULSOSESSID`, HttpOnly, `SameSite=Lax`, path `/`). El FE llama a la API con `credentials: 'include'` vía el proxy Nginx de `/api/`. Las rutas `/dashboard/*` usan un auth guard que consulta `GET /api/auth/me`.
+
+Las vistas viven en `frontend/pages/` (`login`, `register`, `confirm-email`, `dashboard`, …). Nginx las sirve con las URLs públicas `/login/`, `/register/`, etc.; los assets compartidos siguen en `frontend/{css,js,images}/`.
 
 ## Flujo de desarrollo
 
