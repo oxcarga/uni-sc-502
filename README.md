@@ -72,6 +72,16 @@ docker-compose up -d
 - 🗄️ **phpMyAdmin**: http://localhost:3002 (Usuario: `pulso_user` / Contraseña: `pulso_password`)
 - 🔌 **MySQL**: localhost:3306
 
+### Cuentas demo (seed local)
+
+Contraseña para todos: `demo1234`
+
+| Rol | Correo | Panel |
+|-----|--------|-------|
+| Donante | `donante@test.com` | `/dashboard/donor/` |
+| Banco | `banco@test.com` | `/dashboard/bank/` |
+| Admin | `admin@test.com` | `/dashboard/admin/` |
+
 ### Para Detener los Servicios
 
 ```bash

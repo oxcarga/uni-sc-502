@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pulso Solidario — Auditoría (Admin)</title>
+  <meta name="description" content="Registro de auditoría del sistema. Disponible en P8." />
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link rel="stylesheet" href="../../assets/css/custom.css" />
+  <script type="module">
+    import(`/js/auth-guard.js?t=${Date.now()}`);
+  </script>
+</head>
+
+<body class="d-none" data-required-role="admin">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="d-flex align-items-center gap-2 mb-4 px-1">
+        <span class="avatar-initials avatar-initials-lg" style="background-color: #b90538">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path
+              d="M12 21s-7-4.35-9.5-8.5C.5 9 2 5 5.5 5 7.5 5 9 6.5 12 9c3-2.5 4.5-4 6.5-4C22 5 23.5 9 21.5 12.5 19 16.65 12 21 12 21Z" />
+          </svg>
+        </span>
+        <div>
+          <div class="sidebar-brand-name">Pulso Solidario</div>
+          <div class="sidebar-brand-sub">Administración</div>
+        </div>
+      </div>
+
+      <nav class="nav flex-column gap-1" aria-label="Navegación principal">
+        <a class="nav-link" href="/dashboard/admin/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+          Panel
+        </a>
+        <a class="nav-link" href="/dashboard/admin/banks/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6" />
+          </svg>
+          Bancos
+        </a>
+        <a class="nav-link" href="/dashboard/admin/donors/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          </svg>
+          Donantes
+        </a>
+        <a class="nav-link mt-2" href="/dashboard/admin/settings/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.6 15H3.5a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 5.2 8.6l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 5.6V3.5a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 2.79 1.17l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 20.4 9H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+          </svg>
+          Configuración
+        </a>
+        <a class="nav-link active" href="/dashboard/admin/audit/" aria-current="page">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+          </svg>
+          Auditoría
+        </a>
+      </nav>
+    </aside>
+
+    <div class="app-main">
+      <header class="topbar">
+        <span class="topbar-title">Hola, <span id="dashboard-greeting-name">…</span></span>
+        <div class="d-flex align-items-center gap-3">
+          <button class="icon-btn" type="button" disabled
+            aria-label="Notificaciones (próximamente)" title="Notificaciones — Próximamente">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              aria-hidden="true">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </button>
+          <div class="dropdown">
+            <button type="button" id="dashboard-user-initials"
+              class="avatar-initials avatar-initials-lg border-0 user-menu-toggle"
+              style="background-color: #00685f" data-bs-toggle="dropdown" aria-expanded="false"
+              aria-label="Menú de usuario">…</button>
+            <div class="dropdown-menu dropdown-menu-end user-menu shadow border-0 p-0"
+              aria-labelledby="dashboard-user-initials">
+              <div class="user-menu__header">
+                <div id="dashboard-user-name" class="fw-semibold text-truncate">…</div>
+                <div id="dashboard-user-role" class="text-muted" style="font-size: 0.75rem">…</div>
+              </div>
+              <div class="dropdown-divider m-0"></div>
+              <button type="button" id="dashboard-logout" class="dropdown-item user-menu__logout">
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-grow-1" style="padding: 2rem 2.5rem">
+        <div class="mb-4">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Auditoría</h1>
+            <span class="demo-badge">Stub · P8</span>
+          </div>
+          <p class="text-muted mb-0">
+            Aquí se listarán cambios sensibles del sistema desde <code>audit_log</code>.
+          </p>
+        </div>
+
+        <section class="coming-soon" aria-labelledby="audit-stub">
+          <span class="demo-badge mb-3">Próximamente</span>
+          <h2 class="coming-soon__title" id="audit-stub">Registro de auditoría</h2>
+          <p class="coming-soon__text mb-3">
+            Acciones admin (activar centros, cambiar políticas, deshabilitar usuarios) quedarán trazadas cuando exista la API de P8.
+          </p>
+          <p class="text-muted mb-0" style="font-size: 0.875rem">
+            Mientras tanto, esta ruta existe para no romper la navegación del shell.
+          </p>
+        </section>
+
+        <div class="mt-4">
+          <a href="/dashboard/admin/" class="btn btn-outline-secondary rounded-3 fw-semibold">Volver al panel</a>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9bIOgUxi8T/jzmcgIwJ1j23KP4W96JxA4fzpLDo"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>

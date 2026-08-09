@@ -81,6 +81,16 @@ Solo deben quedar en esta carpeta los `.sql` que MySQL deba ejecutar (más `prov
 
 `blood_type` vive en `donor_profiles` (ya no en `users`).
 
+## Cuentas demo (`02_seed.sql`)
+
+Contraseña: `demo1234`
+
+| Correo | Rol |
+|--------|-----|
+| `donante@test.com` | `donor` |
+| `banco@test.com` | `bank` |
+| `admin@test.com` | `admin` |
+
 ## Verificar
 
 ```bash

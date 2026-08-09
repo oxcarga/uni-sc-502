@@ -4,14 +4,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pulso Solidario — Panel de Administración General</title>
+  <title>Pulso Solidario — Panel de Administración</title>
   <meta name="description"
-    content="Panel de administración general de Pulso Solidario: resumen operativo del ecosistema en tiempo real." />
+    content="Panel de administración general de Pulso Solidario: resumen operativo del ecosistema." />
   <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
-  <!-- Bootstrap 5 CDN -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
-  <!-- Brand overrides & custom components -->
   <link rel="stylesheet" href="../assets/css/custom.css" />
   <script type="module">
     import(`/js/auth-guard.js?t=${Date.now()}`);
@@ -20,7 +18,6 @@
 
 <body class="d-none" data-required-role="admin">
   <div class="app-shell">
-    <!-- ===== Sidebar ===== -->
     <aside class="sidebar">
       <div class="d-flex align-items-center gap-2 mb-4 px-1">
         <span class="avatar-initials avatar-initials-lg" style="background-color: #b90538">
@@ -62,7 +59,7 @@
           </svg>
           Donantes
         </a>
-        <a class="nav-link mt-2" href="#">
+        <a class="nav-link mt-2" href="/dashboard/admin/settings/">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             aria-hidden="true">
             <circle cx="12" cy="12" r="3" />
@@ -71,15 +68,23 @@
           </svg>
           Configuración
         </a>
+        <a class="nav-link" href="/dashboard/admin/audit/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+          </svg>
+          Auditoría
+        </a>
       </nav>
     </aside>
 
-    <!-- ===== Main column ===== -->
     <div class="app-main">
       <header class="topbar">
         <span class="topbar-title">Hola, <span id="dashboard-greeting-name">…</span></span>
         <div class="d-flex align-items-center gap-3">
-          <button class="icon-btn" aria-label="Notificaciones">
+          <button class="icon-btn" type="button" disabled
+            aria-label="Notificaciones (próximamente)" title="Notificaciones — Próximamente">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               aria-hidden="true">
               <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -87,16 +92,12 @@
             </svg>
           </button>
           <div class="dropdown">
-            <button
-              type="button"
-              id="dashboard-user-initials"
+            <button type="button" id="dashboard-user-initials"
               class="avatar-initials avatar-initials-lg border-0 user-menu-toggle"
-              style="background-color: #00685f"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-              aria-label="Menú de usuario"
-            >…</button>
-            <div class="dropdown-menu dropdown-menu-end user-menu shadow border-0 p-0" aria-labelledby="dashboard-user-initials">
+              style="background-color: #00685f" data-bs-toggle="dropdown" aria-expanded="false"
+              aria-label="Menú de usuario">…</button>
+            <div class="dropdown-menu dropdown-menu-end user-menu shadow border-0 p-0"
+              aria-labelledby="dashboard-user-initials">
               <div class="user-menu__header">
                 <div id="dashboard-user-name" class="fw-semibold text-truncate">…</div>
                 <div id="dashboard-user-role" class="text-muted" style="font-size: 0.75rem">…</div>
@@ -110,401 +111,146 @@
         </div>
       </header>
 
-      <!-- Content -->
       <main class="flex-grow-1" style="padding: 2rem 2.5rem">
-        <!-- Page heading -->
         <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
           <div>
-            <h1 class="headline fw-bold mb-1" style="font-size: 2rem">
-              Panel de Administración General
-            </h1>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Administración</h1>
+              <span class="demo-badge">Demo</span>
+            </div>
             <p class="text-muted mb-0">
-              Resumen operativo del ecosistema Pulso Solidario.
+              Resumen del ecosistema. KPIs mock hasta cablear APIs de gobierno (P8).
             </p>
           </div>
-          <div class="d-flex gap-2">
-            <button class="btn btn-primary rounded-3 fw-semibold d-flex align-items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                aria-hidden="true">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-              Nuevo Registro
-            </button>
-            <button class="btn btn-outline-secondary rounded-3 fw-semibold d-flex align-items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                aria-hidden="true">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <path d="M7 10l5 5 5-5M12 15V3" />
-              </svg>
-              Exportar Reporte
-            </button>
+          <div class="d-flex gap-2 flex-wrap">
+            <a href="/dashboard/admin/banks/" class="btn btn-outline-secondary rounded-3 fw-semibold">Bancos</a>
+            <a href="/dashboard/admin/donors/" class="btn btn-primary rounded-3 fw-semibold">Donantes</a>
           </div>
         </div>
 
-        <!-- KPI stat cards -->
         <div class="row g-4 mb-4">
           <div class="col-sm-6 col-xl-3">
-            <article class="card stat-card p-3 h-100">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <span class="stat-icon">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    aria-hidden="true">
-                    <path d="M12 3s6 5.5 6 10a6 6 0 0 1-12 0c0-4.5 6-10 6-10Z" />
-                  </svg>
-                </span>
-                <span class="badge-soft badge-soft--green">+12% vs mes ant.</span>
-              </div>
-              <div class="stat-label mb-1">Unidades Totales</div>
-              <div class="stat-value">1,432</div>
+            <article class="card p-3 h-100">
+              <span class="card-eyebrow mb-2">Bancos afiliados</span>
+              <div class="headline fw-bold" style="font-size: 1.75rem">6</div>
+              <div class="text-muted mt-1" style="font-size: 0.8125rem">Demo · listado UI</div>
             </article>
           </div>
           <div class="col-sm-6 col-xl-3">
-            <article class="card stat-card stat-card--critical p-3 h-100">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <span class="stat-icon stat-icon--rose">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path
-                      d="M11 2h2v6.3l4.5-4.5 1.4 1.4L14.4 9.7l6.3.1v2l-6.3.1 4.5 4.5-1.4 1.4L13 13.7V20h-2v-6.3L6.5 18.2 5.1 16.8l4.5-4.5-6.3-.1v-2l6.3-.1L5.1 5.6 6.5 4.2 11 8.7V2Z" />
-                  </svg>
-                </span>
-                <span class="pulse-dot"></span>
-              </div>
-              <div class="stat-label mb-1">Alertas Activas</div>
-              <div class="stat-value">18</div>
+            <article class="card p-3 h-100">
+              <span class="card-eyebrow mb-2">Donantes</span>
+              <div class="headline fw-bold" style="font-size: 1.75rem">8</div>
+              <div class="text-muted mt-1" style="font-size: 0.8125rem">Demo · listado UI</div>
             </article>
           </div>
           <div class="col-sm-6 col-xl-3">
-            <article class="card stat-card p-3 h-100">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <span class="stat-icon stat-icon--blue">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    aria-hidden="true">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                  </svg>
-                </span>
-                <span class="badge-soft badge-soft--green">+42 hoy</span>
-              </div>
-              <div class="stat-label mb-1">Donantes Activos</div>
-              <div class="stat-value">4,890</div>
+            <article class="card p-3 h-100">
+              <span class="card-eyebrow mb-2">Alertas activas</span>
+              <div class="headline fw-bold" style="font-size: 1.75rem; color: #b90538">1</div>
+              <div class="text-muted mt-1" style="font-size: 0.8125rem">Seed · O- crítico</div>
             </article>
           </div>
           <div class="col-sm-6 col-xl-3">
-            <article class="card stat-card p-3 h-100">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <span class="stat-icon stat-icon--slate">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    aria-hidden="true">
-                    <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6" />
-                  </svg>
-                </span>
-              </div>
-              <div class="stat-label mb-1">Bancos Afiliados</div>
-              <div class="stat-value">124</div>
+            <article class="card p-3 h-100">
+              <span class="card-eyebrow mb-2">Solicitudes</span>
+              <div class="headline fw-bold" style="font-size: 1.75rem">1</div>
+              <div class="text-muted mt-1" style="font-size: 0.8125rem">Seed · cola en P7</div>
             </article>
           </div>
         </div>
 
-        <!-- Requests + Activity -->
         <div class="row g-4 mb-4">
-          <div class="col-lg-8">
-            <section class="card p-3 h-100" aria-labelledby="requests">
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <h2 class="section-title mb-0" id="requests">
-                  Solicitudes Recientes de Sangre
-                </h2>
-                <a href="#" class="fw-semibold" style="font-size: 0.875rem">Ver todas</a>
+          <div class="col-lg-5">
+            <section class="card h-100 p-3" aria-labelledby="admin-shortcuts">
+              <h2 class="section-title mb-3" id="admin-shortcuts">Atajos</h2>
+              <div class="d-flex flex-column gap-2">
+                <a class="shortcut-link" href="/dashboard/admin/banks/">
+                  <span class="shortcut-link__label">Gestionar bancos</span>
+                  <span class="shortcut-link__hint">Centros · filtros demo</span>
+                </a>
+                <a class="shortcut-link" href="/dashboard/admin/donors/">
+                  <span class="shortcut-link__label">Gestionar donantes</span>
+                  <span class="shortcut-link__hint">Cuentas · elegibilidad demo</span>
+                </a>
+                <a class="shortcut-link" href="/dashboard/admin/settings/">
+                  <span class="shortcut-link__label">Políticas y config</span>
+                  <span class="shortcut-link__hint">Stub · P8</span>
+                </a>
+                <a class="shortcut-link" href="/dashboard/admin/audit/">
+                  <span class="shortcut-link__label">Auditoría</span>
+                  <span class="shortcut-link__hint">Stub · P8</span>
+                </a>
+              </div>
+            </section>
+          </div>
+          <div class="col-lg-7">
+            <section class="card p-3 h-100" aria-labelledby="seed-snapshot">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                <h2 class="section-title mb-0" id="seed-snapshot">Snapshot del seed</h2>
+                <span class="demo-badge">No es dato en vivo</span>
               </div>
               <div class="table-responsive">
                 <table class="table table-borderless align-middle mb-0">
                   <thead>
                     <tr>
-                      <th scope="col">Institución</th>
-                      <th scope="col">Tipo</th>
-                      <th scope="col">Prioridad</th>
+                      <th scope="col">Concepto</th>
+                      <th scope="col">Detalle</th>
                       <th scope="col">Estado</th>
-                      <th scope="col" class="text-end">Acción</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td>
-                        <div class="d-flex align-items-center gap-2">
-                          <span class="stat-icon stat-icon--rose" style="
-                                width: 36px;
-                                height: 36px;
-                                border-radius: 0.65rem;
-                              ">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                              stroke-width="2" aria-hidden="true">
-                              <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6" />
-                            </svg>
-                          </span>
-                          <div>
-                            <div class="fw-semibold">Hospital Central</div>
-                            <div class="text-muted" style="font-size: 0.75rem">
-                              ID: #RE-9082
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <span class="blood-badge blood-badge--rose">O<small>Negativo</small></span>
-                      </td>
-                      <td>
-                        <span class="d-inline-flex align-items-center gap-2 fw-semibold"
-                          style="font-size: 0.875rem; color: #b90538"><span class="dot" style="
-                                width: 8px;
-                                height: 8px;
-                                border-radius: 50%;
-                                background: #b90538;
-                                display: inline-block;
-                              "></span>Crítica</span>
-                      </td>
-                      <td>
-                        <span class="badge-soft badge-soft--blue">En camino</span>
-                      </td>
-                      <td class="text-end">
-                        <button class="kebab" aria-label="Acción para Hospital Central">
-                          <span></span><span></span><span></span>
-                        </button>
-                      </td>
+                      <td class="fw-semibold">Solicitud demo</td>
+                      <td class="text-muted" style="font-size: 0.875rem">RE-9082 · O- · crítica</td>
+                      <td><span class="badge-soft badge-soft--amber"><span class="dot"></span>Pendiente</span></td>
                     </tr>
                     <tr>
-                      <td>
-                        <div class="d-flex align-items-center gap-2">
-                          <span class="stat-icon" style="
-                                width: 36px;
-                                height: 36px;
-                                border-radius: 0.65rem;
-                              ">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                              stroke-width="2" aria-hidden="true">
-                              <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6" />
-                            </svg>
-                          </span>
-                          <div>
-                            <div class="fw-semibold">Clínica Santa Fe</div>
-                            <div class="text-muted" style="font-size: 0.75rem">
-                              ID: #RE-8812
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <span class="blood-badge blood-badge--teal">A+<small>Positivo</small></span>
-                      </td>
-                      <td>
-                        <span class="d-inline-flex align-items-center gap-2 fw-semibold"
-                          style="font-size: 0.875rem; color: #2e7d52"><span class="dot" style="
-                                width: 8px;
-                                height: 8px;
-                                border-radius: 50%;
-                                background: #2e7d52;
-                                display: inline-block;
-                              "></span>Baja</span>
-                      </td>
-                      <td>
-                        <span class="badge-soft badge-soft--green">Completada</span>
-                      </td>
-                      <td class="text-end">
-                        <button class="kebab" aria-label="Acción para Clínica Santa Fe">
-                          <span></span><span></span><span></span>
-                        </button>
-                      </td>
+                      <td class="fw-semibold">Alerta stock</td>
+                      <td class="text-muted" style="font-size: 0.875rem">O- bajo umbral &lt;50</td>
+                      <td><span class="badge-soft badge-soft--rose"><span class="dot"></span>Activa</span></td>
                     </tr>
                     <tr>
-                      <td>
-                        <div class="d-flex align-items-center gap-2">
-                          <span class="stat-icon stat-icon--blue" style="
-                                width: 36px;
-                                height: 36px;
-                                border-radius: 0.65rem;
-                              ">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                              stroke-width="2" aria-hidden="true">
-                              <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6" />
-                            </svg>
-                          </span>
-                          <div>
-                            <div class="fw-semibold">
-                              Centro Médico Nacional
-                            </div>
-                            <div class="text-muted" style="font-size: 0.75rem">
-                              ID: #RE-9011
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <span class="blood-badge">B+<small>Positivo</small></span>
-                      </td>
-                      <td>
-                        <span class="d-inline-flex align-items-center gap-2 fw-semibold"
-                          style="font-size: 0.875rem; color: #c79a18"><span class="dot" style="
-                                width: 8px;
-                                height: 8px;
-                                border-radius: 50%;
-                                background: #c79a18;
-                                display: inline-block;
-                              "></span>Media</span>
-                      </td>
-                      <td>
-                        <span class="badge-soft badge-soft--slate">Pendiente</span>
-                      </td>
-                      <td class="text-end">
-                        <button class="kebab" aria-label="Acción para Centro Médico Nacional">
-                          <span></span><span></span><span></span>
-                        </button>
-                      </td>
+                      <td class="fw-semibold">Cuenta admin</td>
+                      <td class="text-muted" style="font-size: 0.875rem">admin@test.com</td>
+                      <td><span class="badge-soft badge-soft--teal"><span class="dot"></span>Sesión</span></td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             </section>
           </div>
-
-          <div class="col-lg-4">
-            <section class="card p-3 h-100" aria-labelledby="activity">
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <h2 class="section-title mb-0" id="activity">
-                  Actividad del Sistema
-                </h2>
-                <span class="tag-realtime">En vivo</span>
-              </div>
-              <div class="feed-item">
-                <span class="feed-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    aria-hidden="true">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M20 8v6M23 11h-6" />
-                  </svg>
-                </span>
-                <div>
-                  <p class="mb-1" style="font-size: 0.875rem">
-                    <span class="fw-bold">Nuevo Donante:</span> Ana García se
-                    ha registrado en la sede Norte.
-                  </p>
-                  <span class="feed-time">Hace 2 minutos</span>
-                </div>
-              </div>
-              <div class="feed-item">
-                <span class="feed-icon feed-icon--rose">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    aria-hidden="true">
-                    <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6" />
-                  </svg>
-                </span>
-                <div>
-                  <p class="mb-1" style="font-size: 0.875rem">
-                    <span class="fw-bold">Stock Crítico:</span> Banco de
-                    Sangre Central reporta nivel bajo de AB+.
-                  </p>
-                  <span class="feed-time">Hace 15 minutos</span>
-                </div>
-              </div>
-              <div class="feed-item">
-                <span class="feed-icon feed-icon--blue">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    aria-hidden="true">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <path d="m9 11 3 3L22 4" />
-                  </svg>
-                </span>
-                <div>
-                  <p class="mb-1" style="font-size: 0.875rem">
-                    <span class="fw-bold">Verificación:</span> 12 certificados
-                    de donación emitidos hoy.
-                  </p>
-                  <span class="feed-time">Hace 1 hora</span>
-                </div>
-              </div>
-            </section>
-          </div>
         </div>
 
-        <!-- Promo map + Efficiency + Schedule -->
         <div class="row g-4">
-          <div class="col-lg-8">
-            <section class="card p-0 promo-map" aria-labelledby="network">
-              <div class="promo-map__body">
-                <h2 class="headline fw-bold mb-2" id="network" style="font-size: 1.5rem">
-                  Monitoreo de Red en Tiempo Real
-                </h2>
-                <p class="text-muted mb-3" style="max-width: 420px">
-                  Visualización interactiva de suministros y transporte de
-                  hemoderivados en la zona metropolitana.
-                </p>
-                <button class="btn btn-primary rounded-3 fw-semibold d-flex align-items-center gap-2">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    aria-hidden="true">
-                    <path d="M9 18 3 21V6l6-3 6 3 6-3v15l-6 3-6-3Z" />
-                    <path d="M9 3v15M15 6v15" />
-                  </svg>
-                  Abrir Mapa Completo
-                </button>
-              </div>
+          <div class="col-md-4">
+            <section class="coming-soon h-100" aria-labelledby="reports-soon">
+              <span class="demo-badge mb-3">Próximamente</span>
+              <h2 class="coming-soon__title" id="reports-soon">Reportes</h2>
+              <p class="coming-soon__text">Estadísticas nacionales/regionales cuando existan APIs de reporting.</p>
             </section>
           </div>
-
-          <div class="col-lg-4 d-flex flex-column gap-4">
-            <section class="spotlight" aria-labelledby="efficiency">
-              <div class="eyebrow mb-1" id="efficiency">
-                Eficiencia Operativa
-              </div>
-              <div class="big mb-3">94.8%</div>
-              <div class="progress-track mb-3">
-                <span style="width: 94.8%"></span>
-              </div>
-              <p class="mb-3" style="font-size: 0.875rem; opacity: 0.9">
-                El tiempo de respuesta promedio para emergencias críticas es
-                de 14 minutos en el área metropolitana.
-              </p>
-              <button class="btn-ghost">Ver Análisis de Datos</button>
+          <div class="col-md-4">
+            <section class="coming-soon h-100" aria-labelledby="policies-soon">
+              <span class="demo-badge mb-3">Próximamente</span>
+              <h2 class="coming-soon__title" id="policies-soon">Políticas</h2>
+              <p class="coming-soon__text">Umbrales de inventario e intervalos de donación (P8).</p>
             </section>
-
-            <section class="card p-3" aria-labelledby="today">
-              <h2 class="section-title mb-2" id="today">Citas del Día</h2>
-              <div class="schedule-row">
-                <span class="schedule-time">09:00</span>
-                <span class="schedule-name">Dr. Martínez</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2e7d52" stroke-width="2"
-                  aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="m9 12 2 2 4-4" />
-                </svg>
-              </div>
-              <div class="schedule-row">
-                <span class="schedule-time">10:30</span>
-                <span class="schedule-name">Sede Poniente</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6d7a77" stroke-width="2"
-                  aria-hidden="true">
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 2" />
-                </svg>
-              </div>
-              <div class="schedule-row schedule-row--muted">
-                <span class="schedule-time">14:00</span>
-                <span class="schedule-name">Comité Ético</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9aa5a2" stroke-width="2"
-                  aria-hidden="true">
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 2" />
-                </svg>
-              </div>
+          </div>
+          <div class="col-md-4">
+            <section class="coming-soon h-100" aria-labelledby="notif-soon">
+              <span class="demo-badge mb-3">Próximamente</span>
+              <h2 class="coming-soon__title" id="notif-soon">Notificaciones</h2>
+              <p class="coming-soon__text">Avisos de gobierno y difusión a donantes (P8).</p>
             </section>
           </div>
         </div>
       </main>
     </div>
-    <!-- /app-main -->
   </div>
-  <!-- /app-shell -->
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9bIOgUxi8T/jzmcgIwJ1j23KP4W96JxA4fzpLDo" crossorigin="anonymous"></script>
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9bIOgUxi8T/jzmcgIwJ1j23KP4W96JxA4fzpLDo"
+    crossorigin="anonymous"></script>
 </body>
 
 </html>

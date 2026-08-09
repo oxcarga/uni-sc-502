@@ -37,11 +37,11 @@ function syncSummary() {
   }
 }
 
-function showStatus(message, ok = true) {
+function showStatus(message, type = 'info') {
   if (!statusEl) return;
   statusEl.textContent = message;
-  statusEl.classList.remove('d-none', 'alert-success', 'alert-danger');
-  statusEl.classList.add(ok ? 'alert-success' : 'alert-danger');
+  statusEl.classList.remove('d-none', 'alert-success', 'alert-danger', 'alert-info');
+  statusEl.classList.add(`alert-${type}`);
 }
 
 const user = getCachedSession();
@@ -49,15 +49,7 @@ if (user) {
   if (firstNameEl) firstNameEl.value = user.first_name ?? '';
   if (lastNameEl) lastNameEl.value = user.last_name ?? '';
   if (emailEl) emailEl.value = user.email ?? '';
-  if (bloodTypeEl && user.blood_type) bloodTypeEl.value = user.blood_type;
 }
-
-// Demo defaults until donor profile API exists
-if (bloodTypeEl && !bloodTypeEl.value) bloodTypeEl.value = 'A+';
-const phoneEl = document.getElementById('phone');
-const provinceEl = document.getElementById('province');
-if (phoneEl && !phoneEl.value) phoneEl.value = '8888-0000';
-if (provinceEl && !provinceEl.value) provinceEl.value = 'San José';
 
 syncSummary();
 
@@ -73,15 +65,17 @@ form?.addEventListener('submit', (event) => {
 
   if (password || confirm) {
     if (password.length < 8) {
-      showStatus('La contraseña debe tener al menos 8 caracteres.', false);
+      showStatus('La contraseña debe tener al menos 8 caracteres.', 'danger');
       return;
     }
     if (password !== confirm) {
-      showStatus('Las contraseñas no coinciden.', false);
+      showStatus('Las contraseñas no coinciden.', 'danger');
       return;
     }
   }
 
-  // Placeholder until PUT /api/donor/profile exists
-  showStatus('Cambios listos para guardar. La API de perfil se conectará en una siguiente fase.');
+  showStatus(
+    'Formulario válido en el cliente. Aún no se guarda: la API de perfil se conecta en P4.',
+    'info'
+  );
 });

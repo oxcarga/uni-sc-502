@@ -482,6 +482,31 @@ h1, h2, h3, h4, h5, h6,
 .inv-status--crit { color: #b90538; }
 .inv-card--critical { border-color: #ffb2b7; }
 .inv-card--critical .inv-bar > span { background-color: #b90538; }
+.inv-card--warn { border-color: #f0d78a; }
+.inv-card--warn .inv-bar > span { background-color: #c79a18; }
+
+.stock-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  font-size: 0.8125rem;
+  color: #6d7a77;
+  margin-bottom: 1rem;
+}
+.stock-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.stock-legend__swatch {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+.stock-legend__swatch--ok { background: #2e7d52; }
+.stock-legend__swatch--warn { background: #c79a18; }
+.stock-legend__swatch--crit { background: #b90538; }
 
 /* --- Shortage / priority list (bank) ------------------------------------ */
 .shortage-card {
@@ -848,14 +873,113 @@ h1, h2, h3, h4, h5, h6,
 .fab--rose { background-color: #b90538; }
 .fab--teal { background-color: #00685f; }
 
+/* --- Demo / próximamente markers (P1 shells) ----------------------------- */
+.demo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #545f73;
+  background-color: #eef1f6;
+  border: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 10rem;
+  padding: 1.5rem;
+  border: 1px dashed #cfd8e3;
+  border-radius: 1.25rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%);
+}
+
+.coming-soon__title {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0b1c30;
+  margin-bottom: 0.35rem;
+}
+
+.coming-soon__text {
+  font-size: 0.875rem;
+  color: #6d7a77;
+  margin-bottom: 0;
+  max-width: 28rem;
+}
+
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.shortcut-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background: #fff;
+  color: #0b1c30;
+  transition: border-color 0.15s, background-color 0.15s, color 0.15s;
+}
+
+.shortcut-link:hover {
+  border-color: #b7e0d8;
+  background: #f3fbf9;
+  color: #00685f;
+}
+
+.shortcut-link__label {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.shortcut-link__hint {
+  font-size: 0.75rem;
+  color: #6d7a77;
+}
+
+.icon-btn:disabled,
+.icon-btn.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.icon-btn:disabled:hover,
+.icon-btn.is-disabled:hover {
+  background: none;
+  color: #3d4947;
+}
+
 /* --- Responsive collapse ------------------------------------------------ */
 @media (max-width: 991.98px) {
   .promo-map__body { max-width: 100%; }
+  .shortcut-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
+  /* DESIGN.md: sidebar escritorio → barra superior horizontal en móvil */
+  .app-shell {
+    flex-direction: column;
+  }
+
   .sidebar {
-    position: static;
+    position: sticky;
+    top: 0;
+    z-index: 1020;
     width: 100%;
     height: auto;
     flex-direction: row;
@@ -863,12 +987,44 @@ h1, h2, h3, h4, h5, h6,
     align-items: center;
     border-right: none;
     border-bottom: 1px solid #e2e8f0;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
   }
+
+  .sidebar > .d-flex.align-items-center {
+    flex: 0 0 auto;
+  }
+
+  .sidebar-brand-sub {
+    display: none;
+  }
+
   .sidebar .nav {
+    flex: 1 1 auto;
     flex-direction: row !important;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    gap: 0.25rem !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.15rem;
   }
+
+  .sidebar .nav-link {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.8125rem;
+  }
+
+  .sidebar .nav-link svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .sidebar .nav-link.active::before {
+    display: none;
+  }
+
   .sidebar-footer { display: none; }
   .topbar { padding: 0.75rem 1rem; }
   main.flex-grow-1 { padding: 1.25rem !important; }
@@ -876,4 +1032,5 @@ h1, h2, h3, h4, h5, h6,
     margin: -1.25rem -1.25rem 1.25rem;
     padding: 1rem 1.25rem;
   }
+  .fab { display: none; }
 }

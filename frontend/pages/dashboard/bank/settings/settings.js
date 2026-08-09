@@ -5,11 +5,11 @@ const statusEl = document.getElementById('settings-status');
 const accountEmailEl = document.getElementById('accountEmail');
 const accountNameEl = document.getElementById('accountName');
 
-function showStatus(message, ok = true) {
+function showStatus(message, type = 'info') {
   if (!statusEl) return;
   statusEl.textContent = message;
-  statusEl.classList.remove('d-none', 'alert-success', 'alert-danger');
-  statusEl.classList.add(ok ? 'alert-success' : 'alert-danger');
+  statusEl.classList.remove('d-none', 'alert-success', 'alert-danger', 'alert-info');
+  statusEl.classList.add(`alert-${type}`);
 }
 
 const user = getCachedSession();
@@ -28,14 +28,17 @@ form?.addEventListener('submit', (event) => {
 
   if (password || confirm) {
     if (password.length < 8) {
-      showStatus('La contraseña debe tener al menos 8 caracteres.', false);
+      showStatus('La contraseña debe tener al menos 8 caracteres.', 'danger');
       return;
     }
     if (password !== confirm) {
-      showStatus('Las contraseñas no coinciden.', false);
+      showStatus('Las contraseñas no coinciden.', 'danger');
       return;
     }
   }
 
-  showStatus('Cambios listos para guardar. La API del centro se conectará en una siguiente fase.');
+  showStatus(
+    'Formulario válido en el cliente. Aún no se guarda: la API del centro se conectará en fases posteriores.',
+    'info'
+  );
 });
