@@ -84,6 +84,26 @@ export const authApi = {
     }),
 };
 
+export const donorApi = {
+  getProfile: () => apiFetch('/donor/profile'),
+  updateProfile: (data) =>
+    apiFetch('/donor/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
+};
+
+export const centersApi = {
+  list: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.all) query.set('all', '1');
+    const qs = query.toString();
+    return apiFetch(`/centers${qs ? `?${qs}` : ''}`);
+  },
+  get: (id) => apiFetch(`/centers/${id}`),
+};
+
 /** Cache opcional del perfil; la sesión real vive en cookie de servidor. */
 export function cacheSession(user) {
   sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(user));

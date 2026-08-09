@@ -117,37 +117,34 @@
           <div>
             <div class="d-flex align-items-center gap-2 mb-1">
               <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Bancos</h1>
-              <span class="demo-badge">Demo · filtros UI</span>
             </div>
             <p class="text-muted mb-0">
-              Listado mock. El CRUD real de centros llega en fases posteriores / P4 lectura.
+              Lectura desde <code>GET /api/centers?all=1</code>. Crear/editar centros queda aplazado.
             </p>
           </div>
           <button type="button" class="btn btn-primary rounded-3 fw-semibold" disabled
-            title="Pendiente de API">Nuevo banco</button>
+            title="Escritura de centros aplazada">Nuevo banco</button>
         </div>
 
-        <div id="banks-status" class="alert alert-info mb-4" role="status" aria-live="polite">
-          Los cambios de estado son solo locales en el navegador. No se guardan en el servidor.
-        </div>
+        <div id="banks-status" class="alert alert-info mb-4 d-none" role="status" aria-live="polite"></div>
 
         <div class="row g-3 mb-4">
           <div class="col-sm-6 col-xl-4">
             <article class="card p-3 h-100">
               <span class="card-eyebrow mb-2">Total</span>
-              <div class="headline fw-bold" style="font-size: 1.75rem" id="kpi-total">4</div>
+              <div class="headline fw-bold" style="font-size: 1.75rem" id="kpi-total">—</div>
             </article>
           </div>
           <div class="col-sm-6 col-xl-4">
             <article class="card p-3 h-100">
               <span class="card-eyebrow mb-2">Activos</span>
-              <div class="headline fw-bold" style="font-size: 1.75rem; color: #2e7d52" id="kpi-active">3</div>
+              <div class="headline fw-bold" style="font-size: 1.75rem; color: #2e7d52" id="kpi-active">—</div>
             </article>
           </div>
           <div class="col-sm-6 col-xl-4">
             <article class="card p-3 h-100">
               <span class="card-eyebrow mb-2">Inactivos</span>
-              <div class="headline fw-bold" style="font-size: 1.75rem; color: #b90538" id="kpi-inactive">1</div>
+              <div class="headline fw-bold" style="font-size: 1.75rem; color: #b90538" id="kpi-inactive">—</div>
             </article>
           </div>
         </div>
@@ -172,10 +169,6 @@
               <label class="form-label fw-semibold" for="filterRegion">Región</label>
               <select class="form-select form-select-lg rounded-3" id="filterRegion">
                 <option value="">Todas</option>
-                <option>San José</option>
-                <option>Escazú</option>
-                <option>Heredia</option>
-                <option>Cartago</option>
               </select>
             </div>
             <div class="col-md-1">
@@ -189,7 +182,7 @@
         <section class="card p-3" aria-labelledby="banks-table">
           <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
             <h2 class="section-title mb-0" id="banks-table">Listado de bancos</h2>
-            <span class="demo-badge" id="banks-count">4 centros</span>
+            <span class="demo-badge" id="banks-count">—</span>
           </div>
           <div class="table-responsive">
             <table class="table table-borderless align-middle mb-0" id="admin-banks-table">
@@ -203,81 +196,8 @@
                 </tr>
               </thead>
               <tbody>
-                <tr data-bank-id="1" data-active="1" data-region="San José" data-name="cruz roja central">
-                  <td>
-                    <div class="fw-semibold">Cruz Roja Central</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID demo #BK-001</div>
-                  </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">San José</td>
-                  <td class="text-muted" style="font-size: 0.875rem">2221-0000</td>
-                  <td><span class="badge-soft badge-soft--green bank-status"><span class="dot"></span>Activo</span></td>
-                  <td class="text-end">
-                    <div class="d-flex justify-content-end align-items-center gap-2">
-                      <div class="form-check form-switch m-0">
-                        <input class="form-check-input bank-active-toggle" type="checkbox" role="switch"
-                          aria-label="Activar Cruz Roja Central" checked />
-                      </div>
-                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
-                        title="Pendiente de API">Editar</button>
-                    </div>
-                  </td>
-                </tr>
-                <tr data-bank-id="2" data-active="1" data-region="San José" data-name="hospital regional">
-                  <td>
-                    <div class="fw-semibold">Hospital Regional - Centro de Sangre</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID demo #BK-002 · seed</div>
-                  </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">San José</td>
-                  <td class="text-muted" style="font-size: 0.875rem">2257-0000</td>
-                  <td><span class="badge-soft badge-soft--green bank-status"><span class="dot"></span>Activo</span></td>
-                  <td class="text-end">
-                    <div class="d-flex justify-content-end align-items-center gap-2">
-                      <div class="form-check form-switch m-0">
-                        <input class="form-check-input bank-active-toggle" type="checkbox" role="switch"
-                          aria-label="Activar Hospital Regional" checked />
-                      </div>
-                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
-                        title="Pendiente de API">Editar</button>
-                    </div>
-                  </td>
-                </tr>
-                <tr data-bank-id="3" data-active="1" data-region="Escazú" data-name="clinica del valle">
-                  <td>
-                    <div class="fw-semibold">Clínica del Valle</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID demo #BK-003</div>
-                  </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">Escazú</td>
-                  <td class="text-muted" style="font-size: 0.875rem">2289-0000</td>
-                  <td><span class="badge-soft badge-soft--green bank-status"><span class="dot"></span>Activo</span></td>
-                  <td class="text-end">
-                    <div class="d-flex justify-content-end align-items-center gap-2">
-                      <div class="form-check form-switch m-0">
-                        <input class="form-check-input bank-active-toggle" type="checkbox" role="switch"
-                          aria-label="Activar Clínica del Valle" checked />
-                      </div>
-                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
-                        title="Pendiente de API">Editar</button>
-                    </div>
-                  </td>
-                </tr>
-                <tr data-bank-id="4" data-active="0" data-region="Cartago" data-name="centro materno infantil">
-                  <td>
-                    <div class="fw-semibold">Centro Materno Infantil</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID demo #BK-005</div>
-                  </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">Cartago</td>
-                  <td class="text-muted" style="font-size: 0.875rem">2551-0000</td>
-                  <td><span class="badge-soft badge-soft--slate bank-status"><span class="dot"></span>Inactivo</span></td>
-                  <td class="text-end">
-                    <div class="d-flex justify-content-end align-items-center gap-2">
-                      <div class="form-check form-switch m-0">
-                        <input class="form-check-input bank-active-toggle" type="checkbox" role="switch"
-                          aria-label="Activar Centro Materno Infantil" />
-                      </div>
-                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
-                        title="Pendiente de API">Editar</button>
-                    </div>
-                  </td>
+                <tr>
+                  <td colspan="5" class="text-muted text-center py-4">Cargando centros…</td>
                 </tr>
               </tbody>
             </table>

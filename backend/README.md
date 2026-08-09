@@ -299,13 +299,41 @@ Regístrala en el contenedor DI para inyectarla en controladores.
 
 ## URLs de la API
 
-Con Slim, las rutas no dependen de archivos `.php` individuales:
+Con Slim, las rutas no dependen de archivos `.php` individuales. Prefijo: `/api/`.
+
+### Auth (sesión cookie)
+
+| Método | Ruta | Notas |
+|--------|------|-------|
+| `POST` | `/auth/register` | Registro |
+| `POST` | `/auth/login` | Login → cookie de sesión |
+| `POST` | `/auth/logout` | Cierra sesión |
+| `GET` | `/auth/me` | Usuario autenticado |
+
+### Donante — perfil (P4)
+
+| Método | Ruta | Notas |
+|--------|------|-------|
+| `GET` | `/donor/profile` | Rol `donor`; `data.user` + `data.profile` |
+| `PUT` | `/donor/profile` | Actualiza nombre, campos clínicos, prefs; opcional password. No escribe `eligible` / `last_donation_at` |
+
+`blood_type` vive en `donor_profiles`, no en `users`.
+
+### Centros (P4)
+
+| Método | Ruta | Notas |
+|--------|------|-------|
+| `GET` | `/centers` | Autenticado; solo activos. Admin: `?all=1` incluye inactivos |
+| `GET` | `/centers/{id}` | Detalle; admin puede ver inactivos |
+
+Escritura de centros (crear/editar) queda aplazada.
+
+### Otras rutas (plantilla / legado)
 
 | Ruta Slim | URL | Método |
 |-----------|-----|--------|
 | `/` | http://localhost:3001/api/ | GET |
-| `/users` | http://localhost:3001/api/users | GET |
-| `/users` | http://localhost:3001/api/users | POST |
+| `/users` | http://localhost:3001/api/users | GET / POST |
 | `/users/{id}` | http://localhost:3001/api/users/1 | GET |
 | `/donations` | http://localhost:3001/api/donations | GET |
 | `/bloodbank/inventory` | http://localhost:3001/api/bloodbank/inventory | GET |

@@ -109,14 +109,13 @@
           <div>
             <div class="d-flex align-items-center gap-2 mb-1">
               <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Mi perfil</h1>
-              <span class="demo-badge">UI · sin persistir</span>
             </div>
             <p class="text-muted mb-0">
-              Nombre y correo vienen de la sesión. El resto es formulario listo para la API de P4.
+              Actualiza tus datos personales, clínicos y preferencias de alertas.
             </p>
           </div>
-          <button type="submit" form="donor-profile-form"
-            class="btn btn-primary rounded-3 fw-semibold d-flex align-items-center gap-2">
+          <button type="submit" form="donor-profile-form" id="profile-save-btn"
+            class="btn btn-primary rounded-3 fw-semibold d-flex align-items-center gap-2" disabled>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               aria-hidden="true">
               <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" />
@@ -124,10 +123,8 @@
             </svg>
             Guardar cambios
           </button>
-        </div>
-
-        <div id="profile-status" class="alert alert-info mb-4" role="status" aria-live="polite">
-          Este formulario aún no guarda en el servidor. La API de perfil del donante llega en P4.
+          <div id="profile-status" class="alert alert-info mb-0 py-2 px-3 d-none" role="status"
+            aria-live="polite" style="font-size: 0.875rem"></div>
         </div>
 
         <form id="donor-profile-form">
@@ -151,8 +148,8 @@
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-semibold" for="email">Correo electrónico</label>
-                    <input type="email" class="form-control form-control-lg rounded-3" id="email" name="email" required
-                      autocomplete="email" readonly />
+                    <input type="email" class="form-control form-control-lg rounded-3" id="email" name="email"
+                      autocomplete="email" disabled />
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-semibold" for="phone">Teléfono</label>
@@ -165,7 +162,7 @@
               <section class="card p-3 mb-4" aria-labelledby="donation-data">
                 <h2 class="section-title mb-1" id="donation-data">Datos de donación</h2>
                 <p class="text-muted mb-3" style="font-size: 0.875rem">
-                  Campos de UI. Se persistirán con <code>donor_profiles</code> en P4.
+                  Información clínica usada para elegibilidad y coincidencias.
                 </p>
                 <div class="row g-3">
                   <div class="col-md-4">
@@ -189,7 +186,7 @@
                   <div class="col-md-4">
                     <label class="form-label fw-semibold" for="lastDonationAt">Última donación</label>
                     <input type="date" class="form-control form-control-lg rounded-3" id="lastDonationAt"
-                      name="lastDonationAt" />
+                      name="lastDonationAt" readonly title="Se actualiza al completar donaciones" />
                   </div>
                   <div class="col-12">
                     <label class="form-label fw-semibold" for="medicalHistory">Antecedentes médicos</label>
@@ -265,23 +262,35 @@
                 </div>
                 <div class="d-flex flex-wrap gap-2">
                   <span id="profile-blood-badge" class="badge-soft badge-soft--teal">Tipo: —</span>
-                  <span class="badge-soft badge-soft--slate">Elegibilidad · próximamente</span>
+                  <span id="profile-eligible-badge" class="badge-soft badge-soft--slate">—</span>
                 </div>
               </section>
 
-              <section class="coming-soon mb-4" aria-labelledby="alert-prefs">
-                <span class="demo-badge mb-3">Próximamente</span>
-                <h2 class="coming-soon__title" id="alert-prefs">Alertas y notificaciones</h2>
-                <p class="coming-soon__text">
-                  Preferencias de avisos por cercanía, citas y tipo de sangre (P8).
+              <section class="card p-3 mb-4" aria-labelledby="alert-prefs">
+                <h2 class="section-title mb-1" id="alert-prefs">Alertas y notificaciones</h2>
+                <p class="text-muted mb-3" style="font-size: 0.875rem">
+                  Preferencias guardadas en tu perfil. El envío real de avisos llega en P8.
                 </p>
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" role="switch" id="notifyNearby" name="notifyNearby" />
+                  <label class="form-check-label fw-semibold" for="notifyNearby">Alertas por cercanía</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" role="switch" id="notifyAppointments"
+                    name="notifyAppointments" />
+                  <label class="form-check-label fw-semibold" for="notifyAppointments">Recordatorios de citas</label>
+                </div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="notifyBloodMatch"
+                    name="notifyBloodMatch" />
+                  <label class="form-check-label fw-semibold" for="notifyBloodMatch">Coincidencia de tipo de sangre</label>
+                </div>
               </section>
 
               <section class="card p-3 achieve-card" aria-labelledby="profile-tip">
                 <h2 class="section-title mb-2" id="profile-tip">Consejo</h2>
                 <p class="mb-0" style="font-size: 0.875rem; color: #1f4d47">
-                  Completar ubicación y tipo de sangre mejorará las alertas cuando
-                  exista la API de perfil y notificaciones.
+                  Completar ubicación y tipo de sangre mejora las alertas y el agendado de citas.
                 </p>
               </section>
             </div>
