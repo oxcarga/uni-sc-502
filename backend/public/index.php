@@ -4,9 +4,13 @@
 declare(strict_types=1);
 
 use App\Controllers\AuthController;
+use App\Controllers\CenterController;
+use App\Controllers\DonorProfileController;
 use App\Controllers\UserController;
 use App\Database\Connection;
 use App\Middleware\AuthMiddleware;
+use App\Repositories\DonationCenterRepository;
+use App\Repositories\DonorProfileRepository;
 use App\Repositories\EmailVerificationTokenRepository;
 use App\Repositories\UserRepository;
 use App\Services\EmailVerificationService;
@@ -32,6 +36,14 @@ $container->set(UserRepository::class, fn ($c) => new UserRepository($c->get(\PD
 $container->set(
     EmailVerificationTokenRepository::class,
     fn ($c) => new EmailVerificationTokenRepository($c->get(\PDO::class))
+);
+$container->set(
+    DonorProfileRepository::class,
+    fn ($c) => new DonorProfileRepository($c->get(\PDO::class))
+);
+$container->set(
+    DonationCenterRepository::class,
+    fn ($c) => new DonationCenterRepository($c->get(\PDO::class))
 );
 
 $container->set(
@@ -73,6 +85,21 @@ $container->set(
     )
 );
 $container->set(
+    DonorProfileController::class,
+    fn ($c) => new DonorProfileController(
+        $c->get(UserRepository::class),
+        $c->get(DonorProfileRepository::class),
+        $c->get(LoggerInterface::class)
+    )
+);
+$container->set(
+    CenterController::class,
+    fn ($c) => new CenterController(
+        $c->get(DonationCenterRepository::class),
+        $c->get(LoggerInterface::class)
+    )
+);
+$container->set(
     AuthMiddleware::class,
     fn ($c) => new AuthMiddleware($c->get(UserRepository::class))
 );
@@ -91,5 +118,7 @@ $app->setBasePath('/api');
 (require __DIR__ . '/../src/Routes/index.php')($app);
 (require __DIR__ . '/../src/Routes/auth.php')($app);
 (require __DIR__ . '/../src/Routes/users.php')($app);
+(require __DIR__ . '/../src/Routes/donor.php')($app);
+(require __DIR__ . '/../src/Routes/centers.php')($app);
 
 $app->run();

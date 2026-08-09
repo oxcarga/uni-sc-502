@@ -143,6 +143,37 @@ class UserRepository
         return $this->findById($id);
     }
 
+    /**
+     * Actualiza solo campos de cuenta presentes en $data
+     * (first_name, last_name, password_hash).
+     *
+     * @param array<string, mixed> $data
+     */
+    public function updateAccount(int $id, array $data): ?array
+    {
+        $fields = [];
+        $params = ['id' => $id];
+
+        foreach (['first_name', 'last_name', 'password_hash'] as $key) {
+            if (!array_key_exists($key, $data)) {
+                continue;
+            }
+            $fields[] = "{$key} = :{$key}";
+            $params[$key] = $data[$key];
+        }
+
+        if ($fields === []) {
+            return $this->findById($id);
+        }
+
+        $query = $this->pdo->prepare(
+            'UPDATE users SET ' . implode(', ', $fields) . ' WHERE id = :id'
+        );
+        $query->execute($params);
+
+        return $this->findById($id);
+    }
+
     public function markEmailConfirmed(int $id): ?array
     {
         $query = $this->pdo->prepare(

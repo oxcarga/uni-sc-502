@@ -51,12 +51,12 @@ Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./
 |------|-----------|
 | Auth (P0–P0c) | ✅ Cerrado: registro, confirmación email, sesión servidor, auth-guard |
 | Esquema MySQL | ✅ Tablas de dominio ya en `01_init.sql` + seed demo en `02_seed.sql` (centros, perfiles, citas, inventario, solicitudes, alertas, políticas, logros, notificaciones) |
-| BE dominio | ☐ Solo auth/users; faltan APIs de paneles (P4+) |
-| FE paneles | ☐ Shells P1–P3 cerrados; falta cablear APIs de dominio (P4+) |
+| BE dominio | ✅ Perfil donante + centros (P4); faltan citas/inventario/etc. (P5+) |
+| FE paneles | ✅ Shells P1–P3 + cableado P4 (perfil/centros); faltan APIs P5+ |
 
-**Implicación:** desde P4, el pilar DB casi siempre es *verificar / ajustar seed* (no inventar el esquema desde cero). El trabajo duro es **BE + FE**.
+**Implicación:** desde P5, el pilar DB casi siempre es *verificar / ajustar seed* (no inventar el esquema desde cero). El trabajo duro es **BE + FE**.
 
-La siguiente fase a implementar es **P4**.
+La siguiente fase a implementar es **P5**.
 
 ---
 
@@ -356,19 +356,19 @@ Sin cambios de dominio. Opcional menor: endpoint admin de listado de usuarios pu
 
 ---
 
-## P4 — Perfil de donante y centros
+## ✅ P4 — Perfil de donante y centros
 
 **Objetivo:** separar datos clínicos del donante de la cuenta; listar/consultar centros de donación vía API (el esquema ya existe).
 
 ### DB
 
-**Ya existe** en `01_init.sql` / seed. Verificar y solo ajustar si falta algo:
+**Sin cambios de esquema.** Verificado en `01_init.sql` / seed:
 
 1. `donor_profiles`: `user_id` PK/FK, `blood_type`, `birth_date`, `phone`, `province`, `canton`, `address`, `medical_history`, `eligible`, `last_donation_at`, prefs `notify_*`.
-2. `donation_centers`: `code`, `name`, `description`, dirección/geo, contacto, horarios, `daily_capacity`, `active`, etc. (ver ERD).
+2. `donation_centers`: `code`, `name`, dirección/geo, contacto, horarios, `active`, etc.
 3. `bank_profiles`: `user_id`, `center_id`.
-4. Confirmar que **no** existe `users.blood_type` (correcto hoy).
-5. Registro de donante: fila en `donor_profiles` en la misma transacción (ya parcial en `UserRepository` — validar edge cases).
+4. **No** existe `users.blood_type`.
+5. Registro de donante: fila en `donor_profiles` en la misma transacción (`UserRepository::create`); `ensureForUser` cubre edge cases.
 
 **Seed:** ≥1 centro activo; perfil donante con `blood_type`; usuario `bank` ligado. (Ya en `02_seed.sql`.)
 
@@ -383,28 +383,28 @@ Sin cambios de dominio. Opcional menor: endpoint admin de listado de usuarios pu
 
 - Repositories: `DonorProfileRepository`, `DonationCenterRepository`.
 - No leer/escribir `blood_type` en `users`.
-- Admin (opcional en esta fase): listado/alta básica de centros si el FE admin lo necesita; si no, dejar escritura de centros para ampliación menor documentada.
+- Admin: lectura con `?all=1`; **escritura de centros aplazada**.
 
 ### FE
 
-1. `donor/profile/`: cargar/guardar vía API; quitar defaults fake (`A+`, teléfono inventado).
-2. `donor/banks/`: listar centros desde API (lista primero; mapa opcional).
-3. Home donante: mostrar tipo de sangre / elegibilidad si vienen del perfil.
-4. Admin `banks/`: al menos lectura desde API si el endpoint existe; si escritura se aplaza, documentarlo.
+1. `donor/profile/`: cargar/guardar vía API.
+2. `donor/banks/`: listar centros desde API.
+3. Home donante: tipo de sangre / elegibilidad + centros activos.
+4. Admin `banks/`: lectura desde API; toggles/editar son demo local (escritura aplazada).
 
 ### Config
 
-1. Re-provision solo si hubo cambio de esquema; si no, `Sin cambios` de volúmenes.
-2. Actualizar `database/README.md` con queries de verificación de `donor_profiles` / `donation_centers`.
-3. Documentar endpoints nuevos en `backend/README.md` (breve).
+1. **Sin cambios** de volúmenes (sin migración).
+2. Queries de verificación en `database/README.md`.
+3. Endpoints documentados en `backend/README.md`.
 
 ### Listo cuando
 
-- [ ] No existe `users.blood_type`
-- [ ] Todo donante registrado tiene fila en `donor_profiles`
-- [ ] GET/PUT perfil donante funcionan (API + FE)
-- [ ] Centros se listan desde la API y se ven en FE donante
-- [ ] Stack Docker consistente
+- [x] No existe `users.blood_type`
+- [x] Todo donante registrado tiene fila en `donor_profiles`
+- [x] GET/PUT perfil donante funcionan (API + FE)
+- [x] Centros se listan desde la API y se ven en FE donante
+- [x] Stack Docker consistente
 
 **Desbloquea:** perfil médico + listado de centros (CU1 perfil).
 
@@ -662,7 +662,7 @@ Solo ajustar seed/criterios si la evaluación en BE lo requiere.
 | ✅ P1 | Shell UI donante (`/dashboard/donor/**`) | CU1 (superficie) | ✅ | ✅ | ✅ | ✅ |
 | ✅ P2 | Shell UI banco (`/dashboard/bank/**`) | Panel banco (superficie) | ✅ | ✅ | ✅ | ✅ |
 | ✅ P3 | Shell UI admin (`/dashboard/admin/**`) | Panel admin (superficie) | ✅ | ✅ | ✅ | ✅ |
-| P4 | Perfil donante + centros (API + FE) | CU1 (perfil) | ☐ | ☐ | ☐ | ☐ |
+| ✅ P4 | Perfil donante + centros (API + FE) | CU1 (perfil) | ✅ | ✅ | ✅ | ✅ |
 | P5 | Citas + donaciones | CU1 (agenda/historial) | ☐ | ☐ | ☐ | ☐ |
 | P6 | Inventario + movimientos | Base CU2/CU3 | ☐ | ☐ | ☐ | ☐ |
 | P7 | Solicitudes + alertas + compatibles | CU2, CU3 | ☐ | ☐ | ☐ | ☐ |
@@ -713,6 +713,12 @@ Detalle de columnas: [database/ERD.md](./database/ERD.md).
 10. Cada fase cierra con los 4 pilares revisados; Config incluye docs de cómo probar en Docker.
 11. Rutas internas FE: `/dashboard/{donor,bank,admin}/…`. No reintroducir `/panel/`.
 12. Endpoints de dominio protegidos con `AuthMiddleware` + chequeo de rol.
+13. Formularios → API (UX): seguir [DESIGN.md](./DESIGN.md) → *Formularios que envían datos al servidor*.
+    - Sin spinner en el botón; feedback con alert.
+    - Edición: submit `disabled` hasta que haya cambios (dirty); disabled en gris.
+    - Alert en sticky bar a ancho completo cuando exista `page-sticky-bar`.
+    - Éxito/info ~7 s con fade; error persistente.
+    - Referencia: `frontend/pages/dashboard/donor/profile/`.
 
 ---
 

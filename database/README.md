@@ -97,10 +97,30 @@ Contraseña: `demo1234`
 docker-compose exec db mysql -u pulso_user -ppulso_password pulso_solidario -e "
 SHOW TABLES;
 SELECT id, email, role FROM users;
-SELECT user_id, blood_type, eligible FROM donor_profiles;
+SELECT user_id, blood_type, eligible, phone, province FROM donor_profiles;
+SELECT id, code, name, province, active FROM donation_centers;
 SELECT center_id, blood_type, units FROM inventory ORDER BY blood_type;
 "
 ```
+
+### P4 — perfil donante y centros
+
+Comprobar que no hay `blood_type` en `users` y que todo donante tiene perfil:
+
+```bash
+docker-compose exec db mysql -u pulso_user -ppulso_password pulso_solidario -e "
+SHOW COLUMNS FROM users LIKE 'blood_type';
+SELECT u.id, u.email, u.role, dp.blood_type, dp.eligible
+  FROM users u
+  LEFT JOIN donor_profiles dp ON dp.user_id = u.id
+ WHERE u.role = 'donor';
+SELECT COUNT(*) AS active_centers FROM donation_centers WHERE active = 1;
+"
+```
+
+- `SHOW COLUMNS ... blood_type` debe devolver vacío.
+- Cada fila `role=donor` debe tener `dp.blood_type` (o al menos fila en `donor_profiles`).
+- Debe haber ≥1 centro activo (seed: Hospital Regional).
 
 O en phpMyAdmin: http://localhost:3002 (`pulso_user` / `pulso_password`).
 

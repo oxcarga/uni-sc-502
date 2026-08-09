@@ -38,6 +38,10 @@
   --bs-btn-active-bg: #004540;
   --bs-btn-active-border-color: #004540;
   --bs-btn-focus-shadow-rgb: 0, 104, 95;
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: #94a3b8;
+  --bs-btn-disabled-border-color: #94a3b8;
+  --bs-btn-disabled-opacity: 1;
 }
 
 /* Button – outline variant */
@@ -825,13 +829,26 @@ h1, h2, h3, h4, h5, h6,
   align-items: start;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.75rem 1rem;
   margin: -2rem -2.5rem 1.5rem;
   padding: 1.25rem 2.5rem;
   background-color: rgba(248, 249, 255, 0.92);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid #e2e8f0;
+}
+
+/* Alertas de feedback: fila completa bajo título/acciones */
+.page-sticky-bar > .alert {
+  flex: 1 0 100%;
+  width: 100%;
+  order: 10;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+.page-sticky-bar > .alert.is-fading {
+  opacity: 0;
 }
 
 /* --- Dashboard forms ---------------------------------------------------- */

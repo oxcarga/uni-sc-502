@@ -12,7 +12,8 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
   <link rel="stylesheet" href="../assets/css/custom.css" />
   <script type="module">
-    import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`./home.js?t=${Date.now()}`);
   </script>
 </head>
 
@@ -108,11 +109,15 @@
           <h1 class="headline fw-bold mb-1" style="font-size: 2rem">
             Panel del Donante
           </h1>
-          <p class="text-muted mb-0">
+          <p class="text-muted mb-2">
             Bienvenido de nuevo,
             <strong style="color: #00685f"><span id="dashboard-home-name">…</span></strong>.
             Tu contribución salva vidas.
           </p>
+          <div class="d-flex flex-wrap gap-2">
+            <span id="home-blood-type" class="badge-soft badge-soft--teal">Cargando perfil…</span>
+            <span id="home-eligible" class="badge-soft badge-soft--slate">—</span>
+          </div>
         </div>
 
         <div class="row g-4 mb-4">
@@ -183,24 +188,10 @@
           <div class="col-lg-7">
             <section class="card h-100 p-3" aria-labelledby="nearby-banks">
               <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-                <h2 class="section-title mb-0" id="nearby-banks">Centros cercanos</h2>
-                <span class="demo-badge">Demo</span>
+                <h2 class="section-title mb-0" id="nearby-banks">Centros activos</h2>
               </div>
-              <div class="d-flex flex-column gap-2 mb-3">
-                <div class="shortage-row">
-                  <div class="shortage-info">
-                    <div class="name">Cruz Roja Central</div>
-                    <div class="place">San José · 1.2 km</div>
-                  </div>
-                  <span class="badge-soft badge-soft--teal">Activo</span>
-                </div>
-                <div class="shortage-row">
-                  <div class="shortage-info">
-                    <div class="name">Clínica del Valle</div>
-                    <div class="place">Escazú · 2.5 km</div>
-                  </div>
-                  <span class="badge-soft badge-soft--rose">Alta demanda</span>
-                </div>
+              <div id="home-nearby-list" class="d-flex flex-column gap-2 mb-3">
+                <p class="text-muted mb-0" style="font-size: 0.875rem">Cargando…</p>
               </div>
               <a href="/dashboard/donor/banks/" class="btn btn-outline-secondary rounded-3 fw-semibold w-100">
                 Ver todos los bancos
