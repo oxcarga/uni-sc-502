@@ -9,11 +9,11 @@ const filterStatus = document.getElementById('filterStatus');
 const filterRegion = document.getElementById('filterRegion');
 const filterClear = document.getElementById('filterClear');
 
-function showStatus(message, ok = true) {
+function showStatus(message, type = 'info') {
   if (!statusEl) return;
   statusEl.textContent = message;
-  statusEl.classList.remove('d-none', 'alert-success', 'alert-danger');
-  statusEl.classList.add(ok ? 'alert-success' : 'alert-danger');
+  statusEl.classList.remove('d-none', 'alert-success', 'alert-danger', 'alert-info');
+  statusEl.classList.add(`alert-${type}`);
 }
 
 function setRowActive(row, active) {
@@ -73,8 +73,9 @@ table?.addEventListener('change', (event) => {
   refreshKpis();
   showStatus(
     active
-      ? `${name} quedó activo y visible para donantes.`
-      : `${name} quedó inactivo. No aparecerá en el listado de donantes.`
+      ? `Demo local: ${name} marcado como activo (no se guardó en el servidor).`
+      : `Demo local: ${name} marcado como inactivo (no se guardó en el servidor).`,
+    'info'
   );
 });
 

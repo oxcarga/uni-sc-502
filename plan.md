@@ -8,21 +8,23 @@
 | Pilar | Ámbito | Rutas típicas |
 |-------|--------|----------------|
 | **DB** | Esquema MySQL + seeds | `database/01_init.sql`, `02_seed.sql`, `provision.sh` |
-| **BE** | API PHP (Slim) | `backend/src/{Controllers,Repositories,Routes}/`, `backend/public/index.php` |
-| **FE** | UI estática + JS | `frontend/` |
+| **BE** | API PHP (Slim) | `backend/src/{Controllers,Repositories,Routes,Middleware,Services}/`, `backend/public/index.php` |
+| **FE** | UI estática + JS | `frontend/pages/`, `frontend/js/` |
 | **Config** | Docker, Nginx, Apache, env, docs de arranque | `docker-compose.yml`, `Dockerfile`, `nginx-frontend.conf`, `apache-api.conf`, `.env.example`, `DOCKER.md`, `docker-entrypoint.sh` |
 
 **Motor:** MySQL 8.0 · BD `pulso_solidario`  
 **Convención:** tablas/columnas, claves JSON, roles y rutas HTTP en inglés (p. ej. `users`, `first_name`, `/api/auth/confirm-email`).  
-**Última actualización:** 2026-07-15
+**Rutas FE internas:** `/dashboard/{donor,bank,admin}/` (no `/panel/`).  
+**Última actualización:** 2026-08-09
 
-Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./database/README.md).
+Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./database/README.md) · ERD: [database/ERD.md](./database/ERD.md).
 
 ---
 
 ## Cómo usar este plan
 
-1. Implementar **una fase a la vez**, en orden (P0 → P0b → P0c → P1 → … → P6).
+1. Implementar **una fase a la vez**, en orden:  
+   `P0 → P0b → P0c → P1 → P2 → P3 → P4 → P5 → P6 → P7 → P8 → P9`.
 2. En cada fase cubrir los **4 pilares** (DB, BE, FE, Config). Si un pilar no aplica, dejar la subsección con `Sin cambios` y una línea de por qué.
 3. Tras cambios de esquema: re-provisionar (`database/provision.sh` o `docker compose down -v && up -d`).
 4. Al cerrar una fase: marcar checklist, poner ✅ al inicio del título `## Px` y en el mapa, y pasar a la siguiente.
@@ -32,8 +34,29 @@ Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./
 |----------|---------|
 | Roles | `donor`, `bank`, `admin` |
 | Tipos de sangre | `O+`, `O-`, `A+`, `A-`, `B+`, `B-`, `AB+`, `AB-` |
-| Umbrales inventario | saludable `>100`, moderado `50–100`, crítico `<50` (por tipo y centro) |
+| Umbrales inventario | saludable `>100`, moderado `50–100`, crítico `<50` (por tipo y centro); preferir leer de `donation_policies` desde P8 |
 | Confirmación de correo | token de un solo uso, caduca en 24 h; sin confirmar no hay login |
+| Citas (`appointments.status`) | `pending`, `confirmed`, `completed`, `cancelled`, `no_show` |
+| Unidades (`blood_units.status`) | `available`, `assigned`, `discarded`, `expired` |
+| Solicitudes (`requests.status`) | `pending`, `assigned`, `in_transit`, `completed`, `cancelled` |
+| Prioridad | `low`, `normal`, `critical` |
+| Movimientos | `receipt`, `assignment`, `adjustment`, `discard` |
+| Alertas (`alerts.status`) | `active`, `resolved` |
+
+---
+
+## Estado actual (resumen)
+
+| Área | Situación |
+|------|-----------|
+| Auth (P0–P0c) | ✅ Cerrado: registro, confirmación email, sesión servidor, auth-guard |
+| Esquema MySQL | ✅ Tablas de dominio ya en `01_init.sql` + seed demo en `02_seed.sql` (centros, perfiles, citas, inventario, solicitudes, alertas, políticas, logros, notificaciones) |
+| BE dominio | ☐ Solo auth/users; faltan APIs de paneles (P4+) |
+| FE paneles | ☐ Shells P1–P3 cerrados; falta cablear APIs de dominio (P4+) |
+
+**Implicación:** desde P4, el pilar DB casi siempre es *verificar / ajustar seed* (no inventar el esquema desde cero). El trabajo duro es **BE + FE**.
+
+La siguiente fase a implementar es **P4**.
 
 ---
 
@@ -47,8 +70,6 @@ Estado previo a P0 (referencia histórica):
 | BE | CRUD `/api/users` |
 | FE | `login/` stub y `registro/` parcial |
 | Config | Compose (backend/frontend/db/phpmyadmin), Nginx proxy `/api` → backend |
-
-La siguiente fase es **P1**.
 
 ---
 
@@ -68,7 +89,6 @@ Ampliar `users` en `01_init.sql`:
 | `active` | `TINYINT(1)` NOT NULL DEFAULT 1 |
 | `updated_at` | `TIMESTAMP` DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP |
 | `first_name`, `email`, `created_at` | mantener |
-| `blood_type` | **mantener por ahora** (se mueve en P1) |
 
 Índices: UNIQUE `email`; índice en `role`.
 
@@ -77,7 +97,7 @@ Ampliar `users` en `01_init.sql`:
 ### BE
 
 1. `UserRepository`: columnas nuevas; `findByEmail`; nunca exponer `password_hash`.
-2. `UserController` create/update: `first_name`, `last_name`, `email`, `password`, `blood_type` opcional; hash; `role = donor` en registro público.
+2. `UserController` create/update: `first_name`, `last_name`, `email`, `password`; hash; `role = donor` en registro público.
 3. Email duplicado → 409 (`23000` / MySQL `1062`).
 4. `POST /api/auth/login`: email + password → `password_verify` + `active` → sesión (`id`, `first_name`, `last_name`, `email`, `role`).
 5. Login fallido / inactivo → 401 genérico.
@@ -85,9 +105,8 @@ Ampliar `users` en `01_init.sql`:
 ### FE
 
 1. `register.js` + HTML: enviar `first_name`, `last_name`, `email`, `password` por separado.
-2. `login.js`: llamar login; guardar sesión; redirigir según `role` (paneles placeholder ok).
+2. `login.js`: llamar login; guardar sesión; redirigir según `role` a `/dashboard/{role}/`.
 3. Errores de API visibles en ambos formularios.
-4. Placeholders `frontend/panel/{donor,bank,admin}/`.
 
 ### Config
 
@@ -130,15 +149,15 @@ Ampliar `users` en `01_init.sql`:
 ### FE
 
 1. Tras registro: **no** redirect a `/login/`; mensaje de “correo de confirmación enviado” en la misma página.
-2. `confirm-email/`: consumir token → `saveSession` → redirect al panel por `role`.
+2. `confirm-email/`: consumir token → sesión → redirect al dashboard por `role`.
 3. Login: mostrar 403 de correo no confirmado (+ CTA reenviar opcional).
 
 ### Config
 
-1. Añadir servicio de correo local (p. ej. **Mailhog** o similar) en `docker-compose.yml`, o documentar alternativa (log del enlace en logs del backend).
+1. Servicio de correo local (**Mailhog**) en `docker-compose.yml`.
 2. Variables en `.env.example`: host SMTP, puerto, `APP_URL` / base del enlace de confirmación, from.
-3. Pasar esas vars al contenedor `backend`; actualizar `DOCKER.md` / `README.md` (cómo ver el mail en local, URL típica Mailhog).
-4. Nginx: servir `frontend/confirm-email/` (try_files ya cubre rutas estáticas; verificar).
+3. Pasar esas vars al contenedor `backend`; actualizar `DOCKER.md` / `README.md`.
+4. Nginx: servir `frontend/pages/confirm-email/`.
 
 ### Listo cuando
 
@@ -156,181 +175,342 @@ Ampliar `users` en `01_init.sql`:
 
 ## ✅ P0c — Sesión de usuario y auth guard
 
-**Objetivo:** tener sesión de usuario real (no solo `sessionStorage` en el cliente) y proteger rutas internas `/panel/*`.
-
-**Hueco actual:** tras login/confirm el FE guarda un objeto en `sessionStorage` (`pulso_session`), pero no hay sesión de servidor ni cookie/token verificable. Cualquiera puede abrir `/panel/donor|bank|admin/` sin autenticarse.
+**Objetivo:** sesión de usuario real (no solo `sessionStorage`) y proteger rutas internas `/dashboard/*`.
 
 ### DB
 
-Sin cambios de esquema en P0c (sesión vía cookie de servidor o token firmado, sin tabla `sessions`). Si más adelante se necesitan refresh tokens persistidos, documentarlo en una fase posterior.
+Sin cambios de esquema en P0c (sesión vía cookie de servidor). Si más adelante se necesitan refresh tokens persistidos, documentarlo en una fase posterior.
 
 ### BE
 
-1. Tras login y confirm-email exitosos: emitir sesión de servidor (preferido: cookie HttpOnly de sesión PHP; alternativa: token firmado simple).
+1. Tras login y confirm-email: emitir sesión de servidor (cookie HttpOnly de sesión PHP).
 2. `GET /api/auth/me`: devolver el usuario de la sesión activa o 401.
 3. `POST /api/auth/logout`: invalidar sesión/cookie.
-4. Introducir middleware/patrón de auth reutilizable para endpoints protegidos (en P0c al menos para `/auth/me`; el resto de APIs de panel lo usarán desde P1).
-5. Login/confirm-email deben establecer la misma forma de sesión (no solo devolver JSON de usuario).
+4. Middleware de auth reutilizable (`AuthMiddleware`) para endpoints protegidos.
+5. Login/confirm-email establecen la misma forma de sesión.
 
 ### FE
 
-1. Dejar de tratar `sessionStorage` como única fuente de verdad: la sesión válida es la del servidor (`/api/auth/me`); cache local del perfil es opcional.
-2. Módulo guard (p. ej. `frontend/js/auth-guard.js`) cargado en todas las páginas `/panel/*`:
+1. Sesión válida = servidor (`/api/auth/me`); cache local del perfil es opcional.
+2. `frontend/js/auth-guard.js` en todas las páginas `/dashboard/*`:
    - Sin sesión → redirect a `/login/`
-   - Con sesión pero `role` distinto al panel visitado → redirect al panel correcto (o mensaje 403 UX)
-3. Logout visible en los placeholders de panel (llama a `/api/auth/logout` y limpia cache local).
-4. Alinear `login.js` y `confirm-email.js` con la nueva sesión (credentials/cookies en `fetch` si aplica).
+   - Con sesión pero `role` distinto al dashboard visitado → redirect al dashboard correcto
+3. Logout en topbar (llama a `/api/auth/logout` y limpia cache local).
+4. `login.js` y `confirm-email.js` con `credentials` / cookies en `fetch`.
 
 ### Config
 
 1. Documentar cookie: `SameSite`, `Secure` (local vs production) en `.env.example` / `DOCKER.md` si hace falta.
-2. Asegurar que el proxy Nginx reenvía cookies al backend (`/api/`).
-3. Nota: el FE estático no puede ocultar el HTML; el guard es UX + la API exige sesión. No bloquear `/panel/*` solo en Nginx.
+2. Proxy Nginx reenvía cookies al backend (`/api/`).
+3. El FE estático no oculta el HTML; el guard es UX + la API exige sesión. No bloquear `/dashboard/*` solo en Nginx.
 
 ### Listo cuando
 
 - [x] Login/confirm crean sesión verificable con `GET /api/auth/me`
 - [x] Logout cierra la sesión
-- [x] Visitar `/panel/*` sin sesión redirige a `/login/`
-- [x] Usuario `donor` no permanece en `/panel/admin` (y análogo por rol)
+- [x] Visitar `/dashboard/*` sin sesión redirige a `/login/`
+- [x] Usuario `donor` no permanece en `/dashboard/admin` (y análogo por rol)
 - [x] Sin sesión no se puede “usar” la app como autenticado vía API protegida
 
 **Desbloquea:** paneles internos seguros antes de P1+.
 
 ---
 
-## P1 — UI de donante
+## ✅ P1 — Shell UI del donante
 
+**Objetivo:** dejar el panel donante navegable, coherente con [DESIGN.md](./DESIGN.md) y listo para cablear APIs en P4+. Los datos de negocio pueden seguir siendo mock/placeholder.
 
-## P2 — UI de banco
+**Alcance de páginas (ya hay maquetas; cerrar gaps):**
 
-
-## P3 — UI de admin
-
-
-## P4 — Perfil de donante y centros
-
-**Objetivo:** separar datos clínicos del donante de la cuenta; listar centros de donación.
+| Ruta | Propósito en P1 |
+|------|-----------------|
+| `/dashboard/donor/` | Home: saludo, próxima cita (mock), atajos |
+| `/dashboard/donor/appointments/` | Listado/agenda (UI; datos mock) |
+| `/dashboard/donor/banks/` | Listado de centros (UI; datos mock) |
+| `/dashboard/donor/profile/` | Formulario de perfil (UI; sin persistir aún — API en P4) |
 
 ### DB
 
-1. `donor_profiles`: `user_id` PK/FK, `blood_type`, `birth_date`, `medical_history`, `eligible`, `last_donation_at`.
-2. `donation_centers`: `name`, `address`, `region`, `lat`, `lng`, `contact`, `active`.
-3. Opcional: `bank_profiles` (`user_id`, `center_id`).
-4. **Quitar** `blood_type` de `users`.
-5. Al registrar donante: insertar fila vacía en `donor_profiles` (misma transacción).
-
-**Seed:** ≥1 centro activo; perfiles donante con al menos un `blood_type`; usuario `bank` ligado si hay `bank_profiles`.
+Sin cambios. El seed ya trae donante demo + perfil + citas; no se requieren tablas nuevas.
 
 ### BE
 
-- Endpoints perfil donante (GET/PUT propio) y listado de centros.
-- Dejar de leer/escribir `blood_type` en `users`.
-- Registro crea perfil vacío en la misma transacción.
+Sin cambios de dominio. Opcional: confirmar que `/api/auth/me` basta para rellenar nombre/rol en topbar (ya usado por `auth-guard.js`).
 
 ### FE
 
-- UI “completar perfil” o campos en registro para tipo de sangre → `donor_profiles`.
-- Listado/mapa básico de centros (puede ser lista simple primero).
-- Panel donante: sección perfil (aunque sea mínima).
+1. Unificar shell: sidebar, topbar, logout, `data-required-role="donor"`, `auth-guard.js` en **todas** las subpáginas.
+2. Navegación sin enlaces rotos; estado activo del ítem de menú correcto por ruta.
+3. Sustituir o etiquetar claramente datos hardcodeados como “demo / pendiente de API” (evitar que parezcan reales).
+4. Responsive: sidebar → menú móvil según DESIGN.md.
+5. Placeholders visibles para secciones futuras: elegibilidad, impacto, logros, notificaciones (pueden ser cards “Próximamente” o secciones vacías; no inventar APIs).
+6. Login/confirm deben redirigir donantes a `/dashboard/donor/`.
 
 ### Config
 
-1. Re-provision obligatorio (DROP columnas / tablas nuevas).
-2. Si el mapa usa tiles externos, documentar CSP/permisos en Nginx solo si hace falta; si no, `Sin cambios` de red.
-3. Actualizar `database/README.md` con tablas nuevas en ejemplos de verificación.
+1. Verificar que Nginx sirve `/dashboard/donor/**` (try_files).
+2. Actualizar referencias en docs si aún mencionan `/panel/donor`.
+3. Sin servicios nuevos.
+
+### Listo cuando
+
+- [x] Donante demo entra y navega home → citas → bancos → perfil sin 404
+- [x] Guard + logout funcionan en todas las subpáginas
+- [x] UI alineada a DESIGN.md (tokens, tipografía, estados vacíos)
+- [x] No hay dependencia de APIs de dominio aún no implementadas (fallos silenciosos / mocks etiquetados)
+
+**Desbloquea:** superficie FE del CU1 (donante) lista para P4/P5/P9.
+
+---
+
+## ✅ P2 — Shell UI del banco
+
+**Objetivo:** mismo criterio que P1 para el rol `bank`.
+
+**Alcance de páginas:**
+
+| Ruta | Propósito en P2 |
+|------|-----------------|
+| `/dashboard/bank/` | Home operativo (KPIs mock, alertas mock) |
+| `/dashboard/bank/inventory/` | Grid por tipo de sangre (UI; niveles visuales mock) |
+| `/dashboard/bank/appointments/` | Citas del centro (UI mock) |
+| `/dashboard/bank/donors/` | Compatibilidad / donantes (UI mock) |
+| `/dashboard/bank/settings/` | Ajustes del centro (UI mock) |
+
+### DB
+
+Sin cambios. Seed ya incluye centro, `bank_profiles`, inventario mixto (O- crítico), citas y alerta demo.
+
+### BE
+
+Sin cambios de dominio. El usuario `bank` del seed debe poder autenticarse; el centro ligado se usará en P5/P6.
+
+### FE
+
+1. Shell completo con `data-required-role="bank"` + auth-guard en todas las subpáginas.
+2. Navegación íntegra; topbar muestra usuario banco.
+3. Inventario mock con semáforo (verde/amarillo/rojo) según umbrales del plan — documentar que en P6/P8 vendrán de API/políticas.
+4. Etiquetar mocks; estados vacíos para solicitudes/alertas si la sección aún no tiene página propia (la cola real llega en P7).
+5. Redirect de login `bank` → `/dashboard/bank/`.
+
+### Config
+
+1. Verificar rutas `/dashboard/bank/**` en Nginx.
+2. Docs: cuenta demo `banco@test.com` / contraseña seed.
+3. Sin servicios nuevos.
+
+### Listo cuando
+
+- [x] Banco demo navega todas las subpáginas sin 404
+- [x] Guard de rol impide a `donor` quedarse en `/dashboard/bank/`
+- [x] Semáforo de inventario visible (aunque sea mock)
+- [x] Shell listo para cablear inventario (P6), citas (P5) y solicitudes (P7)
+
+**Desbloquea:** superficie FE del panel banco.
+
+---
+
+## ✅ P3 — Shell UI del admin
+
+**Objetivo:** shell del panel `admin` alineado a README (usuarios, bancos, reportes placeholder, config, auditoría placeholder).
+
+**Alcance de páginas:**
+
+| Ruta | Propósito en P3 |
+|------|-----------------|
+| `/dashboard/admin/` | Home con KPIs mock del ecosistema |
+| `/dashboard/admin/banks/` | Gestión de centros (UI; CRUD real en fases posteriores / P4 lectura) |
+| `/dashboard/admin/donors/` | Gestión de donantes (UI mock) |
+| Config / auditoría / reportes | Enlace o página stub “Próximamente” si no existe aún (políticas + auditoría reales en P8) |
+
+### DB
+
+Sin cambios.
+
+### BE
+
+Sin cambios de dominio. Opcional menor: endpoint admin de listado de usuarios puede esperar a una sub-fase o a P8; en P3 basta la maqueta.
+
+### FE
+
+1. Shell con `data-required-role="admin"` + auth-guard en todas las subpáginas.
+2. Navegación sin enlaces muertos (`href="#"` → stub o deshabilitado con tooltip).
+3. Tablas mock de bancos/donantes con filtros UI (sin API).
+4. Redirect login `admin` → `/dashboard/admin/`.
+5. Dejar anclas claras para P8 (políticas, auditoría, notificaciones).
+
+### Config
+
+1. Verificar `/dashboard/admin/**` en Nginx.
+2. Docs: cuenta `admin@test.com`.
+3. Sin servicios nuevos.
+
+### Listo cuando
+
+- [x] Admin demo navega home → bancos → donantes sin 404
+- [x] Guard de rol correcto
+- [x] Stubs de configuración/auditoría no rompen la navegación
+- [x] Shell listo para cablear gestión real y P8
+
+**Desbloquea:** superficie FE del panel admin.
+
+---
+
+## P4 — Perfil de donante y centros
+
+**Objetivo:** separar datos clínicos del donante de la cuenta; listar/consultar centros de donación vía API (el esquema ya existe).
+
+### DB
+
+**Ya existe** en `01_init.sql` / seed. Verificar y solo ajustar si falta algo:
+
+1. `donor_profiles`: `user_id` PK/FK, `blood_type`, `birth_date`, `phone`, `province`, `canton`, `address`, `medical_history`, `eligible`, `last_donation_at`, prefs `notify_*`.
+2. `donation_centers`: `code`, `name`, `description`, dirección/geo, contacto, horarios, `daily_capacity`, `active`, etc. (ver ERD).
+3. `bank_profiles`: `user_id`, `center_id`.
+4. Confirmar que **no** existe `users.blood_type` (correcto hoy).
+5. Registro de donante: fila en `donor_profiles` en la misma transacción (ya parcial en `UserRepository` — validar edge cases).
+
+**Seed:** ≥1 centro activo; perfil donante con `blood_type`; usuario `bank` ligado. (Ya en `02_seed.sql`.)
+
+### BE
+
+| Método | Ruta | Notas |
+|--------|------|-------|
+| `GET` | `/api/donor/profile` | Propio; requiere sesión `donor` |
+| `PUT` | `/api/donor/profile` | Actualizar campos clínicos / contacto / prefs |
+| `GET` | `/api/centers` | Listado de centros activos (donor/bank/admin) |
+| `GET` | `/api/centers/{id}` | Detalle |
+
+- Repositories: `DonorProfileRepository`, `DonationCenterRepository`.
+- No leer/escribir `blood_type` en `users`.
+- Admin (opcional en esta fase): listado/alta básica de centros si el FE admin lo necesita; si no, dejar escritura de centros para ampliación menor documentada.
+
+### FE
+
+1. `donor/profile/`: cargar/guardar vía API; quitar defaults fake (`A+`, teléfono inventado).
+2. `donor/banks/`: listar centros desde API (lista primero; mapa opcional).
+3. Home donante: mostrar tipo de sangre / elegibilidad si vienen del perfil.
+4. Admin `banks/`: al menos lectura desde API si el endpoint existe; si escritura se aplaza, documentarlo.
+
+### Config
+
+1. Re-provision solo si hubo cambio de esquema; si no, `Sin cambios` de volúmenes.
+2. Actualizar `database/README.md` con queries de verificación de `donor_profiles` / `donation_centers`.
+3. Documentar endpoints nuevos en `backend/README.md` (breve).
 
 ### Listo cuando
 
 - [ ] No existe `users.blood_type`
-- [ ] Todo donante tiene fila en `donor_profiles`
-- [ ] Se listan centros desde la API y se ven en FE
-- [ ] Stack Docker vuelve a quedar consistente tras re-provision
+- [ ] Todo donante registrado tiene fila en `donor_profiles`
+- [ ] GET/PUT perfil donante funcionan (API + FE)
+- [ ] Centros se listan desde la API y se ven en FE donante
+- [ ] Stack Docker consistente
 
-**Desbloquea:** perfil médico, mapa/listado de centros.
+**Desbloquea:** perfil médico + listado de centros (CU1 perfil).
 
 ---
 
 ## P5 — Citas y donaciones
 
-**Objetivo:** agendar donaciones y guardar historial.
+**Objetivo:** agendar donaciones, gestionar estados y materializar historial al completar.
 
 ### DB
 
-**`appointments`:** `donor_id`, `center_id`, `scheduled_at`, `status` (`pending`\|`confirmed`\|`completed`\|`cancelled`\|`no_show`), timestamps.
+**Ya existe:** `appointments`, `donations`, `blood_units` (+ seed con citas en varios estados y 1 donación).
 
-**`donations`:** `donor_id`, `center_id`, `appointment_id` NULL, `blood_type`, `units` DEFAULT 1, `donated_at`, `certificate_code` NULL.
+Reglas de negocio a respetar (app + transacciones SQL):
 
-Al completar cita → crear `donations` + actualizar `donor_profiles.last_donation_at` (y `elegible` si hay regla simple).
+1. Al completar cita (`status = completed`) → crear `donations` (+ `blood_units` si aplica) y actualizar `donor_profiles.last_donation_at`.
+2. Elegibilidad: aplicar `donor_interval_days` de políticas si ya se lee; si no, regla simple hardcodeada hasta P8.
+3. `donations.appointment_id` UNIQUE cuando no es NULL.
 
-**Seed:** citas en distintos estados; ≥1 donación completada.
+**Seed:** mantener citas `pending`/`confirmed`/`completed` y ≥1 donación. Ajustar solo si el flujo demo se rompe.
 
 ### BE
 
-- CRUD/agenda de citas para donante.
-- Historial de donaciones.
-- Acción “completar cita” (banco/admin) que materializa la donación.
+| Método | Ruta | Rol |
+|--------|------|-----|
+| `GET` | `/api/donor/appointments` | donor (propias) |
+| `POST` | `/api/donor/appointments` | donor (agendar) |
+| `PATCH` | `/api/donor/appointments/{id}` | donor (cancelar propia si permitido) |
+| `GET` | `/api/bank/appointments` | bank (citas de su `center_id`) |
+| `POST` | `/api/bank/appointments/{id}/complete` | bank/admin → materializa donación |
+| `GET` | `/api/donor/donations` | donor (historial) |
+
+- Validar capacidad/horario del centro de forma básica.
+- Completar cita en transacción: appointment + donation + blood_unit + `last_donation_at`.
 
 ### FE
 
-- Panel donante: agendar cita + historial.
-- Panel banco: listado de citas del centro y acción completar.
+1. Panel donante `appointments/`: listar, agendar (centro + fecha/hora), cancelar.
+2. Historial de donaciones en home o subsección (leer API).
+3. Panel banco `appointments/`: listado del centro + acción “Completar”.
+4. Quitar mocks de citas donde ya haya API.
 
 ### Config
 
-1. Re-provision tras nuevas tablas.
-2. Revisar timeouts/body size de Apache/Nginx solo si se suben adjuntos (certificados); si no, `Sin cambios`.
-3. Documentar flujo demo (seed) en `DOCKER.md` o README corto de la fase.
+1. Re-provision solo si cambia esquema/seed.
+2. Documentar flujo demo: donante agenda → banco completa → aparece en historial.
+3. Timeouts/body size: `Sin cambios` salvo subida de certificados (fuera de alcance).
 
 ### Listo cuando
 
-- [ ] Donante agenda cita en un centro (FE → BE → DB)
-- [ ] Completar cita crea `donations` y actualiza perfil
+- [ ] Donante agenda cita (FE → BE → DB)
+- [ ] Completar cita crea `donations` (y unidad) y actualiza perfil
+- [ ] Historial visible para el donante
 - [ ] Seed reproducible en Docker
 
-**Desbloquea:** agenda + historial (base CU1 citas).
+**Desbloquea:** agenda + historial (CU1 citas).
 
 ---
 
 ## P6 — Inventario del banco
 
-**Objetivo:** stock en vivo y libro de movimientos.
+**Objetivo:** stock en vivo y libro de movimientos consumibles por API/UI.
 
 ### DB
 
-**`inventory`:** `center_id`, `blood_type`, `units`, UNIQUE(`center_id`, `blood_type`).
+**Ya existe:** `inventory`, `inventory_movements`, `blood_units`.
 
-**`inventory_movements`:** append-only — `center_id`, `type` (`receipt`\|`assignment`\|`adjustment`\|`discard`), `quantity`, FKs opcionales, `user_id`, `detail`, `created_at`.
+**Reglas:**
 
-**`blood_units`** (recomendado ya en P3): `code` UNIQUE, `donation_id`, `center_id`, `blood_type`, `status`, fechas.
+1. Toda variación de stock = transacción (movimiento append-only + update `inventory` [+ estado de unidad]).
+2. Nivel saludable/moderado/crítico = **calculado** (hardcode umbrales del plan hasta P8; no guardar color en BD).
+3. Seed: inventario mixto con **≥1 tipo en crítico** (`O-` < 50) — ya presente.
 
-**Regla:** toda variación de stock = una transacción (movimiento + update inventario [+ estado unidad]).  
-Saludable/moderado/crítico = **calculado** (hardcode P3 o políticas en P5); no guardar color en BD.
-
-**Seed:** inventario mixto; **≥1 tipo en crítico** (`<50`).
+Ajustes solo si faltan índices/constraints detectados al implementar.
 
 ### BE
 
-- API inventario por centro + recepción (p. ej. tras donación).
-- Cálculo de nivel de stock para el FE.
+| Método | Ruta | Rol |
+|--------|------|-----|
+| `GET` | `/api/bank/inventory` | bank (su centro) / admin (por `center_id`) |
+| `GET` | `/api/bank/inventory/movements` | historial |
+| `POST` | `/api/bank/inventory/receipts` | recepción manual o desde donación |
+| `POST` | `/api/bank/inventory/adjustments` | ajuste/descarte (bank/admin) |
+
+- Al completar donación (P5), idealmente enganchar recepción (`receipt`) aquí o en el mismo servicio de dominio.
+- Devolver en GET el `level`: `healthy` \| `moderate` \| `critical` por tipo.
 
 ### FE
 
-- Panel banco: tarjetas/listado por tipo de sangre con nivel visual.
+1. `bank/inventory/`: datos reales + semáforo.
+2. Home banco: resumen de críticos desde API.
+3. (Opcional) vista simple de últimos movimientos.
 
 ### Config
 
-1. Re-provision + verificar seed crítico en phpMyAdmin o `mysql` CLI (doc en `database/README.md`).
-2. Sin servicios nuevos salvo que se añada worker; si no, `Sin cambios` de Compose.
-3. Asegurar que el backend tiene timezone/DB charset utf8mb4 ya configurados (revisión, no reescritura).
+1. Verificar seed crítico en phpMyAdmin/`mysql` CLI; doc en `database/README.md`.
+2. Compose: `Sin cambios`.
+3. Revisar charset/timezone ya configurados (no reescritura).
 
 ### Listo cuando
 
 - [ ] Consulta de stock por tipo (API + UI banco)
-- [ ] Recepción actualiza inventario y deja movimiento
-- [ ] Seed muestra al menos un tipo crítico
+- [ ] Recepción/actualización deja movimiento y cambia `inventory`
+- [ ] Seed muestra al menos un tipo crítico en UI
 
-**Desbloquea:** panel banco (inventario en vivo).
+**Desbloquea:** panel banco (inventario en vivo); base para CU2/CU3.
 
 ---
 
@@ -340,68 +520,88 @@ Saludable/moderado/crítico = **calculado** (hardcode P3 o políticas en P5); no
 
 ### DB
 
-**`medical_institutions`**, **`requests`**, **`alerts`** (campos y estados en inglés en JSON/BD).
+**Ya existe:** `medical_institutions`, `requests`, `alerts` (+ seed: 1 institución, 1 solicitud `pending` crítica, 1 alerta `active` sobre O-).
 
-**Flujos:**
+**Flujos a implementar en app:**
 
-1. Solicitud → asignar centro → stock → asignar unidades + movimiento `assignment` → estado.
-2. Alerta al cruzar umbral; resolver al recuperar stock.
-3. Donantes compatibles vía perfil (`blood_type` + `eligible`); notificaciones en P5.
+1. Solicitud → asignar centro → verificar stock → asignar unidades + movimiento `assignment` → actualizar estados (`requests`, `blood_units`).
+2. Alerta al cruzar umbral de stock; resolver al recuperar stock (o acción manual).
+3. Donantes compatibles vía `donor_profiles` (`blood_type` + `eligible`); **envío de notificaciones a usuarios → P8**.
 
-**Seed:** 1 institución, 1 solicitud `pending`, 1 alerta `active` sobre el tipo crítico de P3.
+Ajustes de seed solo para que el demo CU2/CU3 sea reproducible de un solo login banco.
 
 ### BE
 
-- Endpoints cola de solicitudes, asignación, listado/activación de alertas.
-- Reglas de stock en transacción con movimientos.
+| Método | Ruta | Rol |
+|--------|------|-----|
+| `GET` | `/api/bank/requests` | cola del centro |
+| `POST` | `/api/bank/requests/{id}/assign` | asignar unidades (transacción) |
+| `GET` | `/api/bank/alerts` | alertas del centro |
+| `POST` | `/api/bank/alerts/{id}/resolve` | resolver |
+| `GET` | `/api/bank/donors/compatible` | query `blood_type` |
+
+- Reglas de stock en la misma transacción que el movimiento.
+- Crear/activar alerta automáticamente cuando el stock quede crítico tras un movimiento (síncrono; sin cron salvo que se documente).
 
 ### FE
 
-- Panel banco/admin: cola de solicitudes + detalle de alertas.
-- Indicador visual de alerta crítica para el tipo en bajo stock.
+1. Banco: cola de solicitudes + detalle + acción asignar.
+2. Banco: listado/indicador de alertas críticas (home + donors compatibles).
+3. Admin: visibilidad de solicitudes/alertas (lectura) si encaja en el shell; si no, banco primero.
 
 ### Config
 
-1. Re-provision con seed de demo CU2/CU3.
-2. Si hay job/cron de alertas: documentar en Compose/entrypoint o script; si es síncrono al actualizar inventario, `Sin cambios` de scheduler.
-3. Actualizar puertos/URLs de demo en docs si se añaden páginas nuevas.
+1. Re-provision solo si cambia seed.
+2. Scheduler: `Sin cambios` si las alertas son síncronas al inventario.
+3. Actualizar docs de demo CU2/CU3 (pasos con cuentas seed).
 
 ### Listo cuando
 
 - [ ] Cola de solicitudes operable (FE + BE + DB)
-- [ ] Asignar unidades deja trazabilidad (movimiento + estado unidad)
+- [ ] Asignar unidades deja trazabilidad (movimiento + estado unidad + request)
 - [ ] Alerta crítica visible para el tipo en stock bajo
+- [ ] Listado de donantes compatibles usable en banco
 
-**Desbloquea:** CU2 y CU3 (sin push aún).
+**Desbloquea:** CU2 y CU3 (sin push/notificaciones in-app aún).
 
 ---
 
 ## P8 — Notificaciones, auditoría y políticas
 
-**Objetivo:** cerrar paneles admin/donante con config de negocio y avisos.
+**Objetivo:** cerrar paneles admin/donante/banco con config de negocio, avisos in-app y rastro de auditoría.
 
 ### DB
 
-**`donation_policies`**, **`notifications`**, **`audit_log`** (append-only).
+**Ya existe:** `donation_policies`, `notifications`, `audit_log` (+ seed de umbrales globales, 1 notificación demo).
 
-Dejar de hardcodear umbrales en código de app.
+Trabajo DB típico: ampliar seed de notificaciones/auditoría si hace falta para demos; no rediseñar tablas.
 
 ### BE
 
-- Emitir notificación en: alta, cita próxima, alerta crítica, solicitud atendida.
-- Admin: CRUD/listado de políticas; consulta de auditoría.
-- Marcar notificación leída.
+1. **Políticas:** leer umbrales (`inventory_*`, `donor_interval_days`) desde `donation_policies`; dejar de hardcodear en servicios de inventario/elegibilidad.
+2. **Notificaciones:** emitir en alta relevante, cita próxima (si se dispara), alerta crítica → donantes compatibles, solicitud atendida.
+3. Endpoints:
+
+| Método | Ruta | Rol |
+|--------|------|-----|
+| `GET` | `/api/notifications` | usuario autenticado (propias) |
+| `POST` | `/api/notifications/{id}/read` | marcar leída |
+| `GET`/`PUT` | `/api/admin/policies` | admin |
+| `GET` | `/api/admin/audit-log` | admin |
+
+4. Escribir `audit_log` en acciones admin sensibles (activar usuario, cambiar políticas, asignar solicitud, etc.).
 
 ### FE
 
-- Centro de notificaciones (donante/banco).
-- Panel admin: políticas + auditoría (UI mínima usable).
+1. Centro de notificaciones (donante y, si aplica, banco): campana/listado + marcar leída.
+2. Admin: UI mínima de políticas + consulta de auditoría.
+3. Inventario/alertas deben reflejar umbrales leídos de políticas (mensaje o tooltip opcional).
 
 ### Config
 
 1. Variables de políticas por defecto solo como seed (no secretos en Compose).
 2. Retención/volumen de logs de app: revisar `Logger` y volúmenes Docker si hace falta persistir.
-3. Documentar endpoints admin y cómo cargar seed de políticas.
+3. Documentar endpoints admin y cómo inspeccionar seed de políticas.
 
 ### Listo cuando
 
@@ -409,43 +609,46 @@ Dejar de hardcodear umbrales en código de app.
 - [ ] Alerta crítica genera notificaciones a donantes compatibles
 - [ ] Acciones admin relevantes quedan en `audit_log`
 - [ ] UI de notificaciones usable en al menos un rol
+- [ ] Admin puede ver/editar políticas básicas
 
-**Desbloquea:** paneles + CU2 con aviso a donantes.
+**Desbloquea:** CU2 completo (aviso a donantes) + panel admin de gobierno.
 
 ---
 
 ## P9 — Logros (gamificación)
 
-**Objetivo:** insignias del panel donante.
+**Objetivo:** insignias del panel donante al completar donaciones.
 
 ### DB
 
-**`achievements`** (catálogo) + **`donor_achievements`** (`user_id`, `achievement_id`, `progress`, `unlocked_at`).
+**Ya existe:** `achievements`, `donor_achievements` (+ catálogo `first_donation`, `hero_5`, `legend_10` y desbloqueo demo).
 
-Evaluar al completar `donations`.
-
-**Seed:** catálogo básico (1ª donación, N donaciones, etc.).
+Solo ajustar seed/criterios si la evaluación en BE lo requiere.
 
 ### BE
 
-- Evaluación al completar donación; endpoint(s) de logros del donante autenticado.
+1. Evaluar logros al completar donación (enganche en el servicio de P5).
+2. `GET /api/donor/achievements` — catálogo + progreso/desbloqueos del donante autenticado.
+3. Idempotencia: no duplicar `donor_achievements` por el mismo `achievement_id`.
 
 ### FE
 
-- Sección “Logros” en panel donante (lista/insignias).
+1. Sección “Logros” en panel donante (home o subpágina): insignias bloqueadas/desbloqueadas + progreso.
+2. Cablear al API; quitar mock.
 
 ### Config
 
-1. Re-provision con catálogo.
-2. `Sin cambios` de servicios salvo assets estáticos nuevos en `frontend/`.
-3. Nota breve en docs de demo: cómo desbloquear el primer logro con el seed.
+1. Re-provision solo si cambia catálogo.
+2. `Sin cambios` de servicios.
+3. Nota breve en docs: cómo desbloquear el primer logro con el flujo demo (completar cita).
 
 ### Listo cuando
 
 - [ ] Seed con catálogo básico
 - [ ] Completar donaciones desbloquea al menos un logro visible en API y FE
+- [ ] Donante demo ve su logro `first_donation` del seed
 
-**Desbloquea:** sección “Logros” del panel donante.
+**Desbloquea:** sección “Logros” del panel donante (README).
 
 ---
 
@@ -455,15 +658,20 @@ Evaluar al completar `donations`.
 |------|---------|-------|----|----|----|--------|
 | ✅ P0 | Cuentas + login/registro | CU0, CU1 (cuenta) | ✅ | ✅ | ✅ | ✅ |
 | ✅ P0b | Confirmación de correo | CU1 (cuenta verificada) | ✅ | ✅ | ✅ | ✅ |
-| ✅ P0c | Sesión servidor + auth guard `/panel/*` | CU0 (sesión) | ✅ | ✅ | ✅ | ✅ |
-| P1 | Perfil donante + centros | CU1 (perfil) | ☐ | ☐ | ☐ | ☐ |
-| P2 | Citas + donaciones | CU1 (agenda/historial) | ☐ | ☐ | ☐ | ☐ |
-| P3 | Inventario + movimientos | Base CU2/CU3 | ☐ | ☐ | ☐ | ☐ |
-| P4 | Solicitudes + alertas | CU2, CU3 | ☐ | ☐ | ☐ | ☐ |
-| P5 | Notificaciones + políticas + auditoría | CU2 completo + admin | ☐ | ☐ | ☐ | ☐ |
-| P6 | Logros | Panel donante | ☐ | ☐ | ☐ | ☐ |
+| ✅ P0c | Sesión servidor + auth guard `/dashboard/*` | CU0 (sesión) | ✅ | ✅ | ✅ | ✅ |
+| ✅ P1 | Shell UI donante (`/dashboard/donor/**`) | CU1 (superficie) | ✅ | ✅ | ✅ | ✅ |
+| ✅ P2 | Shell UI banco (`/dashboard/bank/**`) | Panel banco (superficie) | ✅ | ✅ | ✅ | ✅ |
+| ✅ P3 | Shell UI admin (`/dashboard/admin/**`) | Panel admin (superficie) | ✅ | ✅ | ✅ | ✅ |
+| P4 | Perfil donante + centros (API + FE) | CU1 (perfil) | ☐ | ☐ | ☐ | ☐ |
+| P5 | Citas + donaciones | CU1 (agenda/historial) | ☐ | ☐ | ☐ | ☐ |
+| P6 | Inventario + movimientos | Base CU2/CU3 | ☐ | ☐ | ☐ | ☐ |
+| P7 | Solicitudes + alertas + compatibles | CU2, CU3 | ☐ | ☐ | ☐ | ☐ |
+| P8 | Notificaciones + políticas + auditoría | CU2 completo + admin | ☐ | ☐ | ☐ | ☐ |
+| P9 | Logros / gamificación | Panel donante (logros) | ☐ | ☐ | ☐ | ☐ |
 
 Al cerrar una fase, marcar ✅ en el título y en las celdas de pilares del mapa.
+
+**Lectura del mapa:** P1–P3 son FE-first (DB/BE a menudo `Sin cambios`). P4–P9 asumen esquema ya provisionado y concentran BE+FE; DB solo si hay ajuste de seed/constraints.
 
 ---
 
@@ -471,43 +679,48 @@ Al cerrar una fase, marcar ✅ en el título y en las celdas de pilares del mapa
 
 ```
 users 1──* email_verification_tokens
-users 1──1 donor_profiles
-users 1──1 bank_profiles ──> donation_centers
+users 1──0..1 donor_profiles
+users 1──0..1 bank_profiles ──> donation_centers
 donation_centers 1──* appointments *──1 users(donor)
 appointments 0..1──1 donations
 donations 1──* blood_units
 donation_centers 1──* inventory
 donation_centers 1──* inventory_movements
 medical_institutions 1──* requests *──0..1 donation_centers
-alerts → centros (+ solicitud opcional)
+alerts → donation_centers (+ request opcional)
 notifications → users
 audit_log → users
 achievements ←→ donor_achievements → users
-donation_policies (global o por center)
+donation_policies (global si center_id NULL, o por center)
 ```
 
-Orden en `database/01_init.sql`: DROP hijos → padres; CREATE padres → hijos.
+Orden en `database/01_init.sql`: DROP hijos → padres; CREATE padres → hijos.  
+Detalle de columnas: [database/ERD.md](./database/ERD.md).
 
 ---
 
 ## Reglas al implementar
 
-1. MySQL solo en `database/` (`01_init.sql`, `02_seed.sql`, futuros `03_*.sql`).
+1. MySQL solo en `database/` (`01_init.sql`, `02_seed.sql`, futuros `03_*.sql` solo si hace falta migraciones incrementales).
 2. `DROP`/`CREATE` + seeds idempotentes (`INSERT IGNORE` / upserts) para `provision.sh`.
 3. InnoDB, utf8mb4, FKs en tablas nuevas.
 4. Estados e identificadores en inglés (VARCHAR + CHECK o validación en app) = mismos valores en API JSON. Textos/UI al usuario pueden seguir en español.
 5. No persistir derivados de UI (color de stock, “vidas salvadas” si es fórmula).
 6. PII/médicos: no loguear en claro; solo hash de passwords y de tokens de verificación.
 7. Inventario siempre en transacción con su movimiento.
-8. Seed de demo: 3 roles + 1 centro + stock mixto (1 tipo crítico) + 1 solicitud pendiente cuando existan esas tablas.
+8. Seed de demo: 3 roles + 1 centro + stock mixto (1 tipo crítico) + 1 solicitud pendiente + políticas + logros — mantener coherente al tocar `02_seed.sql`.
 9. Misma fase = mismos nombres en SQL, repositorio, JSON y (si aplica) labels FE.
 10. Cada fase cierra con los 4 pilares revisados; Config incluye docs de cómo probar en Docker.
+11. Rutas internas FE: `/dashboard/{donor,bank,admin}/…`. No reintroducir `/panel/`.
+12. Endpoints de dominio protegidos con `AuthMiddleware` + chequeo de rol.
 
 ---
 
 ## Fuera de alcance (no implementar en estas fases)
 
 - HL7/FHIR, OAuth de terceros, compliance HIPAA/GDPR completo, sync realtime (usar polling REST).
+- App móvil nativa, push FCM/APNs (solo notificaciones in-app en P8).
+- Portal completo para hospitales (las solicitudes pueden crearse por seed/admin/banco en demo).
 
 ---
 
@@ -518,8 +731,10 @@ Orden en `database/01_init.sql`: DROP hijos → padres; CREATE padres → hijos.
 | Plan (este archivo) | `plan.md` |
 | Funcionalidades producto | `README.md` |
 | Sistema de diseño | `DESIGN.md` |
-| FE auth en vivo | `frontend/pages/{login,register}/` |
-| FE confirmación (P0b) | `frontend/pages/confirm-email/` |
-| DB / provision | `database/README.md` |
+| ERD | `database/ERD.md` |
+| FE auth | `frontend/pages/{login,register,confirm-email}/` |
+| FE dashboards | `frontend/pages/dashboard/{donor,bank,admin}/` |
+| Auth guard / API client | `frontend/js/auth-guard.js`, `frontend/js/api.js` |
+| DB / provision | `database/README.md`, `database/01_init.sql`, `database/02_seed.sql` |
 | Docker | `DOCKER.md`, `README.md` (sección Cómo Empezar) |
 | Compose / Nginx / Apache | `docker-compose.yml`, `nginx-frontend.conf`, `apache-api.conf` |

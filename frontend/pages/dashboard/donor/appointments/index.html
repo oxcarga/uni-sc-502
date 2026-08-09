@@ -72,10 +72,11 @@
     </aside>
 
     <div class="app-main">
-            <header class="topbar">
+      <header class="topbar">
         <span class="topbar-title">Hola, <span id="dashboard-greeting-name">…</span></span>
         <div class="d-flex align-items-center gap-3">
-          <button class="icon-btn" aria-label="Notificaciones">
+          <button class="icon-btn" type="button" disabled
+            aria-label="Notificaciones (próximamente)" title="Notificaciones — Próximamente">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               aria-hidden="true">
               <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -83,16 +84,12 @@
             </svg>
           </button>
           <div class="dropdown">
-            <button
-              type="button"
-              id="dashboard-user-initials"
+            <button type="button" id="dashboard-user-initials"
               class="avatar-initials avatar-initials-lg border-0 user-menu-toggle"
-              style="background-color: #00685f"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-              aria-label="Menú de usuario"
-            >…</button>
-            <div class="dropdown-menu dropdown-menu-end user-menu shadow border-0 p-0" aria-labelledby="dashboard-user-initials">
+              style="background-color: #00685f" data-bs-toggle="dropdown" aria-expanded="false"
+              aria-label="Menú de usuario">…</button>
+            <div class="dropdown-menu dropdown-menu-end user-menu shadow border-0 p-0"
+              aria-labelledby="dashboard-user-initials">
               <div class="user-menu__header">
                 <div id="dashboard-user-name" class="fw-semibold text-truncate">…</div>
                 <div id="dashboard-user-role" class="text-muted" style="font-size: 0.75rem">…</div>
@@ -109,14 +106,16 @@
       <main class="flex-grow-1" style="padding: 2rem 2.5rem">
         <div class="page-sticky-bar">
           <div>
-            <h1 class="headline fw-bold mb-1" style="font-size: 2rem">
-              Mis citas
-            </h1>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Mis citas</h1>
+              <span class="demo-badge">Demo</span>
+            </div>
             <p class="text-muted mb-0">
-              Consulta, reprograma o cancela tus citas de donación.
+              Listado de demostración. El agendado real se conecta en P5.
             </p>
           </div>
-          <button class="btn btn-primary rounded-3 fw-semibold d-flex align-items-center gap-2">
+          <button type="button" class="btn btn-primary rounded-3 fw-semibold d-flex align-items-center gap-2"
+            disabled title="Disponible cuando exista la API de citas (P5)">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               aria-hidden="true">
               <path d="M12 5v14M5 12h14" />
@@ -132,7 +131,7 @@
                 <div>
                   <span class="card-eyebrow d-block mb-1" id="next-appt">Próxima cita</span>
                   <div class="headline fw-bold" style="font-size: 1.75rem; color: #00685f">
-                    12 Oct, 2023
+                    12 Oct, 2026
                   </div>
                 </div>
                 <span class="icon-tile">
@@ -157,13 +156,15 @@
                   <circle cx="12" cy="12" r="9" />
                   <path d="M12 7v5l3 2" />
                 </svg>
-                09:30 AM
+                09:30 AM · Confirmada
               </p>
               <div class="d-flex gap-2">
-                <button class="btn btn-outline-secondary rounded-3 fw-semibold flex-grow-1">
+                <button type="button" class="btn btn-outline-secondary rounded-3 fw-semibold flex-grow-1" disabled
+                  title="Pendiente de API (P5)">
                   Reprogramar
                 </button>
-                <button class="btn btn-primary rounded-3 fw-semibold flex-grow-1">
+                <button type="button" class="btn btn-primary rounded-3 fw-semibold flex-grow-1" disabled
+                  title="Pendiente de API (P5)">
                   Confirmar
                 </button>
               </div>
@@ -179,7 +180,7 @@
                     <span class="impact-tile__num">1</span>
                     <div>
                       <div class="impact-tile__label">Próximas</div>
-                      <div class="impact-tile__sub">Confirmadas o pendientes</div>
+                      <div class="impact-tile__sub">Demo · no es dato real</div>
                     </div>
                   </div>
                 </div>
@@ -188,7 +189,7 @@
                     <span class="impact-tile__num">3</span>
                     <div>
                       <div class="impact-tile__label">Completadas</div>
-                      <div class="impact-tile__sub">Donaciones realizadas</div>
+                      <div class="impact-tile__sub">Demo · no es dato real</div>
                     </div>
                   </div>
                 </div>
@@ -197,7 +198,7 @@
                     <span class="impact-tile__num">0</span>
                     <div>
                       <div class="impact-tile__label">Canceladas</div>
-                      <div class="impact-tile__sub">En los últimos 12 meses</div>
+                      <div class="impact-tile__sub">Demo · no es dato real</div>
                     </div>
                   </div>
                 </div>
@@ -207,8 +208,9 @@
         </div>
 
         <section class="card p-3" aria-labelledby="appt-history">
-          <div class="d-flex align-items-center justify-content-between mb-3">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
             <h2 class="section-title mb-0" id="appt-history">Historial de citas</h2>
+            <span class="demo-badge">Datos demo · pendiente de API</span>
           </div>
           <div class="table-responsive">
             <table class="table table-borderless align-middle mb-0">
@@ -225,97 +227,53 @@
                 <tr>
                   <td>
                     <div class="fw-semibold">Hospital Regional - Centro de Sangre</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID: #CT-2041</div>
+                    <div class="text-muted" style="font-size: 0.75rem">ID demo: #CT-2041</div>
                   </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">12 Oct 2023</td>
+                  <td class="fw-semibold" style="font-size: 0.875rem">12 Oct 2026</td>
                   <td class="text-muted" style="font-size: 0.875rem">09:30 AM</td>
                   <td><span class="badge-soft badge-soft--teal"><span class="dot"></span>Confirmada</span></td>
                   <td class="text-end">
-                    <button class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Ver</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
+                      title="Pendiente de API (P5)">Ver</button>
                   </td>
                 </tr>
                 <tr>
                   <td>
                     <div class="fw-semibold">Cruz Roja Central</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID: #CT-1988</div>
+                    <div class="text-muted" style="font-size: 0.75rem">ID demo: #CT-1988</div>
                   </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">15 Jul 2023</td>
+                  <td class="fw-semibold" style="font-size: 0.875rem">15 Jul 2026</td>
                   <td class="text-muted" style="font-size: 0.875rem">10:00 AM</td>
                   <td><span class="badge-soft badge-soft--slate"><span class="dot"></span>Completada</span></td>
                   <td class="text-end">
-                    <button class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Ver</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
+                      title="Pendiente de API (P5)">Ver</button>
                   </td>
                 </tr>
                 <tr>
                   <td>
                     <div class="fw-semibold">Clínica del Valle</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID: #CT-1872</div>
+                    <div class="text-muted" style="font-size: 0.75rem">ID demo: #CT-1872</div>
                   </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">02 Abr 2023</td>
+                  <td class="fw-semibold" style="font-size: 0.875rem">02 Abr 2026</td>
                   <td class="text-muted" style="font-size: 0.875rem">08:45 AM</td>
                   <td><span class="badge-soft badge-soft--slate"><span class="dot"></span>Completada</span></td>
                   <td class="text-end">
-                    <button class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Ver</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
+                      title="Pendiente de API (P5)">Ver</button>
                   </td>
                 </tr>
                 <tr>
                   <td>
                     <div class="fw-semibold">Banco de Sangre Regional</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID: #CT-1710</div>
+                    <div class="text-muted" style="font-size: 0.75rem">ID demo: #CT-1710</div>
                   </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">18 Ene 2023</td>
+                  <td class="fw-semibold" style="font-size: 0.875rem">18 Ene 2026</td>
                   <td class="text-muted" style="font-size: 0.875rem">11:15 AM</td>
                   <td><span class="badge-soft badge-soft--slate"><span class="dot"></span>Completada</span></td>
                   <td class="text-end">
-                    <button class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Ver</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="fw-semibold">Hospital Regional - Centro de Sangre</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID: #CT-2041</div>
-                  </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">12 Oct 2023</td>
-                  <td class="text-muted" style="font-size: 0.875rem">09:30 AM</td>
-                  <td><span class="badge-soft badge-soft--teal"><span class="dot"></span>Confirmada</span></td>
-                  <td class="text-end">
-                    <button class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Ver</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="fw-semibold">Cruz Roja Central</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID: #CT-1988</div>
-                  </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">15 Jul 2023</td>
-                  <td class="text-muted" style="font-size: 0.875rem">10:00 AM</td>
-                  <td><span class="badge-soft badge-soft--slate"><span class="dot"></span>Completada</span></td>
-                  <td class="text-end">
-                    <button class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Ver</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="fw-semibold">Clínica del Valle</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID: #CT-1872</div>
-                  </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">02 Abr 2023</td>
-                  <td class="text-muted" style="font-size: 0.875rem">08:45 AM</td>
-                  <td><span class="badge-soft badge-soft--slate"><span class="dot"></span>Completada</span></td>
-                  <td class="text-end">
-                    <button class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Ver</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="fw-semibold">Banco de Sangre Regional</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID: #CT-1710</div>
-                  </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">18 Ene 2023</td>
-                  <td class="text-muted" style="font-size: 0.875rem">11:15 AM</td>
-                  <td><span class="badge-soft badge-soft--slate"><span class="dot"></span>Completada</span></td>
-                  <td class="text-end">
-                    <button class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold">Ver</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
+                      title="Pendiente de API (P5)">Ver</button>
                   </td>
                 </tr>
               </tbody>
@@ -327,7 +285,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9bIOgUxi8T/jzmcgIwJ1j23KP4W96JxA4fzpLDo" crossorigin="anonymous"></script>
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9bIOgUxi8T/jzmcgIwJ1j23KP4W96JxA4fzpLDo"
+    crossorigin="anonymous"></script>
 </body>
 
 </html>

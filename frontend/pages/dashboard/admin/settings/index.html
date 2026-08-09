@@ -4,9 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pulso Solidario — Donantes del Banco</title>
-  <meta name="description"
-    content="Consulta donantes compatibles del centro: tipo de sangre, elegibilidad y contacto." />
+  <title>Pulso Solidario — Configuración (Admin)</title>
+  <meta name="description" content="Configuración y políticas del sistema. Disponible en P8." />
   <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
@@ -16,7 +15,7 @@
   </script>
 </head>
 
-<body class="d-none" data-required-role="bank">
+<body class="d-none" data-required-role="admin">
   <div class="app-shell">
     <aside class="sidebar">
       <div class="d-flex align-items-center gap-2 mb-4 px-1">
@@ -28,12 +27,12 @@
         </span>
         <div>
           <div class="sidebar-brand-name">Pulso Solidario</div>
-          <div class="sidebar-brand-sub">Panel del banco</div>
+          <div class="sidebar-brand-sub">Administración</div>
         </div>
       </div>
 
       <nav class="nav flex-column gap-1" aria-label="Navegación principal">
-        <a class="nav-link" href="/dashboard/bank/">
+        <a class="nav-link" href="/dashboard/admin/">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             aria-hidden="true">
             <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -43,22 +42,14 @@
           </svg>
           Panel
         </a>
-        <a class="nav-link" href="/dashboard/bank/inventory/">
+        <a class="nav-link" href="/dashboard/admin/banks/">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             aria-hidden="true">
-            <path d="M12 3s6 5.5 6 10a6 6 0 0 1-12 0c0-4.5 6-10 6-10Z" />
+            <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6" />
           </svg>
-          Inventario
+          Bancos
         </a>
-        <a class="nav-link" href="/dashboard/bank/appointments/">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            aria-hidden="true">
-            <rect x="3" y="4" width="18" height="18" rx="2" />
-            <path d="M16 2v4M8 2v4M3 10h18" />
-          </svg>
-          Citas
-        </a>
-        <a class="nav-link active" href="/dashboard/bank/donors/" aria-current="page">
+        <a class="nav-link" href="/dashboard/admin/donors/">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             aria-hidden="true">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -67,7 +58,7 @@
           </svg>
           Donantes
         </a>
-        <a class="nav-link mt-2" href="/dashboard/bank/settings/">
+        <a class="nav-link mt-2 active" href="/dashboard/admin/settings/" aria-current="page">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             aria-hidden="true">
             <circle cx="12" cy="12" r="3" />
@@ -75,6 +66,14 @@
               d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.6 15H3.5a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 5.2 8.6l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 5.6V3.5a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 2.79 1.17l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 20.4 9H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
           </svg>
           Configuración
+        </a>
+        <a class="nav-link" href="/dashboard/admin/audit/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+          </svg>
+          Auditoría
         </a>
       </nav>
     </aside>
@@ -94,7 +93,7 @@
           <div class="dropdown">
             <button type="button" id="dashboard-user-initials"
               class="avatar-initials avatar-initials-lg border-0 user-menu-toggle"
-              style="background-color: #b90538" data-bs-toggle="dropdown" aria-expanded="false"
+              style="background-color: #00685f" data-bs-toggle="dropdown" aria-expanded="false"
               aria-label="Menú de usuario">…</button>
             <div class="dropdown-menu dropdown-menu-end user-menu shadow border-0 p-0"
               aria-labelledby="dashboard-user-initials">
@@ -114,86 +113,37 @@
       <main class="flex-grow-1" style="padding: 2rem 2.5rem">
         <div class="mb-4">
           <div class="d-flex align-items-center gap-2 mb-1">
-            <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Donantes</h1>
-            <span class="demo-badge">Demo</span>
+            <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Configuración</h1>
+            <span class="demo-badge">Stub · P8</span>
           </div>
           <p class="text-muted mb-0">
-            Listado de compatibilidad ilustrativo. La búsqueda real llega en P7.
+            Ancla para políticas de donación, umbrales de inventario y preferencias globales.
           </p>
         </div>
 
-        <div class="row g-4 mb-4">
-          <div class="col-lg-4">
-            <section class="coming-soon h-100" aria-labelledby="compat-soon">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <section class="coming-soon h-100" aria-labelledby="policies-stub">
               <span class="demo-badge mb-3">Próximamente</span>
-              <h2 class="coming-soon__title" id="compat-soon">Filtro por compatibilidad</h2>
+              <h2 class="coming-soon__title" id="policies-stub">Políticas de donación</h2>
               <p class="coming-soon__text">
-                Filtrar donantes elegibles según tipo de sangre en falta y políticas (P7/P8).
+                Edición de <code>donation_policies</code>: umbrales saludable/moderado/crítico e intervalos entre donaciones.
               </p>
             </section>
           </div>
-          <div class="col-lg-8">
-            <section class="card p-3 h-100" aria-labelledby="donors-table">
-              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-                <h2 class="section-title mb-0" id="donors-table">Donantes demo</h2>
-                <span class="demo-badge">Pendiente de API</span>
-              </div>
-              <div class="table-responsive">
-                <table class="table table-borderless align-middle mb-0">
-                  <thead>
-                    <tr>
-                      <th scope="col">Donante</th>
-                      <th scope="col">Tipo</th>
-                      <th scope="col">Última donación</th>
-                      <th scope="col">Estado</th>
-                      <th scope="col" class="text-end">Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <div class="fw-semibold">Donante Demo</div>
-                        <div class="text-muted" style="font-size: 0.75rem">donante@test.com</div>
-                      </td>
-                      <td><span class="blood-badge blood-badge--teal">A+</span></td>
-                      <td class="text-muted" style="font-size: 0.875rem">Hace ~90 días</td>
-                      <td><span class="badge-soft badge-soft--green"><span class="dot"></span>Elegible</span></td>
-                      <td class="text-end">
-                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
-                          title="Pendiente de API (P7)">Contactar</button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="fw-semibold">Elena Rodríguez</div>
-                        <div class="text-muted" style="font-size: 0.75rem">ID demo</div>
-                      </td>
-                      <td><span class="blood-badge blood-badge--rose">O-</span></td>
-                      <td class="text-muted" style="font-size: 0.875rem">Hace 45 días</td>
-                      <td><span class="badge-soft badge-soft--green"><span class="dot"></span>Elegible</span></td>
-                      <td class="text-end">
-                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
-                          title="Pendiente de API (P7)">Contactar</button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="fw-semibold">Miguel Ángel Pérez</div>
-                        <div class="text-muted" style="font-size: 0.75rem">ID demo</div>
-                      </td>
-                      <td><span class="blood-badge">O+</span></td>
-                      <td class="text-muted" style="font-size: 0.875rem">Hace 20 días</td>
-                      <td><span class="badge-soft badge-soft--amber"><span class="dot"></span>En espera</span></td>
-                      <td class="text-end">
-                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
-                          title="Pendiente de API (P7)">Contactar</button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+          <div class="col-lg-6">
+            <section class="coming-soon h-100" aria-labelledby="system-stub">
+              <span class="demo-badge mb-3">Próximamente</span>
+              <h2 class="coming-soon__title" id="system-stub">Parámetros del sistema</h2>
+              <p class="coming-soon__text">
+                Configuración operativa global y notificaciones de gobierno (API en P8).
+              </p>
             </section>
           </div>
+        </div>
+
+        <div class="mt-4">
+          <a href="/dashboard/admin/" class="btn btn-outline-secondary rounded-3 fw-semibold">Volver al panel</a>
         </div>
       </main>
     </div>

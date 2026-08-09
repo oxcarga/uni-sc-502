@@ -17,6 +17,7 @@ const userNameEl = document.getElementById('dashboard-user-name');
 const userRoleEl = document.getElementById('dashboard-user-role');
 const userInitialsEl = document.getElementById('dashboard-user-initials');
 const greetingNameEl = document.getElementById('dashboard-greeting-name');
+const homeNameEl = document.getElementById('dashboard-home-name');
 const logoutBtn = document.getElementById('dashboard-logout');
 
 function initialsFromName(firstName = '', lastName = '') {
@@ -54,6 +55,9 @@ try {
     }
     if (greetingNameEl) {
       greetingNameEl.textContent = shortName;
+    }
+    if (homeNameEl) {
+      homeNameEl.textContent = shortName;
     }
     document.body?.classList.remove('d-none');
   }

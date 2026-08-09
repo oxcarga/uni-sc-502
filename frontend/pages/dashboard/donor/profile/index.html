@@ -73,10 +73,11 @@
     </aside>
 
     <div class="app-main">
-            <header class="topbar">
+      <header class="topbar">
         <span class="topbar-title">Hola, <span id="dashboard-greeting-name">…</span></span>
         <div class="d-flex align-items-center gap-3">
-          <button class="icon-btn" aria-label="Notificaciones">
+          <button class="icon-btn" type="button" disabled
+            aria-label="Notificaciones (próximamente)" title="Notificaciones — Próximamente">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               aria-hidden="true">
               <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -84,16 +85,12 @@
             </svg>
           </button>
           <div class="dropdown">
-            <button
-              type="button"
-              id="dashboard-user-initials"
+            <button type="button" id="dashboard-user-initials"
               class="avatar-initials avatar-initials-lg border-0 user-menu-toggle"
-              style="background-color: #00685f"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-              aria-label="Menú de usuario"
-            >…</button>
-            <div class="dropdown-menu dropdown-menu-end user-menu shadow border-0 p-0" aria-labelledby="dashboard-user-initials">
+              style="background-color: #00685f" data-bs-toggle="dropdown" aria-expanded="false"
+              aria-label="Menú de usuario">…</button>
+            <div class="dropdown-menu dropdown-menu-end user-menu shadow border-0 p-0"
+              aria-labelledby="dashboard-user-initials">
               <div class="user-menu__header">
                 <div id="dashboard-user-name" class="fw-semibold text-truncate">…</div>
                 <div id="dashboard-user-role" class="text-muted" style="font-size: 0.75rem">…</div>
@@ -110,11 +107,12 @@
       <main class="flex-grow-1" style="padding: 2rem 2.5rem">
         <div class="page-sticky-bar">
           <div>
-            <h1 class="headline fw-bold mb-1" style="font-size: 2rem">
-              Mi perfil
-            </h1>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Mi perfil</h1>
+              <span class="demo-badge">UI · sin persistir</span>
+            </div>
             <p class="text-muted mb-0">
-              Actualiza tus datos personales, clínicos y preferencias de alertas.
+              Nombre y correo vienen de la sesión. El resto es formulario listo para la API de P4.
             </p>
           </div>
           <button type="submit" form="donor-profile-form"
@@ -128,7 +126,9 @@
           </button>
         </div>
 
-        <div id="profile-status" class="alert d-none mb-4" role="status" aria-live="polite"></div>
+        <div id="profile-status" class="alert alert-info mb-4" role="status" aria-live="polite">
+          Este formulario aún no guarda en el servidor. La API de perfil del donante llega en P4.
+        </div>
 
         <form id="donor-profile-form">
           <div class="row g-4">
@@ -152,7 +152,7 @@
                   <div class="col-md-6">
                     <label class="form-label fw-semibold" for="email">Correo electrónico</label>
                     <input type="email" class="form-control form-control-lg rounded-3" id="email" name="email" required
-                      autocomplete="email" />
+                      autocomplete="email" readonly />
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-semibold" for="phone">Teléfono</label>
@@ -165,12 +165,12 @@
               <section class="card p-3 mb-4" aria-labelledby="donation-data">
                 <h2 class="section-title mb-1" id="donation-data">Datos de donación</h2>
                 <p class="text-muted mb-3" style="font-size: 0.875rem">
-                  Información clínica usada para elegibilidad y coincidencias.
+                  Campos de UI. Se persistirán con <code>donor_profiles</code> en P4.
                 </p>
                 <div class="row g-3">
                   <div class="col-md-4">
                     <label class="form-label fw-semibold" for="bloodType">Tipo de sangre</label>
-                    <select class="form-select form-select-lg rounded-3" id="bloodType" name="bloodType" required>
+                    <select class="form-select form-select-lg rounded-3" id="bloodType" name="bloodType">
                       <option value="">Seleccionar…</option>
                       <option value="O+">O+</option>
                       <option value="O-">O-</option>
@@ -234,7 +234,7 @@
               <section class="card p-3" aria-labelledby="security-data">
                 <h2 class="section-title mb-1" id="security-data">Seguridad</h2>
                 <p class="text-muted mb-3" style="font-size: 0.875rem">
-                  Cambia tu contraseña. Déjalo vacío si no quieres modificarla.
+                  Cambio de contraseña — UI lista; persistencia en fases posteriores.
                 </p>
                 <div class="row g-3">
                   <div class="col-md-6">
@@ -265,52 +265,23 @@
                 </div>
                 <div class="d-flex flex-wrap gap-2">
                   <span id="profile-blood-badge" class="badge-soft badge-soft--teal">Tipo: —</span>
-                  <span class="badge-soft badge-soft--green">Elegible</span>
+                  <span class="badge-soft badge-soft--slate">Elegibilidad · próximamente</span>
                 </div>
               </section>
 
-              <section class="card p-3 mb-4" aria-labelledby="alert-prefs">
-                <h2 class="section-title mb-1" id="alert-prefs">Alertas y notificaciones</h2>
-                <p class="text-muted mb-3" style="font-size: 0.875rem">
-                  Elige qué avisos quieres recibir.
+              <section class="coming-soon mb-4" aria-labelledby="alert-prefs">
+                <span class="demo-badge mb-3">Próximamente</span>
+                <h2 class="coming-soon__title" id="alert-prefs">Alertas y notificaciones</h2>
+                <p class="coming-soon__text">
+                  Preferencias de avisos por cercanía, citas y tipo de sangre (P8).
                 </p>
-                <div class="form-check form-switch mb-3">
-                  <input class="form-check-input" type="checkbox" role="switch" id="notifyNearby" name="notifyNearby"
-                    checked />
-                  <label class="form-check-label fw-semibold" for="notifyNearby">
-                    Alertas por cercanía
-                  </label>
-                  <div class="text-muted" style="font-size: 0.75rem">
-                    Escasez crítica cerca de tu ubicación.
-                  </div>
-                </div>
-                <div class="form-check form-switch mb-3">
-                  <input class="form-check-input" type="checkbox" role="switch" id="notifyAppointments"
-                    name="notifyAppointments" checked />
-                  <label class="form-check-label fw-semibold" for="notifyAppointments">
-                    Recordatorios de citas
-                  </label>
-                  <div class="text-muted" style="font-size: 0.75rem">
-                    Avisos antes de tu próxima donación.
-                  </div>
-                </div>
-                <div class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" role="switch" id="notifyBloodMatch"
-                    name="notifyBloodMatch" checked />
-                  <label class="form-check-label fw-semibold" for="notifyBloodMatch">
-                    Coincidencia de tipo de sangre
-                  </label>
-                  <div class="text-muted" style="font-size: 0.75rem">
-                    Cuando tu tipo sea especialmente necesario.
-                  </div>
-                </div>
               </section>
 
               <section class="card p-3 achieve-card" aria-labelledby="profile-tip">
                 <h2 class="section-title mb-2" id="profile-tip">Consejo</h2>
                 <p class="mb-0" style="font-size: 0.875rem; color: #1f4d47">
-                  Completar tu ubicación y tipo de sangre mejora las alertas
-                  relevantes y acelera el agendado de citas.
+                  Completar ubicación y tipo de sangre mejorará las alertas cuando
+                  exista la API de perfil y notificaciones.
                 </p>
               </section>
             </div>
@@ -321,7 +292,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9bIOgUxi8T/jzmcgIwJ1j23KP4W96JxA4fzpLDo" crossorigin="anonymous"></script>
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9bIOgUxi8T/jzmcgIwJ1j23KP4W96JxA4fzpLDo"
+    crossorigin="anonymous"></script>
 </body>
 
 </html>
