@@ -51,12 +51,12 @@ Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./
 |------|-----------|
 | Auth (P0–P0c) | ✅ Cerrado: registro, confirmación email, sesión servidor, auth-guard |
 | Esquema MySQL | ✅ Tablas de dominio ya en `01_init.sql` + seed demo en `02_seed.sql` (centros, perfiles, citas, inventario, solicitudes, alertas, políticas, logros, notificaciones) |
-| BE dominio | ✅ Perfil donante + centros (P4); faltan citas/inventario/etc. (P5+) |
-| FE paneles | ✅ Shells P1–P3 + cableado P4 (perfil/centros); faltan APIs P5+ |
+| BE dominio | ✅ Perfil/centros (P4) + citas/donaciones (P5); faltan inventario/solicitudes (P6+) |
+| FE paneles | ✅ Shells P1–P3 + P4/P5 cableados; faltan inventario/solicitudes (P6+) |
 
-**Implicación:** desde P5, el pilar DB casi siempre es *verificar / ajustar seed* (no inventar el esquema desde cero). El trabajo duro es **BE + FE**.
+**Implicación:** desde P6, el pilar DB casi siempre es *verificar / ajustar seed* (no inventar el esquema desde cero). El trabajo duro es **BE + FE**.
 
-La siguiente fase a implementar es **P5**.
+La siguiente fase a implementar es **P6**.
 
 ---
 
@@ -410,21 +410,19 @@ Sin cambios de dominio. Opcional menor: endpoint admin de listado de usuarios pu
 
 ---
 
-## P5 — Citas y donaciones
+## ✅ P5 — Citas y donaciones
 
 **Objetivo:** agendar donaciones, gestionar estados y materializar historial al completar.
 
 ### DB
 
-**Ya existe:** `appointments`, `donations`, `blood_units` (+ seed con citas en varios estados y 1 donación).
+**Sin cambios de esquema.** `appointments`, `donations`, `blood_units` + seed (citas en varios estados y ≥1 donación).
 
-Reglas de negocio a respetar (app + transacciones SQL):
+Reglas aplicadas en app + transacción SQL:
 
-1. Al completar cita (`status = completed`) → crear `donations` (+ `blood_units` si aplica) y actualizar `donor_profiles.last_donation_at`.
-2. Elegibilidad: aplicar `donor_interval_days` de políticas si ya se lee; si no, regla simple hardcodeada hasta P8.
-3. `donations.appointment_id` UNIQUE cuando no es NULL.
-
-**Seed:** mantener citas `pending`/`confirmed`/`completed` y ≥1 donación. Ajustar solo si el flujo demo se rompe.
+1. Al completar cita → `donations` + `blood_units` + `donor_profiles.last_donation_at` (y `eligible = 0`).
+2. Intervalo: `donation_policies.donor_interval_days` (default 56).
+3. `donations.appointment_id` UNIQUE respetado.
 
 ### BE
 
@@ -432,33 +430,29 @@ Reglas de negocio a respetar (app + transacciones SQL):
 |--------|------|-----|
 | `GET` | `/api/donor/appointments` | donor (propias) |
 | `POST` | `/api/donor/appointments` | donor (agendar) |
-| `PATCH` | `/api/donor/appointments/{id}` | donor (cancelar propia si permitido) |
-| `GET` | `/api/bank/appointments` | bank (citas de su `center_id`) |
-| `POST` | `/api/bank/appointments/{id}/complete` | bank/admin → materializa donación |
+| `PATCH` | `/api/donor/appointments/{id}` | donor (cancelar) |
+| `GET` | `/api/bank/appointments` | bank (su centro) |
+| `POST` | `/api/bank/appointments/{id}/complete` | bank/admin |
 | `GET` | `/api/donor/donations` | donor (historial) |
-
-- Validar capacidad/horario del centro de forma básica.
-- Completar cita en transacción: appointment + donation + blood_unit + `last_donation_at`.
 
 ### FE
 
-1. Panel donante `appointments/`: listar, agendar (centro + fecha/hora), cancelar.
-2. Historial de donaciones en home o subsección (leer API).
-3. Panel banco `appointments/`: listado del centro + acción “Completar”.
-4. Quitar mocks de citas donde ya haya API.
+1. `donor/appointments/`: listar, agendar (modal), cancelar + historial de donaciones.
+2. Home donante: próxima cita desde API.
+3. `bank/appointments/`: listado del centro + Completar.
+4. Mocks de citas retirados donde hay API.
 
 ### Config
 
-1. Re-provision solo si cambia esquema/seed.
-2. Documentar flujo demo: donante agenda → banco completa → aparece en historial.
-3. Timeouts/body size: `Sin cambios` salvo subida de certificados (fuera de alcance).
+1. **Sin cambios** de volúmenes.
+2. Flujo demo documentado en `database/README.md` / `backend/README.md`.
 
 ### Listo cuando
 
-- [ ] Donante agenda cita (FE → BE → DB)
-- [ ] Completar cita crea `donations` (y unidad) y actualiza perfil
-- [ ] Historial visible para el donante
-- [ ] Seed reproducible en Docker
+- [x] Donante agenda cita (FE → BE → DB)
+- [x] Completar cita crea `donations` (y unidad) y actualiza perfil
+- [x] Historial visible para el donante
+- [x] Seed reproducible en Docker
 
 **Desbloquea:** agenda + historial (CU1 citas).
 
@@ -663,7 +657,7 @@ Solo ajustar seed/criterios si la evaluación en BE lo requiere.
 | ✅ P2 | Shell UI banco (`/dashboard/bank/**`) | Panel banco (superficie) | ✅ | ✅ | ✅ | ✅ |
 | ✅ P3 | Shell UI admin (`/dashboard/admin/**`) | Panel admin (superficie) | ✅ | ✅ | ✅ | ✅ |
 | ✅ P4 | Perfil donante + centros (API + FE) | CU1 (perfil) | ✅ | ✅ | ✅ | ✅ |
-| P5 | Citas + donaciones | CU1 (agenda/historial) | ☐ | ☐ | ☐ | ☐ |
+| ✅ P5 | Citas + donaciones | CU1 (agenda/historial) | ✅ | ✅ | ✅ | ✅ |
 | P6 | Inventario + movimientos | Base CU2/CU3 | ☐ | ☐ | ☐ | ☐ |
 | P7 | Solicitudes + alertas + compatibles | CU2, CU3 | ☐ | ☐ | ☐ | ☐ |
 | P8 | Notificaciones + políticas + auditoría | CU2 completo + admin | ☐ | ☐ | ☐ | ☐ |

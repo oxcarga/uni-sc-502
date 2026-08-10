@@ -328,6 +328,19 @@ Con Slim, las rutas no dependen de archivos `.php` individuales. Prefijo: `/api/
 
 Escritura de centros (crear/editar) queda aplazada.
 
+### Citas y donaciones (P5)
+
+| Método | Ruta | Notas |
+|--------|------|-------|
+| `GET` | `/donor/appointments` | Citas del donante autenticado |
+| `POST` | `/donor/appointments` | Body: `center_id`, `scheduled_at`, `notes?`. Valida cupo, horario, intervalo y 1 cita abierta |
+| `PATCH` | `/donor/appointments/{id}` | Solo `{ "status": "cancelled" }` en pendientes/confirmadas propias |
+| `GET` | `/donor/donations` | Historial de donaciones |
+| `GET` | `/bank/appointments` | Citas del `center_id` del banco (`bank_profiles`) |
+| `POST` | `/bank/appointments/{id}/complete` | Transacción: cita → `donations` + `blood_units` + `last_donation_at` |
+
+**Flujo demo:** donante agenda → banco completa → aparece en `GET /donor/donations`.
+
 ### Otras rutas (plantilla / legado)
 
 | Ruta Slim | URL | Método |

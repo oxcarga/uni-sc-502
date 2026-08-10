@@ -198,6 +198,8 @@ h1, h2, h3, h4, h5, h6,
 
 /* --- Topbar -------------------------------------------------------------- */
 .topbar {
+  position: relative;
+  z-index: 40; /* por encima de .page-sticky-bar (30) para que el menú de usuario se vea */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -772,6 +774,7 @@ h1, h2, h3, h4, h5, h6,
   border-radius: 0.875rem;
   padding: 0.875rem 1rem;
   height: 100%;
+  min-width: 0;
 }
 .impact-tile--rose { border-left-color: #b90538; }
 .impact-tile--slate { border-left-color: #545f73; }
@@ -780,9 +783,15 @@ h1, h2, h3, h4, h5, h6,
   font-size: 1.75rem;
   font-weight: 800;
   color: #00685f;
+  flex-shrink: 0;
+  line-height: 1;
 }
 .impact-tile--rose .impact-tile__num { color: #b90538; }
-.impact-tile--slate .impact-tile__num { color: #545f73; font-size: 1.25rem; }
+.impact-tile--slate .impact-tile__num { color: #545f73; }
+.impact-tile__text {
+  min-width: 0;
+  flex: 1 1 auto;
+}
 .impact-tile__label { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #3d4947; }
 .impact-tile__sub { font-size: 0.75rem; color: #6d7a77; }
 
