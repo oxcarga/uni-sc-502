@@ -12,7 +12,8 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
   <link rel="stylesheet" href="../assets/css/custom.css" />
   <script type="module">
-    import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`./home.js?t=${Date.now()}`);
   </script>
 </head>
 
@@ -119,7 +120,7 @@
               <span class="demo-badge">Demo</span>
             </div>
             <p class="text-muted mb-0">
-              Resumen operativo. Inventario y citas reales se cablean en P5–P6.
+              Resumen operativo con inventario y citas del centro.
             </p>
           </div>
           <div class="d-flex gap-2 flex-wrap">
@@ -133,58 +134,18 @@
         </div>
 
         <div class="d-flex align-items-center gap-2 mb-2">
-          <h2 class="section-title mb-0">Inventario por tipo</h2>
-          <span class="demo-badge">Semáforo mock</span>
+          <h2 class="section-title mb-0">Inventario (prioridad)</h2>
+          <span class="demo-badge" id="home-inv-badge">—</span>
         </div>
         <div class="stock-legend" aria-label="Umbrales de inventario">
           <span class="stock-legend__item"><span class="stock-legend__swatch stock-legend__swatch--ok"></span>Saludable &gt;100</span>
           <span class="stock-legend__item"><span class="stock-legend__swatch stock-legend__swatch--warn"></span>Moderado 50–100</span>
           <span class="stock-legend__item"><span class="stock-legend__swatch stock-legend__swatch--crit"></span>Crítico &lt;50</span>
-          <span class="text-muted">Valores alineados al seed · API en P6/P8</span>
         </div>
 
-        <div class="row g-3 mb-4">
-          <div class="col-sm-6 col-xl-3">
-            <div class="inv-card">
-              <div class="d-flex align-items-start justify-content-between">
-                <span class="inv-card__type">O+</span>
-              </div>
-              <div class="inv-bar"><span style="width: 80%"></span></div>
-              <span class="inv-card__count">120 Unidades</span>
-              <span class="inv-card__status inv-status--ok">(Saludable)</span>
-            </div>
-          </div>
-          <div class="col-sm-6 col-xl-3">
-            <div class="inv-card inv-card--critical">
-              <div class="d-flex align-items-start justify-content-between">
-                <span class="inv-card__type">O-</span>
-                <span class="pulse-dot" aria-hidden="true"></span>
-              </div>
-              <div class="inv-bar"><span style="width: 19%"></span></div>
-              <span class="inv-card__count">28 Unidades</span>
-              <span class="inv-card__status inv-status--crit">(Crítico)</span>
-            </div>
-          </div>
-          <div class="col-sm-6 col-xl-3">
-            <div class="inv-card inv-card--warn">
-              <div class="d-flex align-items-start justify-content-between">
-                <span class="inv-card__type">A+</span>
-              </div>
-              <div class="inv-bar"><span style="width: 63%"></span></div>
-              <span class="inv-card__count">95 Unidades</span>
-              <span class="inv-card__status inv-status--warn">(Moderado)</span>
-            </div>
-          </div>
-          <div class="col-sm-6 col-xl-3">
-            <div class="inv-card inv-card--critical">
-              <div class="d-flex align-items-start justify-content-between">
-                <span class="inv-card__type">AB-</span>
-                <span class="pulse-dot" aria-hidden="true"></span>
-              </div>
-              <div class="inv-bar"><span style="width: 27%"></span></div>
-              <span class="inv-card__count">40 Unidades</span>
-              <span class="inv-card__status inv-status--crit">(Crítico)</span>
-            </div>
+        <div class="row g-3 mb-4" id="home-inventory-grid">
+          <div class="col-12">
+            <p class="text-muted mb-0">Cargando inventario…</p>
           </div>
         </div>
 
@@ -201,18 +162,13 @@
           <div class="col-lg-4">
             <section class="card shortage-card h-100 p-3" aria-labelledby="alerts-demo">
               <div class="d-flex align-items-center justify-content-between mb-2">
-                <h2 class="shortage-title mb-0" id="alerts-demo">Alertas</h2>
-                <span class="demo-badge">Demo</span>
+                <h2 class="shortage-title mb-0" id="alerts-demo">Stock crítico</h2>
               </div>
               <p class="text-muted mb-3" style="font-size: 0.875rem">
-                Mock basado en el seed (O- crítico). Alertas reales en P7/P8.
+                Tipos bajo umbral. Alertas push / email llegan en P7–P8.
               </p>
-              <div class="shortage-row mb-3">
-                <div class="shortage-info">
-                  <div class="name">O- Negativo</div>
-                  <div class="place">28 unidades · umbral &lt;50</div>
-                </div>
-                <span class="priority-tag">Crítico</span>
+              <div id="home-critical-list">
+                <p class="text-muted mb-0" style="font-size: 0.875rem">Cargando…</p>
               </div>
               <button type="button" class="btn btn-primary rounded-3 fw-semibold w-100" disabled
                 title="Disponible en P7/P8">
@@ -226,7 +182,7 @@
               <div class="d-flex flex-column gap-2">
                 <a class="shortcut-link" href="/dashboard/bank/inventory/">
                   <span class="shortcut-link__label">Inventario completo</span>
-                  <span class="shortcut-link__hint">8 tipos · semáforo</span>
+                  <span class="shortcut-link__hint">8 tipos · movimientos</span>
                 </a>
                 <a class="shortcut-link" href="/dashboard/bank/donors/">
                   <span class="shortcut-link__label">Donantes compatibles</span>
@@ -245,38 +201,23 @@
           <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
             <h2 class="section-title mb-0" id="recent-appts">Citas recientes</h2>
             <div class="d-flex align-items-center gap-2">
-              <span class="demo-badge">Demo</span>
+              <span class="demo-badge" id="home-appt-badge">—</span>
               <a href="/dashboard/bank/appointments/" class="fw-semibold" style="font-size: 0.875rem">Ver todas</a>
             </div>
           </div>
           <div class="table-responsive">
-            <table class="table table-borderless align-middle mb-0">
+            <table class="table table-borderless align-middle mb-0" id="home-appointments-table">
               <thead>
                 <tr>
                   <th scope="col">Donante</th>
                   <th scope="col">Tipo</th>
-                  <th scope="col">Hora</th>
+                  <th scope="col">Fecha</th>
                   <th scope="col">Estado</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td class="fw-semibold">Miguel Ángel Pérez</td>
-                  <td><span class="blood-badge blood-badge--teal">O+</span></td>
-                  <td class="text-muted" style="font-size: 0.875rem">10:30 AM</td>
-                  <td><span class="badge-soft badge-soft--teal"><span class="dot"></span>Confirmada</span></td>
-                </tr>
-                <tr>
-                  <td class="fw-semibold">Elena Rodríguez</td>
-                  <td><span class="blood-badge blood-badge--rose">A-</span></td>
-                  <td class="text-muted" style="font-size: 0.875rem">11:15 AM</td>
-                  <td><span class="badge-soft badge-soft--amber"><span class="dot"></span>Pendiente</span></td>
-                </tr>
-                <tr>
-                  <td class="fw-semibold">Juan Sánchez</td>
-                  <td><span class="blood-badge">B+</span></td>
-                  <td class="text-muted" style="font-size: 0.875rem">09:00 AM</td>
-                  <td><span class="badge-soft badge-soft--slate"><span class="dot"></span>Completada</span></td>
+                  <td colspan="4" class="text-muted text-center py-3">Cargando citas…</td>
                 </tr>
               </tbody>
             </table>

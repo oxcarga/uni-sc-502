@@ -114,6 +114,21 @@ export const bankApi = {
     apiFetch(`/bank/appointments/${id}/complete`, {
       method: 'POST',
     }),
+  getInventory: () => apiFetch('/bank/inventory'),
+  listInventoryMovements: (limit = 50) =>
+    apiFetch(`/bank/inventory/movements?limit=${encodeURIComponent(String(limit))}`),
+  createInventoryReceipt: (data) =>
+    apiFetch('/bank/inventory/receipts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
+  createInventoryAdjustment: (data) =>
+    apiFetch('/bank/inventory/adjustments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
 };
 
 export const centersApi = {

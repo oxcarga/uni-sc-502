@@ -154,7 +154,7 @@ tableBody?.addEventListener('click', async (event) => {
   btn.disabled = true;
   try {
     await bankApi.completeAppointment(id);
-    showStatus('Donación registrada. La cita quedó completada.', 'success');
+    showStatus('Donación registrada e inventario actualizado.', 'success');
     await loadAppointments();
   } catch (error) {
     showStatus(error?.message || 'No se pudo completar la cita.', 'danger');

@@ -7,6 +7,7 @@ use App\Controllers\AppointmentController;
 use App\Controllers\AuthController;
 use App\Controllers\CenterController;
 use App\Controllers\DonorProfileController;
+use App\Controllers\InventoryController;
 use App\Controllers\UserController;
 use App\Database\Connection;
 use App\Middleware\AuthMiddleware;
@@ -17,6 +18,7 @@ use App\Repositories\DonationPolicyRepository;
 use App\Repositories\DonationRepository;
 use App\Repositories\DonorProfileRepository;
 use App\Repositories\EmailVerificationTokenRepository;
+use App\Repositories\InventoryRepository;
 use App\Repositories\UserRepository;
 use App\Services\EmailVerificationService;
 use App\Support\Session;
@@ -65,6 +67,10 @@ $container->set(
 $container->set(
     DonationPolicyRepository::class,
     fn ($c) => new DonationPolicyRepository($c->get(\PDO::class))
+);
+$container->set(
+    InventoryRepository::class,
+    fn ($c) => new InventoryRepository($c->get(\PDO::class))
 );
 
 $container->set(
@@ -129,6 +135,17 @@ $container->set(
         $c->get(DonationCenterRepository::class),
         $c->get(DonorProfileRepository::class),
         $c->get(BankProfileRepository::class),
+        $c->get(DonationPolicyRepository::class),
+        $c->get(InventoryRepository::class),
+        $c->get(LoggerInterface::class)
+    )
+);
+$container->set(
+    InventoryController::class,
+    fn ($c) => new InventoryController(
+        $c->get(InventoryRepository::class),
+        $c->get(BankProfileRepository::class),
+        $c->get(DonationCenterRepository::class),
         $c->get(DonationPolicyRepository::class),
         $c->get(LoggerInterface::class)
     )

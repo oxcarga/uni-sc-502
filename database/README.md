@@ -135,6 +135,22 @@ SELECT key_name, value_text FROM donation_policies WHERE key_name = 'donor_inter
 
 **Flujo demo (UI):** login `donante@test.com` → Citas → agendar (o usar seed) → login `banco@test.com` → Citas → Completar → volver como donante y ver historial de donaciones.
 
+### P6 — inventario
+
+```bash
+docker-compose exec db mysql -u pulso_user -ppulso_password pulso_solidario -e "
+SELECT blood_type, units FROM inventory WHERE center_id = 1 ORDER BY blood_type;
+SELECT id, type, blood_type, quantity, detail, created_at
+  FROM inventory_movements WHERE center_id = 1 ORDER BY id DESC LIMIT 10;
+SELECT key_name, value_text FROM donation_policies
+  WHERE key_name LIKE 'inventory_%';
+"
+```
+
+Seed: O- (28) y AB- (40) en crítico (&lt;50). Completar una cita (P5) deja un `receipt` y suma 1 unidad.
+
+**Flujo demo (UI):** login `banco@test.com` → Inventario (semáforo + movimientos) → Registrar entrada / Ajustar stock.
+
 O en phpMyAdmin: http://localhost:3002 (`pulso_user` / `pulso_password`).
 
 ## Solución de problemas

@@ -12,7 +12,8 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
   <link rel="stylesheet" href="../../assets/css/custom.css" />
   <script type="module">
-    import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`./inventory.js?t=${Date.now()}`);
   </script>
 </head>
 
@@ -116,96 +117,30 @@
           <div>
             <div class="d-flex align-items-center gap-2 mb-1">
               <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Inventario</h1>
-              <span class="demo-badge">Demo · seed</span>
             </div>
             <p class="text-muted mb-0">
-              Semáforo visual. Movimientos y stock reales llegan en P6; umbrales de políticas en P8.
+              Stock en vivo por tipo de sangre. Toda recepción o ajuste deja un movimiento.
             </p>
           </div>
           <div class="d-flex gap-2 flex-wrap">
-            <button type="button" class="btn btn-outline-secondary rounded-3 fw-semibold" disabled
-              title="Pendiente de API (P6)">Exportar</button>
-            <button type="button" class="btn btn-primary rounded-3 fw-semibold" disabled
-              title="Pendiente de API (P6)">Registrar entrada</button>
+            <button type="button" class="btn btn-outline-secondary rounded-3 fw-semibold"
+              data-bs-toggle="modal" data-bs-target="#adjustModal">Ajustar stock</button>
+            <button type="button" class="btn btn-primary rounded-3 fw-semibold"
+              data-bs-toggle="modal" data-bs-target="#receiptModal">Registrar entrada</button>
           </div>
+          <div id="inventory-status" class="alert alert-info mb-0 py-2 px-3 d-none" role="status"
+            aria-live="polite" style="font-size: 0.875rem"></div>
         </div>
 
-        <div class="stock-legend" aria-label="Umbrales de inventario">
-          <span class="stock-legend__item"><span class="stock-legend__swatch stock-legend__swatch--ok"></span>Saludable &gt;100</span>
+        <div class="stock-legend" id="inventory-legend" aria-label="Umbrales de inventario">
+          <span class="stock-legend__item"><span class="stock-legend__swatch stock-legend__swatch--ok"></span>Saludable ≥101</span>
           <span class="stock-legend__item"><span class="stock-legend__swatch stock-legend__swatch--warn"></span>Moderado 50–100</span>
-          <span class="stock-legend__item"><span class="stock-legend__swatch stock-legend__swatch--crit"></span>Crítico &lt;50</span>
+          <span class="stock-legend__item"><span class="stock-legend__swatch stock-legend__swatch--crit"></span>Crítico ≤49</span>
         </div>
 
-        <div class="row g-3 mb-4">
-          <div class="col-sm-6 col-xl-3">
-            <div class="inv-card">
-              <span class="inv-card__type">O+</span>
-              <div class="inv-bar"><span style="width: 80%"></span></div>
-              <span class="inv-card__count">120 Unidades</span>
-              <span class="inv-card__status inv-status--ok">(Saludable)</span>
-            </div>
-          </div>
-          <div class="col-sm-6 col-xl-3">
-            <div class="inv-card inv-card--critical">
-              <div class="d-flex align-items-start justify-content-between">
-                <span class="inv-card__type">O-</span>
-                <span class="pulse-dot" aria-hidden="true"></span>
-              </div>
-              <div class="inv-bar"><span style="width: 19%"></span></div>
-              <span class="inv-card__count">28 Unidades</span>
-              <span class="inv-card__status inv-status--crit">(Crítico)</span>
-            </div>
-          </div>
-          <div class="col-sm-6 col-xl-3">
-            <div class="inv-card inv-card--warn">
-              <span class="inv-card__type">A+</span>
-              <div class="inv-bar"><span style="width: 63%"></span></div>
-              <span class="inv-card__count">95 Unidades</span>
-              <span class="inv-card__status inv-status--warn">(Moderado)</span>
-            </div>
-          </div>
-          <div class="col-sm-6 col-xl-3">
-            <div class="inv-card inv-card--warn">
-              <span class="inv-card__type">A-</span>
-              <div class="inv-bar"><span style="width: 47%"></span></div>
-              <span class="inv-card__count">70 Unidades</span>
-              <span class="inv-card__status inv-status--warn">(Moderado)</span>
-            </div>
-          </div>
-          <div class="col-sm-6 col-xl-3">
-            <div class="inv-card">
-              <span class="inv-card__type">B+</span>
-              <div class="inv-bar"><span style="width: 73%"></span></div>
-              <span class="inv-card__count">110 Unidades</span>
-              <span class="inv-card__status inv-status--ok">(Saludable)</span>
-            </div>
-          </div>
-          <div class="col-sm-6 col-xl-3">
-            <div class="inv-card inv-card--warn">
-              <span class="inv-card__type">B-</span>
-              <div class="inv-bar"><span style="width: 37%"></span></div>
-              <span class="inv-card__count">55 Unidades</span>
-              <span class="inv-card__status inv-status--warn">(Moderado)</span>
-            </div>
-          </div>
-          <div class="col-sm-6 col-xl-3">
-            <div class="inv-card inv-card--warn">
-              <span class="inv-card__type">AB+</span>
-              <div class="inv-bar"><span style="width: 53%"></span></div>
-              <span class="inv-card__count">80 Unidades</span>
-              <span class="inv-card__status inv-status--warn">(Moderado)</span>
-            </div>
-          </div>
-          <div class="col-sm-6 col-xl-3">
-            <div class="inv-card inv-card--critical">
-              <div class="d-flex align-items-start justify-content-between">
-                <span class="inv-card__type">AB-</span>
-                <span class="pulse-dot" aria-hidden="true"></span>
-              </div>
-              <div class="inv-bar"><span style="width: 27%"></span></div>
-              <span class="inv-card__count">40 Unidades</span>
-              <span class="inv-card__status inv-status--crit">(Crítico)</span>
-            </div>
+        <div class="row g-3 mb-4" id="inventory-grid">
+          <div class="col-12">
+            <p class="text-muted mb-0">Cargando inventario…</p>
           </div>
         </div>
 
@@ -213,26 +148,130 @@
           <div class="col-md-4">
             <article class="card p-3 h-100">
               <span class="card-eyebrow mb-2">Total unidades</span>
-              <div class="headline fw-bold" style="font-size: 1.75rem">598</div>
-              <div class="text-muted mt-1" style="font-size: 0.8125rem">Suma demo del seed</div>
+              <div class="headline fw-bold" style="font-size: 1.75rem" id="kpi-total-units">—</div>
+              <div class="text-muted mt-1" style="font-size: 0.8125rem">Suma de los 8 tipos</div>
             </article>
           </div>
           <div class="col-md-4">
             <article class="card p-3 h-100">
               <span class="card-eyebrow mb-2">Tipos críticos</span>
-              <div class="headline fw-bold" style="font-size: 1.75rem; color: #b90538">2</div>
-              <div class="text-muted mt-1" style="font-size: 0.8125rem">O- y AB- (&lt;50)</div>
+              <div class="headline fw-bold" style="font-size: 1.75rem; color: #b90538" id="kpi-critical">—</div>
+              <div class="text-muted mt-1" style="font-size: 0.8125rem" id="kpi-critical-detail">—</div>
             </article>
           </div>
           <div class="col-md-4">
-            <section class="coming-soon h-100" aria-labelledby="movements-soon">
-              <span class="demo-badge mb-3">Próximamente</span>
-              <h2 class="coming-soon__title" id="movements-soon">Movimientos</h2>
-              <p class="coming-soon__text">Libro de stock (recepción, asignación, ajuste, descarte) en P6.</p>
-            </section>
+            <article class="card p-3 h-100">
+              <span class="card-eyebrow mb-2">Libro de stock</span>
+              <div class="headline fw-bold" style="font-size: 1.25rem">Movimientos</div>
+              <div class="text-muted mt-1" style="font-size: 0.8125rem">
+                Recepción, ajuste y descarte (asignación en P7).
+              </div>
+            </article>
           </div>
         </div>
+
+        <section class="card p-3" aria-labelledby="movements-title">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <h2 class="section-title mb-0" id="movements-title">Últimos movimientos</h2>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-borderless align-middle mb-0" id="movements-table">
+              <thead>
+                <tr>
+                  <th scope="col">Fecha</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col">Sangre</th>
+                  <th scope="col">Cant.</th>
+                  <th scope="col">Detalle</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="5" class="text-muted text-center py-4">Cargando movimientos…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
       </main>
+    </div>
+  </div>
+
+  <div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <form id="receipt-form">
+          <div class="modal-header border-0">
+            <h2 class="modal-title fs-5 fw-bold" id="receiptModalLabel">Registrar entrada</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div id="receipt-status" class="alert alert-danger py-2 px-3 d-none" role="alert"
+              aria-live="assertive" style="font-size: 0.875rem"></div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="receipt-blood-type">Tipo de sangre</label>
+              <select class="form-select form-select-lg rounded-3" id="receipt-blood-type" required></select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="receipt-quantity">Cantidad</label>
+              <input type="number" min="1" step="1" class="form-control form-control-lg rounded-3"
+                id="receipt-quantity" value="1" required />
+            </div>
+            <div class="mb-0">
+              <label class="form-label fw-semibold" for="receipt-detail">Detalle (opcional)</label>
+              <input type="text" class="form-control form-control-lg rounded-3" id="receipt-detail"
+                maxlength="255" placeholder="Ej. Donación externa" />
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary rounded-3 fw-semibold">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="adjustModal" tabindex="-1" aria-labelledby="adjustModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <form id="adjust-form">
+          <div class="modal-header border-0">
+            <h2 class="modal-title fs-5 fw-bold" id="adjustModalLabel">Ajustar stock</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div id="adjust-status" class="alert alert-danger py-2 px-3 d-none" role="alert"
+              aria-live="assertive" style="font-size: 0.875rem"></div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="adjust-blood-type">Tipo de sangre</label>
+              <select class="form-select form-select-lg rounded-3" id="adjust-blood-type" required></select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="adjust-mode">Operación</label>
+              <select class="form-select form-select-lg rounded-3" id="adjust-mode" required>
+                <option value="add">Sumar (ajuste +)</option>
+                <option value="subtract">Restar (ajuste −)</option>
+                <option value="discard">Descartar</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="adjust-quantity">Cantidad</label>
+              <input type="number" min="1" step="1" class="form-control form-control-lg rounded-3"
+                id="adjust-quantity" value="1" required />
+            </div>
+            <div class="mb-0">
+              <label class="form-label fw-semibold" for="adjust-detail">Detalle (opcional)</label>
+              <input type="text" class="form-control form-control-lg rounded-3" id="adjust-detail"
+                maxlength="255" placeholder="Ej. Caducidad / conteo físico" />
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary rounded-3 fw-semibold">Guardar</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
