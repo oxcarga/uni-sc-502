@@ -24,7 +24,7 @@ Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./
 ## Cómo usar este plan
 
 1. Implementar **una fase a la vez**, en orden:  
-   `P0 → P0b → P0c → P1 → P2 → P3 → P4 → P5 → P6 → P7 → P8 → P9`.
+   `P0 → P0b → P0c → P1 → P2 → P3 → P4 → P5 → P6 → P7 → P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15`.
 2. En cada fase cubrir los **4 pilares** (DB, BE, FE, Config). Si un pilar no aplica, dejar la subsección con `Sin cambios` y una línea de por qué.
 3. Tras cambios de esquema: re-provisionar (`database/provision.sh` o `docker compose down -v && up -d`).
 4. Al cerrar una fase: marcar checklist, poner ✅ al inicio del título `## Px` y en el mapa, y pasar a la siguiente.
@@ -51,12 +51,13 @@ Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./
 |------|-----------|
 | Auth (P0–P0c) | ✅ Cerrado: registro, confirmación email, sesión servidor, auth-guard |
 | Esquema MySQL | ✅ Tablas de dominio ya en `01_init.sql` + seed demo en `02_seed.sql` (centros, perfiles, citas, inventario, solicitudes, alertas, políticas, logros, notificaciones) |
-| BE dominio | ✅ P4–P9 (dominio principal cerrado en el plan) |
-| FE paneles | ✅ Shells P1–P3 + P4–P9 cableados |
+| BE dominio | ✅ P4–P9 (MVP de dominio cerrado) |
+| FE paneles | ✅ Shells P1–P3 + flujos donante/banco P4–P9; admin: políticas + auditoría vivos; home/donantes/bancos (write) aún mock o parcial |
+| Backlog | P10–P15 pendientes (gobierno admin, centros write, notificaciones UX, elegibilidad/impacto, ciclo solicitudes/trazabilidad, reportes) |
 
-**Implicación:** el mapa P0–P9 del plan está implementado; mejoras posteriores quedan fuera de fase.
+**Implicación:** MVP P0–P9 cerrado; backlog de gobierno y polish en P10–P15.
 
-Fases P0–P9: **cerradas** según este plan.
+Fases P0–P9: **cerradas**. Fases P10–P15: **pendientes**.
 
 ---
 
@@ -646,26 +647,287 @@ Solo ajustar seed/criterios si la evaluación en BE lo requiere.
 
 ---
 
+## P10 — Admin home + gestión de usuarios
+
+**Objetivo:** KPIs reales en el home admin y gestión persistente de cuentas (activar/desactivar, rol), con auditoría.
+
+**Roles:** `admin` (único; opera sobre cuentas de cualquier rol, pero la UI/API de esta fase es del panel admin).
+
+### DB
+
+**Sin cambios** de esquema: usar `users.active`, `users.role`, `audit_log`.
+
+Ampliar seed solo si hacen falta más usuarios demo para filtros (p. ej. donante inactivo).
+
+### BE
+
+1. `GET /api/admin/stats` (o agregados equivalentes) — conteos: centros, donantes/usuarios, alertas activas, solicitudes abiertas.
+2. `GET /api/admin/users` — listado con filtros `role`, `active`, búsqueda por nombre/email.
+3. `PATCH /api/admin/users/{id}` — campos `active` y/o `role` (reglas: no degradar el último admin; no auto-desactivarse sin otro admin).
+4. Escribir `audit_log`: `user.activate`, `user.deactivate`, `user.role_change`.
+5. Endurecer `/api/users`: retirar o proteger con auth+admin las mutaciones legacy; el alta pública queda solo en `/api/auth/register`.
+
+| Método | Ruta | Rol |
+|--------|------|-----|
+| `GET` | `/api/admin/stats` | admin |
+| `GET` | `/api/admin/users` | admin |
+| `PATCH` | `/api/admin/users/{id}` | admin |
+
+### FE
+
+1. `frontend/pages/dashboard/admin/home.js` (+ cablear `index.html`): KPIs desde API; quitar números mock y copy “Stub · P8” / “Próximamente” de políticas/auditoría (ya viven en `/settings/` y `/audit/`).
+2. Cablear `/dashboard/admin/donors/` a `GET/PATCH` admin users; persistir toggle activo; quitar filas HTML hardcodeadas.
+3. Extender `adminApi` en `frontend/js/api.js`.
+
+### Config
+
+1. Documentar endpoints y flujo de prueba (login `admin@test.com` → home KPIs → activar/desactivar donante → ver fila en auditoría) en `backend/README.md`.
+2. `Sin cambios` de Compose/Nginx.
+
+### Listo cuando
+
+- [ ] Home admin muestra conteos en vivo (no mock del seed)
+- [ ] Listado de donantes/usuarios viene de API
+- [ ] Activar/desactivar (y cambio de rol si se expone) persiste y deja `audit_log`
+- [ ] Mutaciones públicas de `/api/users` no permiten gobierno de cuentas sin auth
+
+**Desbloquea:** gestión de usuarios del panel admin (README) + P11 (centros) con shell admin coherente.
+
+---
+
+## P11 — Escritura de centros + settings de banco
+
+**Objetivo:** create/edit/activar centros (deferido desde P4) y persistir settings del banco.
+
+**Roles:** `admin` + `bank`  
+- `admin`: create/edit/activar cualquier centro (`/dashboard/admin/banks/`).  
+- `bank`: persistir settings solo de *su* centro (`/dashboard/bank/settings/`).
+
+### DB
+
+**Sin cambios** de esquema: `donation_centers`, `bank_profiles`.
+
+Seed: mantener al menos un centro inactivo o segundo centro si ayuda a demos de toggle.
+
+### BE
+
+1. `POST /api/centers` y `PUT /api/centers/{id}` (o bajo `/api/admin/centers`) — nombre, dirección, contacto, `active`, etc.
+2. Permisos: **admin** create/edit/activar cualquiera; **bank** solo actualizar campos permitidos de *su* centro (settings).
+3. Auditar: `center.create`, `center.update`, `center.activate` / `center.deactivate`.
+
+| Método | Ruta | Rol |
+|--------|------|-----|
+| `POST` | `/api/centers` | admin |
+| `PUT` | `/api/centers/{id}` | admin (completo); bank (solo su centro, campos limitados) |
+
+### FE
+
+1. `/dashboard/admin/banks/`: toggle activo y edición persisten; habilitar “Nuevo banco” / “Editar” contra API (UX formularios según DESIGN.md).
+2. `/dashboard/bank/settings/`: formulario persiste vía API del centro del banco; quitar aviso de “no se guarda”.
+3. Mensajes de error/éxito con alert sticky donde aplique.
+
+### Config
+
+1. Documentar create/edit/activar centro y prueba Docker (admin + banco).
+2. `Sin cambios` de servicios salvo docs.
+
+### Listo cuando
+
+- [ ] Admin puede crear/editar/activar un centro y verlo en listados (`?all=1`)
+- [ ] Toggle activo en FE admin persiste (ya no es demo local)
+- [ ] Banco guarda settings de su centro
+- [ ] Cambios sensibles aparecen en `audit_log`
+
+**Desbloquea:** “Bancos registrados” del README + settings de banco reales.
+
+---
+
+## P12 — Notificaciones UX completa
+
+**Objetivo:** campana usable en todos los shells y despacho según prefs (`notify_appointments`, `notify_nearby`), además de `shortage_alert`.
+
+**Roles:** `donor` + `bank` + `admin` (campana en los tres shells; prefs de despacho principalmente del perfil `donor`).
+
+### DB
+
+**Sin cambios** de tablas. Ampliar seed de `notifications` con ejemplos por tipo/rol si hace falta demo.
+
+### BE
+
+1. Despachar respetando prefs del perfil donante:
+   - `notify_appointments` — cita próxima / completada (y cancelada si aplica).
+   - `notify_nearby` — alerta de stock del centro preferido/cercano.
+   - Mantener `shortage_alert` → compatibles (`notify_blood_match` u existente).
+2. Feedback al banco/admin cuando corresponda (p. ej. solicitud asignada) si el receptor tiene cuenta.
+3. Reutilizar `NotificationDispatchService` + endpoints P8 (`GET /api/notifications`, `POST .../read`).
+
+### FE
+
+1. Montar `frontend/js/notifications-ui.js` en shells admin, banco y subpáginas donante (no solo home donante).
+2. Quitar botones “Notificaciones — Próximamente”.
+3. Preferencias de perfil siguen siendo la fuente de verdad para opt-out.
+
+### Config
+
+1. Checklist de prueba de campana por rol en docs.
+2. `Sin cambios` de Compose.
+
+### Listo cuando
+
+- [ ] Campana funciona en donor (todas las páginas del shell), bank y admin
+- [ ] Prefs `notify_appointments` / `notify_nearby` afectan el despacho
+- [ ] Marcar leída sigue funcionando vía API existente
+
+**Desbloquea:** centro de notificaciones del README en todos los paneles.
+
+---
+
+## P13 — Elegibilidad + impacto donante
+
+**Objetivo:** reemplazar cards “Próximamente” del home donante con elegibilidad derivada de políticas e impacto calculado.
+
+**Roles:** `donor` (único; panel `/dashboard/donor/`).
+
+### DB
+
+**Sin cambios** de tablas. Reglas desde `donation_policies.donor_interval_days` + `donor_profiles.last_donation_at` / `eligible`.
+
+### BE
+
+1. Al leer perfil (o endpoint dedicado): derivar elegibilidad; restaurar `eligible = 1` cuando haya pasado el intervalo (no solo bloquear al agendar).
+2. Impacto: servicio que agregue donaciones del donante y calcule métricas en respuesta (p. ej. unidades donadas + “vidas estimadas” por fórmula fija en código — **no** persistir el derivado).
+3. Exponer en `GET /api/donor/profile` (campos derivados) y/o `GET /api/donor/impact`.
+
+### FE
+
+1. En `frontend/pages/dashboard/donor/index.html` (+ `home.js`): cards Elegibilidad y Mi impacto con datos API.
+2. Copiar clara: fecha estimada de próxima elegibilidad si aún no puede donar.
+
+### Config
+
+1. Documentar fórmula de impacto e intervalo en `backend/README.md` o nota breve en README.
+2. `Sin cambios` de servicios.
+
+### Listo cuando
+
+- [ ] Donante ve estado de elegibilidad coherente con políticas + última donación
+- [ ] Tras el intervalo, `eligible` vuelve a permitir donar sin intervención manual
+- [ ] Card de impacto muestra unidades (y vidas estimadas) desde API, sin tabla nueva
+
+**Desbloquea:** “Elegibilidad” y “Mi Impacto” del panel donante (README).
+
+---
+
+## P14 — Ciclo de solicitudes + no-show + trazabilidad básica
+
+**Objetivo:** usar los estados del esquema (`in_transit`, `completed`, `cancelled`, `no_show`) y exponer trazabilidad mínima de `blood_units`.
+
+**Roles:** `bank` + `admin`  
+- `bank`: UI principal (crear solicitud, transiciones, `no_show`, trazabilidad).  
+- `admin`: mismas APIs operativas / lectura multi-centro opcional (sin portal hospital).
+
+### DB
+
+**Sin cambios** de estados (ya en CHECK/convención). Ajustar seed: al menos una solicitud en estado distinto de `pending`/`assigned` si ayuda la demo.
+
+### BE
+
+1. `POST /api/bank/requests` (admin/banco) — alta de solicitud (institución, tipo, unidades, prioridad).
+2. Transiciones: `assigned → in_transit → completed`; `cancelled` desde estados abiertos.
+3. Citas banco: acción `no_show` (`PATCH`/`POST` sobre appointment).
+4. Trazabilidad: `GET /api/bank/blood-units` y/o `GET /api/bank/blood-units/{id}` — unit → donation → appointment/donor → request (si asignada).
+5. Auditar asignaciones/cambios de estado relevantes.
+
+### FE
+
+1. Panel banco: crear solicitud; botones de avance de estado; marcar cita `no_show`.
+2. Vista simple de trazabilidad (detalle de unidad o tabla filtrable).
+3. Opcional: admin lectura multi-centro de cola (reutilizar APIs con `center_id` o list-all).
+
+### Config
+
+1. Documentar ciclo de vida de solicitudes y cómo probar no-show + traza con seed.
+2. `Sin cambios` de Compose.
+
+### Listo cuando
+
+- [ ] Se puede crear una solicitud desde API/FE (no solo seed)
+- [ ] Estados `in_transit` / `completed` / `cancelled` son alcanzables
+- [ ] Banco puede marcar `no_show`
+- [ ] Se puede seguir una unidad desde donación hasta asignación/solicitud
+
+**Desbloquea:** cola médica completa + “Reporte de trazabilidad” básico (README).
+
+---
+
+## P15 — Reportes admin
+
+**Objetivo:** estadísticas nacionales/regionales del home admin (hoy “Próximamente”) con agregaciones SQL.
+
+**Roles:** `admin` (único; panel `/dashboard/admin/`).
+
+### DB
+
+**Sin cambios** de esquema. Agregaciones sobre `donations`, `blood_units`, `donation_centers`, `requests`.
+
+### BE
+
+1. `GET /api/admin/reports/summary` — payload JSON con:
+   - donaciones por mes (últimos N meses),
+   - distribución por tipo de sangre,
+   - volumen/efectividad por centro (p. ej. donaciones completadas, solicitudes atendidas).
+2. Solo rol `admin`; sin PII innecesaria en el reporte.
+
+| Método | Ruta | Rol |
+|--------|------|-----|
+| `GET` | `/api/admin/reports/summary` | admin |
+
+### FE
+
+1. Página o sección `/dashboard/admin/reports/` (o reemplazar card “Próximamente” del home) con gráficos/tablas simples alimentados por API.
+2. Preferir CSS/HTML + datos; librería de charts solo si ya hay dependencia o es imprescindible.
+
+### Config
+
+1. Documentar cómo probar reportes con el seed demo.
+2. `Sin cambios` de servicios.
+
+### Listo cuando
+
+- [ ] Endpoint de summary responde con series usables
+- [ ] Admin ve reportes en UI (no placeholder)
+- [ ] Números coherentes con datos del seed tras provision
+
+**Desbloquea:** “Reportes” del panel de administración (README).
+
+---
+
 ## Mapa fase → entrega → pilares
 
-| Fase | Entrega | Casos | DB | BE | FE | Config |
-|------|---------|-------|----|----|----|--------|
-| ✅ P0 | Cuentas + login/registro | CU0, CU1 (cuenta) | ✅ | ✅ | ✅ | ✅ |
-| ✅ P0b | Confirmación de correo | CU1 (cuenta verificada) | ✅ | ✅ | ✅ | ✅ |
-| ✅ P0c | Sesión servidor + auth guard `/dashboard/*` | CU0 (sesión) | ✅ | ✅ | ✅ | ✅ |
-| ✅ P1 | Shell UI donante (`/dashboard/donor/**`) | CU1 (superficie) | ✅ | ✅ | ✅ | ✅ |
-| ✅ P2 | Shell UI banco (`/dashboard/bank/**`) | Panel banco (superficie) | ✅ | ✅ | ✅ | ✅ |
-| ✅ P3 | Shell UI admin (`/dashboard/admin/**`) | Panel admin (superficie) | ✅ | ✅ | ✅ | ✅ |
-| ✅ P4 | Perfil donante + centros (API + FE) | CU1 (perfil) | ✅ | ✅ | ✅ | ✅ |
-| ✅ P5 | Citas + donaciones | CU1 (agenda/historial) | ✅ | ✅ | ✅ | ✅ |
-| ✅ P6 | Inventario + movimientos | Base CU2/CU3 | ✅ | ✅ | ✅ | ✅ |
-| ✅ P7 | Solicitudes + alertas + compatibles | CU2, CU3 | ✅ | ✅ | ✅ | ✅ |
-| ✅ P8 | Notificaciones + políticas + auditoría | CU2 completo + admin | ✅ | ✅ | ✅ | ✅ |
-| ✅ P9 | Logros / gamificación | Panel donante (logros) | ✅ | ✅ | ✅ | ✅ |
+| Fase | Entrega | Roles | Casos | DB | BE | FE | Config |
+|------|---------|-------|-------|----|----|----|--------|
+| ✅ P0 | Cuentas + login/registro | donor, bank, admin | CU0, CU1 (cuenta) | ✅ | ✅ | ✅ | ✅ |
+| ✅ P0b | Confirmación de correo | donor (alta) | CU1 (cuenta verificada) | ✅ | ✅ | ✅ | ✅ |
+| ✅ P0c | Sesión servidor + auth guard `/dashboard/*` | donor, bank, admin | CU0 (sesión) | ✅ | ✅ | ✅ | ✅ |
+| ✅ P1 | Shell UI donante (`/dashboard/donor/**`) | donor | CU1 (superficie) | ✅ | ✅ | ✅ | ✅ |
+| ✅ P2 | Shell UI banco (`/dashboard/bank/**`) | bank | Panel banco (superficie) | ✅ | ✅ | ✅ | ✅ |
+| ✅ P3 | Shell UI admin (`/dashboard/admin/**`) | admin | Panel admin (superficie) | ✅ | ✅ | ✅ | ✅ |
+| ✅ P4 | Perfil donante + centros (API + FE) | donor | CU1 (perfil) | ✅ | ✅ | ✅ | ✅ |
+| ✅ P5 | Citas + donaciones | donor, bank | CU1 (agenda/historial) | ✅ | ✅ | ✅ | ✅ |
+| ✅ P6 | Inventario + movimientos | bank | Base CU2/CU3 | ✅ | ✅ | ✅ | ✅ |
+| ✅ P7 | Solicitudes + alertas + compatibles | bank (admin API) | CU2, CU3 | ✅ | ✅ | ✅ | ✅ |
+| ✅ P8 | Notificaciones + políticas + auditoría | donor, bank, admin | CU2 completo + admin | ✅ | ✅ | ✅ | ✅ |
+| ✅ P9 | Logros / gamificación | donor | Panel donante (logros) | ✅ | ✅ | ✅ | ✅ |
+| P10 | Admin home KPIs + gestión usuarios | admin | Panel admin (gobierno) | — | — | — | — |
+| P11 | Escritura centros + settings banco | admin, bank | Admin bancos / bank settings | — | — | — | — |
+| P12 | Notificaciones UX + prefs | donor, bank, admin | Todos los paneles | — | — | — | — |
+| P13 | Elegibilidad + impacto donante | donor | CU1 (polish) | — | — | — | — |
+| P14 | Ciclo solicitudes + no-show + traza | bank, admin | CU2/CU3 + trazabilidad | — | — | — | — |
+| P15 | Reportes admin | admin | Panel admin (analítica) | — | — | — | — |
 
 Al cerrar una fase, marcar ✅ en el título y en las celdas de pilares del mapa.
 
-**Lectura del mapa:** P1–P3 son FE-first (DB/BE a menudo `Sin cambios`). P4–P9 asumen esquema ya provisionado y concentran BE+FE; DB solo si hay ajuste de seed/constraints.
+**Lectura del mapa:** P1–P3 son FE-first (DB/BE a menudo `Sin cambios`). P4–P9 asumen esquema ya provisionado y concentran BE+FE; DB solo si hay ajuste de seed/constraints. P10–P15 son backlog post-MVP: gobierno admin, polish de notificaciones/donante, ciclo de solicitudes y reportes.
 
 ---
 
@@ -716,11 +978,14 @@ Detalle de columnas: [database/ERD.md](./database/ERD.md).
 
 ---
 
-## Fuera de alcance (no implementar en estas fases)
+## Fuera de alcance (no implementar en P0–P15)
+
+Queda **fuera** incluso del backlog P10–P15:
 
 - HL7/FHIR, OAuth de terceros, compliance HIPAA/GDPR completo, sync realtime (usar polling REST).
-- App móvil nativa, push FCM/APNs (solo notificaciones in-app en P8).
-- Portal completo para hospitales (las solicitudes pueden crearse por seed/admin/banco en demo).
+- App móvil nativa, push FCM/APNs (notificaciones in-app: P8 + ampliación UX en P12).
+- Portal completo para hospitales / rol `hospital` / personal médico como rol distinto de `bank` (en P14 las solicitudes se crean por admin/banco; no hay dashboard de institución).
+- Roles adicionales (`nurse`, `doctor`, etc.): el sistema sigue con `donor` | `bank` | `admin`.
 
 ---
 
