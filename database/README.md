@@ -168,6 +168,18 @@ Seed: solicitud `RE-9082` (O- ×4, pending), alerta activa O-, 8 unidades O- dis
 
 **Flujo demo (UI):** login `banco@test.com` → Panel → Asignar solicitud → ver movimiento `assignment` en Inventario → Donantes (filtro O-).
 
+### P8 — notificaciones, políticas, auditoría
+
+```bash
+docker-compose exec db mysql -u pulso_user -ppulso_password pulso_solidario -e "
+SELECT key_name, value_text FROM donation_policies WHERE center_id IS NULL;
+SELECT id, user_id, type, title, read_at FROM notifications ORDER BY id DESC LIMIT 10;
+SELECT id, action, entity_type, entity_id, detail FROM audit_log ORDER BY id DESC LIMIT 10;
+"
+```
+
+**Flujo demo:** login `donante_o@test.com` → campana / panel (aviso de escasez O-) → `admin@test.com` → Configuración (políticas) → Auditoría.
+
 O en phpMyAdmin: http://localhost:3002 (`pulso_user` / `pulso_password`).
 
 ## Solución de problemas

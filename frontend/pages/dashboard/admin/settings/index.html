@@ -11,7 +11,8 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
   <link rel="stylesheet" href="../../assets/css/custom.css" />
   <script type="module">
-    import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`./settings.js?t=${Date.now()}`);
   </script>
 </head>
 
@@ -111,40 +112,46 @@
       </header>
 
       <main class="flex-grow-1" style="padding: 2rem 2.5rem">
-        <div class="mb-4">
-          <div class="d-flex align-items-center gap-2 mb-1">
-            <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Configuración</h1>
-            <span class="demo-badge">Stub · P8</span>
+        <div class="page-sticky-bar">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Configuración</h1>
+            </div>
+            <p class="text-muted mb-0">
+              Políticas globales de inventario e intervalo entre donaciones.
+            </p>
           </div>
-          <p class="text-muted mb-0">
-            Ancla para políticas de donación, umbrales de inventario y preferencias globales.
-          </p>
+          <div id="policies-status" class="alert alert-info mb-0 py-2 px-3 d-none" role="status"
+            aria-live="polite" style="font-size: 0.875rem"></div>
         </div>
 
-        <div class="row g-4">
-          <div class="col-lg-6">
-            <section class="coming-soon h-100" aria-labelledby="policies-stub">
-              <span class="demo-badge mb-3">Próximamente</span>
-              <h2 class="coming-soon__title" id="policies-stub">Políticas de donación</h2>
-              <p class="coming-soon__text">
-                Edición de <code>donation_policies</code>: umbrales saludable/moderado/crítico e intervalos entre donaciones.
-              </p>
-            </section>
-          </div>
-          <div class="col-lg-6">
-            <section class="coming-soon h-100" aria-labelledby="system-stub">
-              <span class="demo-badge mb-3">Próximamente</span>
-              <h2 class="coming-soon__title" id="system-stub">Parámetros del sistema</h2>
-              <p class="coming-soon__text">
-                Configuración operativa global y notificaciones de gobierno (API en P8).
-              </p>
-            </section>
-          </div>
-        </div>
-
-        <div class="mt-4">
-          <a href="/dashboard/admin/" class="btn btn-outline-secondary rounded-3 fw-semibold">Volver al panel</a>
-        </div>
+        <section class="card p-3 mb-4" aria-labelledby="policies-title">
+          <h2 class="section-title mb-3" id="policies-title">Políticas de donación</h2>
+          <form id="policies-form" class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="policy-healthy-min">Saludable desde (unidades)</label>
+              <input type="number" min="1" class="form-control form-control-lg rounded-3" id="policy-healthy-min" required />
+              <div class="form-text">Stock ≥ este valor se considera saludable.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="policy-moderate-min">Moderado desde (unidades)</label>
+              <input type="number" min="1" class="form-control form-control-lg rounded-3" id="policy-moderate-min" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="policy-critical-max">Crítico hasta (unidades)</label>
+              <input type="number" min="1" class="form-control form-control-lg rounded-3" id="policy-critical-max" required />
+              <div class="form-text">Stock ≤ este valor dispara alerta crítica.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold" for="policy-interval-days">Intervalo entre donaciones (días)</label>
+              <input type="number" min="1" class="form-control form-control-lg rounded-3" id="policy-interval-days" required />
+            </div>
+            <div class="col-12 d-flex gap-2 flex-wrap">
+              <button type="submit" class="btn btn-primary rounded-3 fw-semibold" id="policies-save" disabled>Guardar</button>
+              <a href="/dashboard/admin/audit/" class="btn btn-outline-secondary rounded-3 fw-semibold">Ver auditoría</a>
+            </div>
+          </form>
+        </section>
       </main>
     </div>
   </div>

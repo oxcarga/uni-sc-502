@@ -367,6 +367,19 @@ Tras cada movimiento de stock se sincroniza alerta crítica (`created` / `resolv
 **Flujo demo CU3:** login `banco@test.com` → Panel → Asignar `RE-9082` (O- ×4).  
 **Flujo demo CU2:** alertas activas en panel; donantes O- en `/dashboard/bank/donors/?blood_type=O-` (`donante_o@test.com`).
 
+### Notificaciones, políticas y auditoría (P8)
+
+| Método | Ruta | Notas |
+|--------|------|-------|
+| `GET` | `/notifications` | Propias del usuario; incluye `unread_count` |
+| `POST` | `/notifications/{id}/read` | Marcar leída |
+| `GET` | `/admin/policies` | Políticas globales + umbrales derivados |
+| `PUT` | `/admin/policies` | Body: `inventory_*`, `donor_interval_days` (enteros > 0) |
+| `GET` | `/admin/audit-log` | Últimos registros (`?limit=`) |
+
+Al **crear** una alerta crítica se notifican donantes compatibles con `notify_blood_match`.  
+Auditoría en: `policy.update`, `request.assign`.
+
 ### Otras rutas (plantilla / legado)
 
 | Ruta Slim | URL | Método |

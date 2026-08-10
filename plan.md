@@ -51,12 +51,12 @@ Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./
 |------|-----------|
 | Auth (P0–P0c) | ✅ Cerrado: registro, confirmación email, sesión servidor, auth-guard |
 | Esquema MySQL | ✅ Tablas de dominio ya en `01_init.sql` + seed demo en `02_seed.sql` (centros, perfiles, citas, inventario, solicitudes, alertas, políticas, logros, notificaciones) |
-| BE dominio | ✅ Perfil/centros (P4) + citas/donaciones (P5) + inventario (P6) + solicitudes/alertas (P7); faltan notificaciones/políticas admin (P8+) |
-| FE paneles | ✅ Shells P1–P3 + P4–P7 cableados; faltan notificaciones in-app (P8+) |
+| BE dominio | ✅ P4–P8 (incluye notificaciones, políticas admin, auditoría); falta gamificación (P9) |
+| FE paneles | ✅ Shells P1–P3 + P4–P8 cableados; falta logros donante (P9) |
 
-**Implicación:** desde P8, el pilar DB casi siempre es *verificar / ajustar seed* (no inventar el esquema desde cero). El trabajo duro es **BE + FE**.
+**Implicación:** P9 asume esquema ya provisionado; trabajo duro en BE+FE de logros.
 
-La siguiente fase a implementar es **P8**.
+La siguiente fase a implementar es **P9**.
 
 ---
 
@@ -560,7 +560,7 @@ Ajustes de seed solo para que el demo CU2/CU3 sea reproducible de un solo login 
 
 ---
 
-## P8 — Notificaciones, auditoría y políticas
+## ✅ P8 — Notificaciones, auditoría y políticas
 
 **Objetivo:** cerrar paneles admin/donante/banco con config de negocio, avisos in-app y rastro de auditoría.
 
@@ -599,11 +599,11 @@ Trabajo DB típico: ampliar seed de notificaciones/auditoría si hace falta para
 
 ### Listo cuando
 
-- [ ] Umbrales salen de `donation_policies`
-- [ ] Alerta crítica genera notificaciones a donantes compatibles
-- [ ] Acciones admin relevantes quedan en `audit_log`
-- [ ] UI de notificaciones usable en al menos un rol
-- [ ] Admin puede ver/editar políticas básicas
+- [x] Umbrales salen de `donation_policies`
+- [x] Alerta crítica genera notificaciones a donantes compatibles
+- [x] Acciones admin relevantes quedan en `audit_log`
+- [x] UI de notificaciones usable en al menos un rol
+- [x] Admin puede ver/editar políticas básicas
 
 **Desbloquea:** CU2 completo (aviso a donantes) + panel admin de gobierno.
 
@@ -660,7 +660,7 @@ Solo ajustar seed/criterios si la evaluación en BE lo requiere.
 | ✅ P5 | Citas + donaciones | CU1 (agenda/historial) | ✅ | ✅ | ✅ | ✅ |
 | ✅ P6 | Inventario + movimientos | Base CU2/CU3 | ✅ | ✅ | ✅ | ✅ |
 | ✅ P7 | Solicitudes + alertas + compatibles | CU2, CU3 | ✅ | ✅ | ✅ | ✅ |
-| P8 | Notificaciones + políticas + auditoría | CU2 completo + admin | ☐ | ☐ | ☐ | ☐ |
+| ✅ P8 | Notificaciones + políticas + auditoría | CU2 completo + admin | ✅ | ✅ | ✅ | ✅ |
 | P9 | Logros / gamificación | Panel donante (logros) | ☐ | ☐ | ☐ | ☐ |
 
 Al cerrar una fase, marcar ✅ en el título y en las celdas de pilares del mapa.

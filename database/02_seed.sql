@@ -218,8 +218,16 @@ WHERE u.email = 'donante@test.com';
 
 INSERT IGNORE INTO notifications (user_id, type, title, body, related_type, related_id)
 SELECT
-  u.id, 'appointment_reminder', 'Próxima cita de donación',
-  'Tu cita confirmada es en 3 días en Hospital Regional.',
+  u.id, 'appointment_reminder', 'Proxima cita de donacion',
+  'Tu cita confirmada es en 3 dias en Hospital Regional.',
   'appointment', 1
 FROM users u
 WHERE u.email = 'donante@test.com';
+
+INSERT IGNORE INTO notifications (user_id, type, title, body, related_type, related_id)
+SELECT
+  u.id, 'shortage_alert', 'Se necesita sangre O-',
+  'Stock critico en un centro afiliado. Si puedes donar, agenda una cita.',
+  'alert', 1
+FROM users u
+WHERE u.email = 'donante_o@test.com';

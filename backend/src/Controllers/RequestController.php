@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Repositories\AuditLogRepository;
 use App\Repositories\BankProfileRepository;
 use App\Repositories\BloodUnitRepository;
 use App\Repositories\DonationCenterRepository;
@@ -27,6 +28,7 @@ class RequestController
         private readonly BankProfileRepository $bankProfiles,
         private readonly DonationCenterRepository $centers,
         private readonly InventoryAlertService $alertSync,
+        private readonly AuditLogRepository $audit,
         private Logger $logger
     ) {
     }
@@ -141,6 +143,21 @@ class RequestController
                 $bloodType,
                 (int) $stock['inventory']['units'],
                 $id
+            );
+
+            $serverParams = $request->getServerParams();
+            $ip = is_string($serverParams['REMOTE_ADDR'] ?? null) ? $serverParams['REMOTE_ADDR'] : null;
+            $this->audit->write(
+                (int) $auth['id'],
+                'request.assign',
+                'request',
+                $id,
+                json_encode([
+                    'code' => $locked['code'] ?? null,
+                    'blood_type' => $bloodType,
+                    'quantity' => $quantity,
+                ], JSON_UNESCAPED_UNICODE),
+                $ip
             );
 
             $this->pdo->commit();

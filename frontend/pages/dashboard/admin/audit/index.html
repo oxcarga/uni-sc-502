@@ -11,7 +11,8 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
   <link rel="stylesheet" href="../../assets/css/custom.css" />
   <script type="module">
-    import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`./audit.js?t=${Date.now()}`);
   </script>
 </head>
 
@@ -111,30 +112,40 @@
       </header>
 
       <main class="flex-grow-1" style="padding: 2rem 2.5rem">
-        <div class="mb-4">
-          <div class="d-flex align-items-center gap-2 mb-1">
-            <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Auditoría</h1>
-            <span class="demo-badge">Stub · P8</span>
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Auditoría</h1>
+              <span class="demo-badge" id="audit-count">—</span>
+            </div>
+            <p class="text-muted mb-0">
+              Acciones sensibles: cambio de políticas, asignación de solicitudes, etc.
+            </p>
           </div>
-          <p class="text-muted mb-0">
-            Aquí se listarán cambios sensibles del sistema desde <code>audit_log</code>.
-          </p>
+          <a href="/dashboard/admin/settings/" class="btn btn-outline-secondary rounded-3 fw-semibold">Políticas</a>
         </div>
 
-        <section class="coming-soon" aria-labelledby="audit-stub">
-          <span class="demo-badge mb-3">Próximamente</span>
-          <h2 class="coming-soon__title" id="audit-stub">Registro de auditoría</h2>
-          <p class="coming-soon__text mb-3">
-            Acciones admin (activar centros, cambiar políticas, deshabilitar usuarios) quedarán trazadas cuando exista la API de P8.
-          </p>
-          <p class="text-muted mb-0" style="font-size: 0.875rem">
-            Mientras tanto, esta ruta existe para no romper la navegación del shell.
-          </p>
+        <section class="card p-3" aria-labelledby="audit-table-title">
+          <h2 class="section-title mb-3" id="audit-table-title">Registro reciente</h2>
+          <div class="table-responsive">
+            <table class="table table-borderless align-middle mb-0" id="audit-table">
+              <thead>
+                <tr>
+                  <th scope="col">Fecha</th>
+                  <th scope="col">Actor</th>
+                  <th scope="col">Acción</th>
+                  <th scope="col">Entidad</th>
+                  <th scope="col">Detalle</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="5" class="text-muted text-center py-4">Cargando…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </section>
-
-        <div class="mt-4">
-          <a href="/dashboard/admin/" class="btn btn-outline-secondary rounded-3 fw-semibold">Volver al panel</a>
-        </div>
       </main>
     </div>
   </div>

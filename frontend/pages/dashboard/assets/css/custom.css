@@ -292,6 +292,70 @@ h1, h2, h3, h4, h5, h6,
   color: #0b1c30;
 }
 
+.notif-bell-wrap {
+  position: relative;
+}
+.notif-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.25rem;
+  border-radius: 9999px;
+  background: #b90538;
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.1rem;
+  text-align: center;
+  pointer-events: none;
+}
+.notif-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: 22rem;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.875rem;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+  z-index: 50;
+}
+.notif-panel.show { display: block; }
+.notif-panel__header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+.notif-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+}
+.notif-item:hover { background: #f8fafc; }
+.notif-item--unread { background: #f0faf8; }
+.notif-item__title { font-weight: 700; font-size: 0.875rem; color: #0b1c30; }
+.notif-item__body {
+  margin-top: 0.2rem;
+  font-size: 0.8125rem;
+  color: #64748b;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.notif-item__meta { margin-top: 0.35rem; font-size: 0.75rem; color: #94a3b8; }
+
 /* --- Avatar initials / photo --------------------------------------------- */
 .avatar-initials {
   display: inline-flex;
