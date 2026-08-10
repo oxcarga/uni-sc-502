@@ -53,6 +53,7 @@ Patrón de referencia: perfil donante (`frontend/pages/dashboard/donor/profile/`
 4. **Error** (`alert-danger`): **persistente** hasta el siguiente mensaje o acción del usuario. No auto-ocultar.
 5. No mostrar mensajes de “cargado desde el servidor” al abrir el formulario; solo feedback de **error de carga**, **error al guardar** o **éxito al guardar**.
 6. `aria-live="polite"` en el contenedor del alert.
+7. Si la acción ocurre en un **modal**, los errores de esa acción van **dentro del modal** (visibles sin cerrarlo). El éxito puede mostrarse en el sticky bar tras cerrar el modal.
 
 ### Tarjetas
 - Fondo blanco con borde 1px en gris muy claro

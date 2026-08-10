@@ -122,6 +122,19 @@ SELECT COUNT(*) AS active_centers FROM donation_centers WHERE active = 1;
 - Cada fila `role=donor` debe tener `dp.blood_type` (o al menos fila en `donor_profiles`).
 - Debe haber ≥1 centro activo (seed: Hospital Regional).
 
+### P5 — citas y donaciones
+
+```bash
+docker-compose exec db mysql -u pulso_user -ppulso_password pulso_solidario -e "
+SELECT id, code, donor_id, center_id, scheduled_at, status FROM appointments ORDER BY scheduled_at;
+SELECT id, donor_id, appointment_id, blood_type, donated_at, certificate_code FROM donations;
+SELECT id, code, donation_id, blood_type, status FROM blood_units;
+SELECT key_name, value_text FROM donation_policies WHERE key_name = 'donor_interval_days';
+"
+```
+
+**Flujo demo (UI):** login `donante@test.com` → Citas → agendar (o usar seed) → login `banco@test.com` → Citas → Completar → volver como donante y ver historial de donaciones.
+
 O en phpMyAdmin: http://localhost:3002 (`pulso_user` / `pulso_password`).
 
 ## Solución de problemas

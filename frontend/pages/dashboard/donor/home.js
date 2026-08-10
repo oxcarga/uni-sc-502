@@ -3,6 +3,9 @@ const { donorApi, centersApi } = await import(`/js/api.js?t=${Date.now()}`);
 const bloodEl = document.getElementById('home-blood-type');
 const eligibleEl = document.getElementById('home-eligible');
 const nearbyEl = document.getElementById('home-nearby-list');
+const nextDateEl = document.getElementById('home-next-date');
+const nextCenterEl = document.getElementById('home-next-center');
+const nextMetaEl = document.getElementById('home-next-meta');
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -10,6 +13,11 @@ function escapeHtml(value) {
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;');
+}
+
+function parseDate(value) {
+  const date = new Date(String(value ?? '').replace(' ', 'T'));
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 try {
@@ -25,6 +33,42 @@ try {
   }
 } catch {
   if (bloodEl) bloodEl.textContent = 'Perfil no disponible';
+}
+
+try {
+  const apptPayload = await donorApi.listAppointments();
+  const list = Array.isArray(apptPayload?.data) ? apptPayload.data : [];
+  const now = Date.now();
+  const next = list
+    .filter((item) => item.status === 'pending' || item.status === 'confirmed')
+    .filter((item) => {
+      const date = parseDate(item.scheduled_at);
+      return date && date.getTime() >= now;
+    })
+    .sort((a, b) => parseDate(a.scheduled_at) - parseDate(b.scheduled_at))[0];
+
+  if (!next) {
+    if (nextDateEl) nextDateEl.textContent = 'Sin cita';
+    if (nextCenterEl) nextCenterEl.textContent = 'Agenda tu próxima donación.';
+    if (nextMetaEl) nextMetaEl.textContent = '—';
+  } else {
+    const date = parseDate(next.scheduled_at);
+    if (nextDateEl && date) {
+      nextDateEl.textContent = date.toLocaleDateString('es-CR', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      });
+    }
+    if (nextCenterEl) nextCenterEl.textContent = next.center_name || 'Centro';
+    if (nextMetaEl && date) {
+      const time = date.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
+      const status = next.status === 'confirmed' ? 'Confirmada' : 'Pendiente';
+      nextMetaEl.textContent = `${time} · ${status}`;
+    }
+  }
+} catch {
+  if (nextCenterEl) nextCenterEl.textContent = 'No se pudieron cargar citas.';
 }
 
 try {

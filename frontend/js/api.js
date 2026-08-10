@@ -92,6 +92,28 @@ export const donorApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     }),
+  listAppointments: () => apiFetch('/donor/appointments'),
+  createAppointment: (data) =>
+    apiFetch('/donor/appointments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
+  cancelAppointment: (id) =>
+    apiFetch(`/donor/appointments/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'cancelled' }),
+    }),
+  listDonations: () => apiFetch('/donor/donations'),
+};
+
+export const bankApi = {
+  listAppointments: () => apiFetch('/bank/appointments'),
+  completeAppointment: (id) =>
+    apiFetch(`/bank/appointments/${id}/complete`, {
+      method: 'POST',
+    }),
 };
 
 export const centersApi = {

@@ -99,6 +99,20 @@ class DonorProfileRepository
         return $updated;
     }
 
+    public function touchLastDonation(int $userId, string $donatedAt): void
+    {
+        $this->ensureForUser($userId);
+        $query = $this->pdo->prepare(
+            'UPDATE donor_profiles
+             SET last_donation_at = :donated_at, eligible = 0
+             WHERE user_id = :user_id'
+        );
+        $query->execute([
+            'donated_at' => $donatedAt,
+            'user_id' => $userId,
+        ]);
+    }
+
     public static function isValidBloodType(?string $bloodType): bool
     {
         if ($bloodType === null || $bloodType === '') {
