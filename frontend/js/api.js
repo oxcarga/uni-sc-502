@@ -129,6 +129,29 @@ export const bankApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     }),
+  listRequests: () => apiFetch('/bank/requests'),
+  assignRequest: (id) =>
+    apiFetch(`/bank/requests/${id}/assign`, {
+      method: 'POST',
+    }),
+  listAlerts: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.status) query.set('status', params.status);
+    const qs = query.toString();
+    return apiFetch(`/bank/alerts${qs ? `?${qs}` : ''}`);
+  },
+  resolveAlert: (id) =>
+    apiFetch(`/bank/alerts/${id}/resolve`, {
+      method: 'POST',
+    }),
+  listCompatibleDonors: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.blood_type) query.set('blood_type', params.blood_type);
+    if (params.eligible === false || params.eligible === 0) query.set('eligible', '0');
+    if (params.limit) query.set('limit', String(params.limit));
+    const qs = query.toString();
+    return apiFetch(`/bank/donors/compatible${qs ? `?${qs}` : ''}`);
+  },
 };
 
 export const centersApi = {

@@ -13,7 +13,8 @@ INSERT IGNORE INTO users (
 ) VALUES
   ('Donante', 'Donante', 'donante@test.com', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'donor', 1, 1),
   ('Banco', 'Banco', 'banco@test.com', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'bank', 1, 1),
-  ('Admin', 'Admin', 'admin@test.com', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'admin', 1, 1);
+  ('Admin', 'Admin', 'admin@test.com', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'admin', 1, 1),
+  ('Elena', 'Rodríguez', 'donante_o@test.com', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'donor', 1, 1);
 
 -- ---------------------------------------------------------------------------
 -- Centro + perfiles
@@ -44,6 +45,18 @@ SELECT
   1, 1, 1
 FROM users u
 WHERE u.email = 'donante@test.com';
+
+INSERT IGNORE INTO donor_profiles (
+  user_id, blood_type, birth_date, phone, province, canton, address,
+  medical_history, eligible, last_donation_at,
+  notify_nearby, notify_appointments, notify_blood_match
+)
+SELECT
+  u.id, 'O-', '1992-03-22', '8777-0000', 'San José', 'Escazú', 'San Rafael',
+  NULL, 1, DATE_SUB(CURDATE(), INTERVAL 60 DAY),
+  1, 1, 1
+FROM users u
+WHERE u.email = 'donante_o@test.com';
 
 INSERT IGNORE INTO bank_profiles (user_id, center_id)
 SELECT u.id, 1
@@ -111,6 +124,28 @@ INSERT IGNORE INTO blood_units (
   DATE_SUB(NOW(), INTERVAL 90 DAY), DATE_ADD(CURDATE(), INTERVAL 35 DAY)
 );
 
+-- Stock físico O- (para asignar solicitud RE-9082 qty=4). Sin cita asociada.
+INSERT IGNORE INTO donations (
+  id, donor_id, center_id, appointment_id, blood_type, units, donated_at, certificate_code
+)
+SELECT
+  2, u.id, 1, NULL, 'O-', 8,
+  DATE_SUB(NOW(), INTERVAL 30 DAY), 'CERT-DEMO-O-STOCK'
+FROM users u
+WHERE u.email = 'donante_o@test.com';
+
+INSERT IGNORE INTO blood_units (
+  id, code, donation_id, center_id, blood_type, status, collected_at, expires_at
+) VALUES
+  (2, 'BU-DEMO-O-001', 2, 1, 'O-', 'available', DATE_SUB(NOW(), INTERVAL 30 DAY), DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
+  (3, 'BU-DEMO-O-002', 2, 1, 'O-', 'available', DATE_SUB(NOW(), INTERVAL 30 DAY), DATE_ADD(CURDATE(), INTERVAL 30 DAY)),
+  (4, 'BU-DEMO-O-003', 2, 1, 'O-', 'available', DATE_SUB(NOW(), INTERVAL 29 DAY), DATE_ADD(CURDATE(), INTERVAL 31 DAY)),
+  (5, 'BU-DEMO-O-004', 2, 1, 'O-', 'available', DATE_SUB(NOW(), INTERVAL 29 DAY), DATE_ADD(CURDATE(), INTERVAL 31 DAY)),
+  (6, 'BU-DEMO-O-005', 2, 1, 'O-', 'available', DATE_SUB(NOW(), INTERVAL 28 DAY), DATE_ADD(CURDATE(), INTERVAL 32 DAY)),
+  (7, 'BU-DEMO-O-006', 2, 1, 'O-', 'available', DATE_SUB(NOW(), INTERVAL 28 DAY), DATE_ADD(CURDATE(), INTERVAL 32 DAY)),
+  (8, 'BU-DEMO-O-007', 2, 1, 'O-', 'available', DATE_SUB(NOW(), INTERVAL 27 DAY), DATE_ADD(CURDATE(), INTERVAL 33 DAY)),
+  (9, 'BU-DEMO-O-008', 2, 1, 'O-', 'available', DATE_SUB(NOW(), INTERVAL 27 DAY), DATE_ADD(CURDATE(), INTERVAL 33 DAY));
+
 -- ---------------------------------------------------------------------------
 -- Inventario (mixto; O- en crítico <50)
 -- ---------------------------------------------------------------------------
@@ -149,7 +184,7 @@ INSERT IGNORE INTO alerts (
   id, center_id, request_id, blood_type, priority, status, message
 ) VALUES (
   1, 1, 1, 'O-', 'critical', 'active',
-  'Stock crítico de O- en Hospital Regional'
+  'Stock critico de O- en Hospital Regional'
 );
 
 -- ---------------------------------------------------------------------------

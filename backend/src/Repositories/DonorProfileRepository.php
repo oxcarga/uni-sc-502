@@ -113,6 +113,44 @@ class DonorProfileRepository
         ]);
     }
 
+    /**
+     * Donantes con el mismo tipo de sangre (exacto) y elegibles por defecto.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function findCompatible(string $bloodType, bool $eligibleOnly = true, int $limit = 50): array
+    {
+        if (!in_array($bloodType, self::BLOOD_TYPES, true)) {
+            return [];
+        }
+
+        $limit = max(1, min(100, $limit));
+        $sql = 'SELECT u.id AS user_id, u.first_name, u.last_name, u.email,
+                       dp.blood_type, dp.phone, dp.province, dp.canton,
+                       dp.eligible, dp.last_donation_at,
+                       dp.notify_blood_match
+                FROM donor_profiles dp
+                JOIN users u ON u.id = dp.user_id
+                WHERE dp.blood_type = :blood_type
+                  AND u.role = \'donor\'
+                  AND u.active = 1';
+        if ($eligibleOnly) {
+            $sql .= ' AND dp.eligible = 1';
+        }
+        $sql .= " ORDER BY dp.last_donation_at ASC, u.last_name ASC, u.first_name ASC LIMIT {$limit}";
+
+        $query = $this->pdo->prepare($sql);
+        $query->execute(['blood_type' => $bloodType]);
+
+        return array_map(static function (array $row): array {
+            $row['user_id'] = (int) $row['user_id'];
+            $row['eligible'] = (bool) $row['eligible'];
+            $row['notify_blood_match'] = (bool) $row['notify_blood_match'];
+
+            return $row;
+        }, $query->fetchAll());
+    }
+
     public static function isValidBloodType(?string $bloodType): bool
     {
         if ($bloodType === null || $bloodType === '') {

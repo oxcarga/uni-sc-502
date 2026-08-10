@@ -352,6 +352,21 @@ Escritura de centros (crear/editar) queda aplazada.
 
 Admin puede filtrar por `center_id` (query o body). Umbrales desde `donation_policies` (`inventory_*`).
 
+Tras cada movimiento de stock se sincroniza alerta crítica (`created` / `resolved` / `none` en `alert_sync`).
+
+### Solicitudes, alertas y donantes (P7)
+
+| Método | Ruta | Notas |
+|--------|------|-------|
+| `GET` | `/bank/requests` | Cola del centro (institución + prioridad) |
+| `POST` | `/bank/requests/{id}/assign` | Transacción: unidades `assigned` + movimiento `assignment` + request `assigned` |
+| `GET` | `/bank/alerts` | `?status=active\|resolved` |
+| `POST` | `/bank/alerts/{id}/resolve` | Resolución manual |
+| `GET` | `/bank/donors/compatible` | Query: `blood_type` (requerido), `eligible=0` opcional |
+
+**Flujo demo CU3:** login `banco@test.com` → Panel → Asignar `RE-9082` (O- ×4).  
+**Flujo demo CU2:** alertas activas en panel; donantes O- en `/dashboard/bank/donors/?blood_type=O-` (`donante_o@test.com`).
+
 ### Otras rutas (plantilla / legado)
 
 | Ruta Slim | URL | Método |

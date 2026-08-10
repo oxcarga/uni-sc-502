@@ -3,24 +3,31 @@
 // Evita conversiones implícitas de tipos
 declare(strict_types=1);
 
+use App\Controllers\AlertController;
 use App\Controllers\AppointmentController;
 use App\Controllers\AuthController;
+use App\Controllers\BankDonorController;
 use App\Controllers\CenterController;
 use App\Controllers\DonorProfileController;
 use App\Controllers\InventoryController;
+use App\Controllers\RequestController;
 use App\Controllers\UserController;
 use App\Database\Connection;
 use App\Middleware\AuthMiddleware;
+use App\Repositories\AlertRepository;
 use App\Repositories\AppointmentRepository;
 use App\Repositories\BankProfileRepository;
+use App\Repositories\BloodUnitRepository;
 use App\Repositories\DonationCenterRepository;
 use App\Repositories\DonationPolicyRepository;
 use App\Repositories\DonationRepository;
 use App\Repositories\DonorProfileRepository;
 use App\Repositories\EmailVerificationTokenRepository;
 use App\Repositories\InventoryRepository;
+use App\Repositories\RequestRepository;
 use App\Repositories\UserRepository;
 use App\Services\EmailVerificationService;
+use App\Services\InventoryAlertService;
 use App\Support\Session;
 use App\Support\SmtpMailer;
 use DI\Container;
@@ -72,6 +79,18 @@ $container->set(
     InventoryRepository::class,
     fn ($c) => new InventoryRepository($c->get(\PDO::class))
 );
+$container->set(
+    RequestRepository::class,
+    fn ($c) => new RequestRepository($c->get(\PDO::class))
+);
+$container->set(
+    AlertRepository::class,
+    fn ($c) => new AlertRepository($c->get(\PDO::class))
+);
+$container->set(
+    BloodUnitRepository::class,
+    fn ($c) => new BloodUnitRepository($c->get(\PDO::class))
+);
 
 $container->set(
     SmtpMailer::class,
@@ -91,6 +110,13 @@ $container->set(
         $c->get(SmtpMailer::class),
         $c->get(LoggerInterface::class),
         (string) (getenv('APP_URL') ?: 'http://localhost:3000'),
+    )
+);
+$container->set(
+    InventoryAlertService::class,
+    fn ($c) => new InventoryAlertService(
+        $c->get(AlertRepository::class),
+        $c->get(DonationPolicyRepository::class)
     )
 );
 
@@ -137,6 +163,7 @@ $container->set(
         $c->get(BankProfileRepository::class),
         $c->get(DonationPolicyRepository::class),
         $c->get(InventoryRepository::class),
+        $c->get(InventoryAlertService::class),
         $c->get(LoggerInterface::class)
     )
 );
@@ -147,6 +174,38 @@ $container->set(
         $c->get(BankProfileRepository::class),
         $c->get(DonationCenterRepository::class),
         $c->get(DonationPolicyRepository::class),
+        $c->get(InventoryAlertService::class),
+        $c->get(LoggerInterface::class)
+    )
+);
+$container->set(
+    RequestController::class,
+    fn ($c) => new RequestController(
+        $c->get(\PDO::class),
+        $c->get(RequestRepository::class),
+        $c->get(BloodUnitRepository::class),
+        $c->get(InventoryRepository::class),
+        $c->get(BankProfileRepository::class),
+        $c->get(DonationCenterRepository::class),
+        $c->get(InventoryAlertService::class),
+        $c->get(LoggerInterface::class)
+    )
+);
+$container->set(
+    AlertController::class,
+    fn ($c) => new AlertController(
+        $c->get(AlertRepository::class),
+        $c->get(BankProfileRepository::class),
+        $c->get(DonationCenterRepository::class),
+        $c->get(LoggerInterface::class)
+    )
+);
+$container->set(
+    BankDonorController::class,
+    fn ($c) => new BankDonorController(
+        $c->get(DonorProfileRepository::class),
+        $c->get(BankProfileRepository::class),
+        $c->get(DonationCenterRepository::class),
         $c->get(LoggerInterface::class)
     )
 );
