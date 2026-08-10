@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Controllers\AchievementController;
 use App\Controllers\AppointmentController;
 use App\Controllers\DonorProfileController;
 use App\Middleware\AuthMiddleware;
@@ -21,5 +22,8 @@ return function (App $app) {
         ->add(AuthMiddleware::class);
 
     $app->get('/donor/donations', [AppointmentController::class, 'indexDonorDonations'])
+        ->add(AuthMiddleware::class);
+
+    $app->get('/donor/achievements', [AchievementController::class, 'indexDonor'])
         ->add(AuthMiddleware::class);
 };

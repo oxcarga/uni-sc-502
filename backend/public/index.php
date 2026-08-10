@@ -3,6 +3,7 @@
 // Evita conversiones implícitas de tipos
 declare(strict_types=1);
 
+use App\Controllers\AchievementController;
 use App\Controllers\AdminAuditController;
 use App\Controllers\AdminPolicyController;
 use App\Controllers\AlertController;
@@ -17,6 +18,7 @@ use App\Controllers\RequestController;
 use App\Controllers\UserController;
 use App\Database\Connection;
 use App\Middleware\AuthMiddleware;
+use App\Repositories\AchievementRepository;
 use App\Repositories\AlertRepository;
 use App\Repositories\AppointmentRepository;
 use App\Repositories\AuditLogRepository;
@@ -31,6 +33,7 @@ use App\Repositories\InventoryRepository;
 use App\Repositories\NotificationRepository;
 use App\Repositories\RequestRepository;
 use App\Repositories\UserRepository;
+use App\Services\AchievementService;
 use App\Services\EmailVerificationService;
 use App\Services\InventoryAlertService;
 use App\Services\NotificationDispatchService;
@@ -105,6 +108,10 @@ $container->set(
     AuditLogRepository::class,
     fn ($c) => new AuditLogRepository($c->get(\PDO::class))
 );
+$container->set(
+    AchievementRepository::class,
+    fn ($c) => new AchievementRepository($c->get(\PDO::class))
+);
 
 $container->set(
     SmtpMailer::class,
@@ -139,6 +146,13 @@ $container->set(
         $c->get(AlertRepository::class),
         $c->get(DonationPolicyRepository::class),
         $c->get(NotificationDispatchService::class)
+    )
+);
+$container->set(
+    AchievementService::class,
+    fn ($c) => new AchievementService(
+        $c->get(AchievementRepository::class),
+        $c->get(DonationRepository::class)
     )
 );
 
@@ -186,6 +200,14 @@ $container->set(
         $c->get(DonationPolicyRepository::class),
         $c->get(InventoryRepository::class),
         $c->get(InventoryAlertService::class),
+        $c->get(AchievementService::class),
+        $c->get(LoggerInterface::class)
+    )
+);
+$container->set(
+    AchievementController::class,
+    fn ($c) => new AchievementController(
+        $c->get(AchievementService::class),
         $c->get(LoggerInterface::class)
     )
 );

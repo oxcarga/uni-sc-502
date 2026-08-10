@@ -8,6 +8,9 @@ const nextCenterEl = document.getElementById('home-next-center');
 const nextMetaEl = document.getElementById('home-next-meta');
 const homeNotifList = document.getElementById('home-notif-list');
 const homeNotifCount = document.getElementById('home-notif-count');
+const homeAchieveList = document.getElementById('home-achieve-list');
+const homeAchieveCount = document.getElementById('home-achieve-count');
+const homeAchieveSummary = document.getElementById('home-achieve-summary');
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -133,5 +136,48 @@ try {
   if (homeNotifList) {
     homeNotifList.innerHTML =
       '<p class="text-muted mb-0" style="font-size: 0.875rem">No se pudieron cargar avisos.</p>';
+  }
+}
+
+try {
+  const achievePayload = await donorApi.listAchievements();
+  const items = Array.isArray(achievePayload?.data?.achievements)
+    ? achievePayload.data.achievements
+    : [];
+  const donationCount = Number(achievePayload?.data?.donation_count ?? 0);
+  const unlocked = items.filter((item) => item.unlocked).length;
+  if (homeAchieveCount) {
+    homeAchieveCount.textContent = `${unlocked}/${items.length}`;
+  }
+  if (homeAchieveSummary) {
+    homeAchieveSummary.textContent =
+      donationCount === 1
+        ? '1 donacion registrada. Sigue sumando para desbloquear mas insignias.'
+        : `${donationCount} donaciones registradas. Sigue sumando para desbloquear mas insignias.`;
+  }
+  if (homeAchieveList) {
+    homeAchieveList.innerHTML = items
+      .map((item) => {
+        const locked = !item.unlocked;
+        const progressLabel = locked
+          ? `${item.progress}/${item.criteria_value}`
+          : 'Desbloqueado';
+        return `
+        <div class="achieve-badge ${locked ? 'achieve-badge--locked' : ''}" title="${escapeHtml(item.description || '')}">
+          <div class="ico" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/>
+              <path d="M17 9h1a3 3 0 0 0 0-6h-1M7 9H6a3 3 0 0 1 0-6h1"/>
+            </svg>
+          </div>
+          <div class="name">${escapeHtml(item.name)}</div>
+          <div class="text-muted" style="font-size: 0.6875rem">${escapeHtml(progressLabel)}</div>
+        </div>`;
+      })
+      .join('');
+  }
+} catch {
+  if (homeAchieveSummary) {
+    homeAchieveSummary.textContent = 'No se pudieron cargar los logros.';
   }
 }
