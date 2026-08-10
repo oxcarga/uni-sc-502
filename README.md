@@ -39,6 +39,8 @@ Control del inventario de sangre:
 - Trazabilidad de unidades de sangre
 - Reporte de compatibilidad de donantes
 
+> **Estado de implementación:** el MVP (auth, paneles donante/banco, inventario, solicitudes, políticas, auditoría, logros) está en las fases **P0–P9** de [plan.md](plan.md). Gobierno admin completo (KPIs en vivo, usuarios, escritura de centros), campana de notificaciones en todos los shells, elegibilidad/impacto, ciclo completo de solicitudes + trazabilidad y reportes están en el backlog **P10–P15**. No hay portal de hospital ni roles `nurse`/`doctor` (solo `donor`, `bank`, `admin`).
+
 ---
 
 ## 🚀 Cómo Empezar
@@ -154,36 +156,37 @@ npx http-server frontend
 ### 1. **Panel de Administración General** 
 
 **Secciones principales:**
-- **Panel principal**: Indicadores clave (donantes activos, donaciones este mes, tasa de conversión)
-- **Gestión de Usuarios**: Tabla de usuarios con filtros y acciones (activar/desactivar, cambiar rol)
-- **Reportes**: Gráficos de donaciones por mes, distribución por tipo de sangre, efectividad por centro
-- **Configuración**: Políticas de donación, intervalos mínimos entre donaciones, criterios de elegibilidad
-- **Registro de auditoría**: Registro de cambios en el sistema con marca de tiempo y usuario responsable
-- **Bancos Registrados**: Gestión de centros de donación y coordinación
+- **Panel principal**: Indicadores clave (P10: KPIs en vivo; hoy mock en home)
+- **Gestión de Usuarios**: Tabla con filtros y activar/desactivar / rol (P10; UI demo hasta entonces)
+- **Reportes**: Donaciones por mes, tipos de sangre, volumen por centro (P15)
+- **Configuración**: Políticas de donación e intervalos (✅ P8 — `/dashboard/admin/settings/`)
+- **Registro de auditoría**: Cambios con marca de tiempo y usuario (✅ P8 — `/dashboard/admin/audit/`)
+- **Bancos Registrados**: Listado live; create/edit/activar (P11)
 
 ### 2. **Panel del Donante**
 
 **Secciones principales:**
-- **Mi Perfil**: Información personal, grupo sanguíneo, antecedentes médicos
-- **Historial de Donaciones**: Listado de todas las donaciones realizadas con fechas y ubicaciones
-- **Agendar Donación**: Formulario para seleccionar fecha, hora y centro preferido
-- **Elegibilidad**: Verificador interactivo que indica si el usuario puede donar según criterios actuales
-- **Mi Impacto**: Visualización del impacto de sus donaciones (vidas salvadas, cantidad de unidades)
-- **Logros**: Sistema de insignias por hitos de donación
-- **Notificaciones**: Centro de alertas sobre citas próximas y alertas de disponibilidad
+- **Mi Perfil**: Información personal, grupo sanguíneo, antecedentes médicos (✅)
+- **Historial de Donaciones**: Listado de donaciones con fechas y ubicaciones (✅)
+- **Agendar Donación**: Fecha, hora y centro preferido (✅)
+- **Elegibilidad**: Verificador según criterios/políticas (P13)
+- **Mi Impacto**: Unidades / vidas estimadas (P13)
+- **Logros**: Insignias por hitos de donación (✅ P9)
+- **Notificaciones**: Campana in-app (✅ en home; P12 en todo el shell + más tipos)
 
 ### 3. **Gestión de Banco de Sangre** 
 
 **Secciones principales:**
-- **Inventario en Vivo**: Visualización de existencias por tipo de sangre con indicadores de disponibilidad
+- **Inventario en Vivo**: Existencias por tipo con indicadores de disponibilidad (✅)
   - Verde: Disponibilidad normal (>100 unidades)
   - Amarillo: Disponibilidad moderada (50-100 unidades)
   - Rojo: Disponibilidad crítica (<50 unidades)
-- **Alertas Activas**: Notificaciones de donaciones requeridas urgentemente
-- **Movimientos de Inventario**: Historial de recepciones y asignaciones
-- **Solicitudes de Centros Médicos**: Cola de solicitudes pendientes
-- **Compatibilidad de Donantes**: Búsqueda de donantes compatibles por tipo de sangre
-- **Reporte de Trazabilidad**: Seguimiento completo de una unidad de sangre desde donación hasta administración
+- **Alertas Activas**: Notificaciones de donaciones requeridas urgentemente (✅)
+- **Movimientos de Inventario**: Historial de recepciones y asignaciones (✅)
+- **Solicitudes de Centros Médicos**: Cola y asignación (✅ list/assign; P14 create + ciclo `in_transit`/`completed`)
+- **Compatibilidad de Donantes**: Búsqueda por tipo de sangre (✅)
+- **Reporte de Trazabilidad**: Unidad desde donación hasta asignación (P14)
+- **Settings del centro**: Persistencia de datos del banco (P11)
 
 ---
 
@@ -192,6 +195,7 @@ npx http-server frontend
 ```
 ./
 ├── README.md               # Documentación del proyecto
+├── plan.md                 # Fases de implementación (P0–P15)
 ├── DESIGN.md               # Sistema de diseño
 ├── DOCKER.md               # Documentación Docker
 ├── docker-compose.yml      # Orquestación de servicios ⭐ Ejecutar desde aquí
