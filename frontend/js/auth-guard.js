@@ -60,6 +60,9 @@ try {
       homeNameEl.textContent = shortName;
     }
     document.body?.classList.remove('d-none');
+    if (document.getElementById('notif-bell')) {
+      import(`./notifications-ui.js?t=${Date.now()}`);
+    }
   }
 } catch {
   clearSessionCache();

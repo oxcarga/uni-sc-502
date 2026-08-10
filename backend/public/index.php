@@ -3,6 +3,8 @@
 // Evita conversiones implícitas de tipos
 declare(strict_types=1);
 
+use App\Controllers\AdminAuditController;
+use App\Controllers\AdminPolicyController;
 use App\Controllers\AlertController;
 use App\Controllers\AppointmentController;
 use App\Controllers\AuthController;
@@ -10,12 +12,14 @@ use App\Controllers\BankDonorController;
 use App\Controllers\CenterController;
 use App\Controllers\DonorProfileController;
 use App\Controllers\InventoryController;
+use App\Controllers\NotificationController;
 use App\Controllers\RequestController;
 use App\Controllers\UserController;
 use App\Database\Connection;
 use App\Middleware\AuthMiddleware;
 use App\Repositories\AlertRepository;
 use App\Repositories\AppointmentRepository;
+use App\Repositories\AuditLogRepository;
 use App\Repositories\BankProfileRepository;
 use App\Repositories\BloodUnitRepository;
 use App\Repositories\DonationCenterRepository;
@@ -24,10 +28,12 @@ use App\Repositories\DonationRepository;
 use App\Repositories\DonorProfileRepository;
 use App\Repositories\EmailVerificationTokenRepository;
 use App\Repositories\InventoryRepository;
+use App\Repositories\NotificationRepository;
 use App\Repositories\RequestRepository;
 use App\Repositories\UserRepository;
 use App\Services\EmailVerificationService;
 use App\Services\InventoryAlertService;
+use App\Services\NotificationDispatchService;
 use App\Support\Session;
 use App\Support\SmtpMailer;
 use DI\Container;
@@ -91,6 +97,14 @@ $container->set(
     BloodUnitRepository::class,
     fn ($c) => new BloodUnitRepository($c->get(\PDO::class))
 );
+$container->set(
+    NotificationRepository::class,
+    fn ($c) => new NotificationRepository($c->get(\PDO::class))
+);
+$container->set(
+    AuditLogRepository::class,
+    fn ($c) => new AuditLogRepository($c->get(\PDO::class))
+);
 
 $container->set(
     SmtpMailer::class,
@@ -113,10 +127,18 @@ $container->set(
     )
 );
 $container->set(
+    NotificationDispatchService::class,
+    fn ($c) => new NotificationDispatchService(
+        $c->get(NotificationRepository::class),
+        $c->get(DonorProfileRepository::class)
+    )
+);
+$container->set(
     InventoryAlertService::class,
     fn ($c) => new InventoryAlertService(
         $c->get(AlertRepository::class),
-        $c->get(DonationPolicyRepository::class)
+        $c->get(DonationPolicyRepository::class),
+        $c->get(NotificationDispatchService::class)
     )
 );
 
@@ -188,6 +210,7 @@ $container->set(
         $c->get(BankProfileRepository::class),
         $c->get(DonationCenterRepository::class),
         $c->get(InventoryAlertService::class),
+        $c->get(AuditLogRepository::class),
         $c->get(LoggerInterface::class)
     )
 );
@@ -206,6 +229,28 @@ $container->set(
         $c->get(DonorProfileRepository::class),
         $c->get(BankProfileRepository::class),
         $c->get(DonationCenterRepository::class),
+        $c->get(LoggerInterface::class)
+    )
+);
+$container->set(
+    NotificationController::class,
+    fn ($c) => new NotificationController(
+        $c->get(NotificationRepository::class),
+        $c->get(LoggerInterface::class)
+    )
+);
+$container->set(
+    AdminPolicyController::class,
+    fn ($c) => new AdminPolicyController(
+        $c->get(DonationPolicyRepository::class),
+        $c->get(AuditLogRepository::class),
+        $c->get(LoggerInterface::class)
+    )
+);
+$container->set(
+    AdminAuditController::class,
+    fn ($c) => new AdminAuditController(
+        $c->get(AuditLogRepository::class),
         $c->get(LoggerInterface::class)
     )
 );
@@ -231,5 +276,7 @@ $app->setBasePath('/api');
 (require __DIR__ . '/../src/Routes/donor.php')($app);
 (require __DIR__ . '/../src/Routes/bank.php')($app);
 (require __DIR__ . '/../src/Routes/centers.php')($app);
+(require __DIR__ . '/../src/Routes/notifications.php')($app);
+(require __DIR__ . '/../src/Routes/admin.php')($app);
 
 $app->run();

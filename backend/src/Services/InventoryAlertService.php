@@ -14,12 +14,13 @@ class InventoryAlertService
 {
     public function __construct(
         private readonly AlertRepository $alerts,
-        private readonly DonationPolicyRepository $policies
+        private readonly DonationPolicyRepository $policies,
+        private readonly NotificationDispatchService $notifications
     ) {
     }
 
     /**
-     * @return array{action: 'created'|'resolved'|'none', alert: ?array<string, mixed>}
+     * @return array{action: 'created'|'resolved'|'none', alert: ?array<string, mixed>, notifications_sent: int}
      */
     public function syncForBloodType(
         int $centerId,
@@ -33,25 +34,30 @@ class InventoryAlertService
 
         if ($level === 'critical') {
             if ($active !== null) {
-                return ['action' => 'none', 'alert' => $active];
+                return ['action' => 'none', 'alert' => $active, 'notifications_sent' => 0];
             }
             $alert = $this->alerts->create(
                 $centerId,
                 $bloodType,
-                "Stock crítico de {$bloodType} ({$units} unidades)",
+                "Stock critico de {$bloodType} ({$units} unidades)",
                 'critical',
                 $requestId
             );
+            $sent = $this->notifications->notifyCompatibleDonorsOfShortage(
+                $bloodType,
+                (int) $alert['id'],
+                $units
+            );
 
-            return ['action' => 'created', 'alert' => $alert];
+            return ['action' => 'created', 'alert' => $alert, 'notifications_sent' => $sent];
         }
 
         if ($active !== null) {
             $resolved = $this->alerts->resolve((int) $active['id']);
 
-            return ['action' => 'resolved', 'alert' => $resolved];
+            return ['action' => 'resolved', 'alert' => $resolved, 'notifications_sent' => 0];
         }
 
-        return ['action' => 'none', 'alert' => null];
+        return ['action' => 'none', 'alert' => null, 'notifications_sent' => 0];
     }
 }

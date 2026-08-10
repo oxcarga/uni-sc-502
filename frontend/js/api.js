@@ -164,6 +164,26 @@ export const centersApi = {
   get: (id) => apiFetch(`/centers/${id}`),
 };
 
+export const notificationsApi = {
+  list: (limit = 50) => apiFetch(`/notifications?limit=${encodeURIComponent(String(limit))}`),
+  markRead: (id) =>
+    apiFetch(`/notifications/${id}/read`, {
+      method: 'POST',
+    }),
+};
+
+export const adminApi = {
+  getPolicies: () => apiFetch('/admin/policies'),
+  updatePolicies: (data) =>
+    apiFetch('/admin/policies', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
+  listAuditLog: (limit = 100) =>
+    apiFetch(`/admin/audit-log?limit=${encodeURIComponent(String(limit))}`),
+};
+
 /** Cache opcional del perfil; la sesión real vive en cookie de servidor. */
 export function cacheSession(user) {
   sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(user));

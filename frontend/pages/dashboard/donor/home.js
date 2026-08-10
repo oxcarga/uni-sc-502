@@ -1,4 +1,4 @@
-const { donorApi, centersApi } = await import(`/js/api.js?t=${Date.now()}`);
+const { donorApi, centersApi, notificationsApi } = await import(`/js/api.js?t=${Date.now()}`);
 
 const bloodEl = document.getElementById('home-blood-type');
 const eligibleEl = document.getElementById('home-eligible');
@@ -6,6 +6,8 @@ const nearbyEl = document.getElementById('home-nearby-list');
 const nextDateEl = document.getElementById('home-next-date');
 const nextCenterEl = document.getElementById('home-next-center');
 const nextMetaEl = document.getElementById('home-next-meta');
+const homeNotifList = document.getElementById('home-notif-list');
+const homeNotifCount = document.getElementById('home-notif-count');
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -96,5 +98,40 @@ try {
 } catch {
   if (nearbyEl) {
     nearbyEl.innerHTML = '<p class="text-muted mb-0" style="font-size: 0.875rem">No se pudieron cargar centros.</p>';
+  }
+}
+
+try {
+  const notifPayload = await notificationsApi.list(5);
+  const items = Array.isArray(notifPayload?.data?.notifications)
+    ? notifPayload.data.notifications
+    : [];
+  const unread = Number(notifPayload?.data?.unread_count ?? 0);
+  if (homeNotifCount) {
+    homeNotifCount.textContent = unread ? `${unread} sin leer` : `${items.length} total`;
+  }
+  if (homeNotifList) {
+    if (!items.length) {
+      homeNotifList.innerHTML =
+        '<p class="text-muted mb-0" style="font-size: 0.875rem">Sin avisos por ahora.</p>';
+    } else {
+      homeNotifList.innerHTML = items
+        .map(
+          (item) => `
+        <div class="shortage-row">
+          <div class="shortage-info">
+            <div class="name">${escapeHtml(item.title)}${item.unread ? ' ·' : ''}</div>
+            <div class="place">${escapeHtml(item.body || '')}</div>
+          </div>
+          ${item.unread ? '<span class="badge-soft badge-soft--rose">Nueva</span>' : ''}
+        </div>`
+        )
+        .join('');
+    }
+  }
+} catch {
+  if (homeNotifList) {
+    homeNotifList.innerHTML =
+      '<p class="text-muted mb-0" style="font-size: 0.875rem">No se pudieron cargar avisos.</p>';
   }
 }

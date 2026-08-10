@@ -10,8 +10,83 @@ class DonationPolicyRepository
 {
     public const DEFAULT_DONOR_INTERVAL_DAYS = 56;
 
+    /** Claves editables por admin (globales). */
+    public const EDITABLE_KEYS = [
+        'inventory_healthy_min',
+        'inventory_moderate_min',
+        'inventory_critical_max',
+        'donor_interval_days',
+    ];
+
     public function __construct(private readonly PDO $pdo)
     {
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function findAllGlobal(): array
+    {
+        $query = $this->pdo->query(
+            'SELECT id, center_id, key_name, value_text, description, active, created_at, updated_at
+             FROM donation_policies
+             WHERE center_id IS NULL
+             ORDER BY key_name ASC'
+        );
+
+        return array_map(static function (array $row): array {
+            $row['id'] = (int) $row['id'];
+            $row['center_id'] = $row['center_id'] !== null ? (int) $row['center_id'] : null;
+            $row['active'] = (bool) $row['active'];
+
+            return $row;
+        }, $query->fetchAll());
+    }
+
+    /**
+     * @param array<string, int|string> $values key_name => value
+     * @return list<array<string, mixed>>
+     */
+    public function upsertGlobals(array $values): array
+    {
+        foreach ($values as $key => $value) {
+            if (!in_array($key, self::EDITABLE_KEYS, true)) {
+                continue;
+            }
+            $text = (string) (int) $value;
+            if ((int) $text <= 0) {
+                continue;
+            }
+
+            $find = $this->pdo->prepare(
+                'SELECT id FROM donation_policies
+                 WHERE center_id IS NULL AND key_name = :key
+                 LIMIT 1'
+            );
+            $find->execute(['key' => $key]);
+            $existing = $find->fetch();
+
+            if ($existing) {
+                $update = $this->pdo->prepare(
+                    'UPDATE donation_policies
+                     SET value_text = :value, active = 1
+                     WHERE id = :id'
+                );
+                $update->execute([
+                    'value' => $text,
+                    'id' => (int) $existing['id'],
+                ]);
+            } else {
+                $insert = $this->pdo->prepare(
+                    'INSERT INTO donation_policies (center_id, key_name, value_text, description, active)
+                     VALUES (NULL, :key, :value, NULL, 1)'
+                );
+                $insert->execute([
+                    'key' => $key,
+                    'value' => $text,
+                ]);
+            }
+        }
+
+        return $this->findAllGlobal();
     }
 
     public function getInt(string $key, int $default): int
