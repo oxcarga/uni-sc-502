@@ -10,6 +10,7 @@ use App\Repositories\DonationCenterRepository;
 use App\Repositories\DonationPolicyRepository;
 use App\Repositories\DonationRepository;
 use App\Repositories\DonorProfileRepository;
+use App\Repositories\InventoryRepository;
 use App\Support\JsonResponse;
 use Monolog\Logger;
 use PDO;
@@ -27,6 +28,7 @@ class AppointmentController
         private readonly DonorProfileRepository $profiles,
         private readonly BankProfileRepository $bankProfiles,
         private readonly DonationPolicyRepository $policies,
+        private readonly InventoryRepository $inventory,
         private Logger $logger
     ) {
     }
@@ -274,6 +276,18 @@ class AppointmentController
             );
             $this->profiles->touchLastDonation((int) $locked['donor_id'], $donatedAt);
 
+            $stock = $this->inventory->applyChange(
+                (int) $locked['center_id'],
+                (string) $bloodType,
+                1,
+                1,
+                'receipt',
+                (int) $auth['id'],
+                'Recepción por donación completada',
+                (int) $created['donation']['id'],
+                (int) $created['blood_unit']['id']
+            );
+
             $this->pdo->commit();
 
             $appointment = $this->appointments->findById($id);
@@ -282,7 +296,9 @@ class AppointmentController
                 'appointment' => $appointment,
                 'donation' => $created['donation'],
                 'blood_unit' => $created['blood_unit'],
-            ], 'Donación registrada.');
+                'inventory' => $stock['inventory'],
+                'movement_id' => $stock['movement_id'],
+            ], 'Donación registrada e inventario actualizado.');
         } catch (PDOException $error) {
             if ($this->pdo->inTransaction()) {
                 $this->pdo->rollBack();

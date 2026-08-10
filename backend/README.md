@@ -337,9 +337,20 @@ Escritura de centros (crear/editar) queda aplazada.
 | `PATCH` | `/donor/appointments/{id}` | Solo `{ "status": "cancelled" }` en pendientes/confirmadas propias |
 | `GET` | `/donor/donations` | Historial de donaciones |
 | `GET` | `/bank/appointments` | Citas del `center_id` del banco (`bank_profiles`) |
-| `POST` | `/bank/appointments/{id}/complete` | Transacción: cita → `donations` + `blood_units` + `last_donation_at` |
+| `POST` | `/bank/appointments/{id}/complete` | Transacción: cita → `donations` + `blood_units` + `last_donation_at` + recepción en inventario |
 
-**Flujo demo:** donante agenda → banco completa → aparece en `GET /donor/donations`.
+**Flujo demo:** donante agenda → banco completa → aparece en `GET /donor/donations` y suma 1 unidad al stock del tipo.
+
+### Inventario (P6)
+
+| Método | Ruta | Notas |
+|--------|------|-------|
+| `GET` | `/bank/inventory` | Stock por tipo + `level` (`healthy`/`moderate`/`critical`) y umbrales |
+| `GET` | `/bank/inventory/movements` | Libro reciente (`?limit=`, máx. 200) |
+| `POST` | `/bank/inventory/receipts` | Body: `blood_type`, `quantity`, `detail?` → movimiento `receipt` |
+| `POST` | `/bank/inventory/adjustments` | Body: `blood_type`, `quantity`, `mode` (`add`\|`subtract`\|`discard`), `detail?` |
+
+Admin puede filtrar por `center_id` (query o body). Umbrales desde `donation_policies` (`inventory_*`).
 
 ### Otras rutas (plantilla / legado)
 

@@ -51,12 +51,12 @@ Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./
 |------|-----------|
 | Auth (P0–P0c) | ✅ Cerrado: registro, confirmación email, sesión servidor, auth-guard |
 | Esquema MySQL | ✅ Tablas de dominio ya en `01_init.sql` + seed demo en `02_seed.sql` (centros, perfiles, citas, inventario, solicitudes, alertas, políticas, logros, notificaciones) |
-| BE dominio | ✅ Perfil/centros (P4) + citas/donaciones (P5); faltan inventario/solicitudes (P6+) |
-| FE paneles | ✅ Shells P1–P3 + P4/P5 cableados; faltan inventario/solicitudes (P6+) |
+| BE dominio | ✅ Perfil/centros (P4) + citas/donaciones (P5) + inventario (P6); faltan solicitudes (P7+) |
+| FE paneles | ✅ Shells P1–P3 + P4–P6 cableados; faltan solicitudes (P7+) |
 
-**Implicación:** desde P6, el pilar DB casi siempre es *verificar / ajustar seed* (no inventar el esquema desde cero). El trabajo duro es **BE + FE**.
+**Implicación:** desde P7, el pilar DB casi siempre es *verificar / ajustar seed* (no inventar el esquema desde cero). El trabajo duro es **BE + FE**.
 
-La siguiente fase a implementar es **P6**.
+La siguiente fase a implementar es **P7**.
 
 ---
 
@@ -458,7 +458,7 @@ Reglas aplicadas en app + transacción SQL:
 
 ---
 
-## P6 — Inventario del banco
+## ✅ P6 — Inventario del banco
 
 **Objetivo:** stock en vivo y libro de movimientos consumibles por API/UI.
 
@@ -500,9 +500,9 @@ Ajustes solo si faltan índices/constraints detectados al implementar.
 
 ### Listo cuando
 
-- [ ] Consulta de stock por tipo (API + UI banco)
-- [ ] Recepción/actualización deja movimiento y cambia `inventory`
-- [ ] Seed muestra al menos un tipo crítico en UI
+- [x] Consulta de stock por tipo (API + UI banco)
+- [x] Recepción/actualización deja movimiento y cambia `inventory`
+- [x] Seed muestra al menos un tipo crítico en UI
 
 **Desbloquea:** panel banco (inventario en vivo); base para CU2/CU3.
 
@@ -658,7 +658,7 @@ Solo ajustar seed/criterios si la evaluación en BE lo requiere.
 | ✅ P3 | Shell UI admin (`/dashboard/admin/**`) | Panel admin (superficie) | ✅ | ✅ | ✅ | ✅ |
 | ✅ P4 | Perfil donante + centros (API + FE) | CU1 (perfil) | ✅ | ✅ | ✅ | ✅ |
 | ✅ P5 | Citas + donaciones | CU1 (agenda/historial) | ✅ | ✅ | ✅ | ✅ |
-| P6 | Inventario + movimientos | Base CU2/CU3 | ☐ | ☐ | ☐ | ☐ |
+| ✅ P6 | Inventario + movimientos | Base CU2/CU3 | ✅ | ✅ | ✅ | ✅ |
 | P7 | Solicitudes + alertas + compatibles | CU2, CU3 | ☐ | ☐ | ☐ | ☐ |
 | P8 | Notificaciones + políticas + auditoría | CU2 completo + admin | ☐ | ☐ | ☐ | ☐ |
 | P9 | Logros / gamificación | Panel donante (logros) | ☐ | ☐ | ☐ | ☐ |
