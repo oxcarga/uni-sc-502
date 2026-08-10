@@ -106,6 +106,7 @@ export const donorApi = {
       body: JSON.stringify({ status: 'cancelled' }),
     }),
   listDonations: () => apiFetch('/donor/donations'),
+  listAchievements: () => apiFetch('/donor/achievements'),
 };
 
 export const bankApi = {

@@ -380,6 +380,16 @@ Tras cada movimiento de stock se sincroniza alerta crítica (`created` / `resolv
 Al **crear** una alerta crítica se notifican donantes compatibles con `notify_blood_match`.  
 Auditoría en: `policy.update`, `request.assign`.
 
+### Logros (P9)
+
+| Método | Ruta | Notas |
+|--------|------|-------|
+| `GET` | `/donor/achievements` | Catálogo + progreso/`unlocked` del donante |
+
+Al completar una cita (`POST /bank/appointments/{id}/complete`) se recalcula progreso (`donation_count`) y se desbloquean logros sin duplicar filas.
+
+**Demo:** `donante@test.com` ya tiene `first_donation` en el seed. Completar más donaciones avanza `hero_5` / `legend_10`.
+
 ### Otras rutas (plantilla / legado)
 
 | Ruta Slim | URL | Método |

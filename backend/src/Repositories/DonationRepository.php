@@ -40,6 +40,16 @@ class DonationRepository
         return (bool) $query->fetch();
     }
 
+    public function countByDonor(int $donorId): int
+    {
+        $query = $this->pdo->prepare(
+            'SELECT COUNT(*) AS total FROM donations WHERE donor_id = :donor_id'
+        );
+        $query->execute(['donor_id' => $donorId]);
+
+        return (int) ($query->fetch()['total'] ?? 0);
+    }
+
     /**
      * @return array{donation: array<string, mixed>, blood_unit: array<string, mixed>}
      */

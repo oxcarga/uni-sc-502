@@ -202,8 +202,8 @@ INSERT IGNORE INTO donation_policies (center_id, key_name, value_text, descripti
 -- ---------------------------------------------------------------------------
 
 INSERT IGNORE INTO achievements (code, name, description, criteria_type, criteria_value, active) VALUES
-  ('first_donation', 'Fundador', 'Completa tu primera donación', 'donation_count', 1, 1),
-  ('hero_5', 'Héroe', 'Completa 5 donaciones', 'donation_count', 5, 1),
+  ('first_donation', 'Fundador', 'Completa tu primera donacion', 'donation_count', 1, 1),
+  ('hero_5', 'Heroe', 'Completa 5 donaciones', 'donation_count', 5, 1),
   ('legend_10', 'Leyenda', 'Completa 10 donaciones', 'donation_count', 10, 1);
 
 INSERT IGNORE INTO donor_achievements (user_id, achievement_id, progress, unlocked_at)

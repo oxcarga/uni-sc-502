@@ -11,6 +11,7 @@ use App\Repositories\DonationPolicyRepository;
 use App\Repositories\DonationRepository;
 use App\Repositories\DonorProfileRepository;
 use App\Repositories\InventoryRepository;
+use App\Services\AchievementService;
 use App\Services\InventoryAlertService;
 use App\Support\JsonResponse;
 use Monolog\Logger;
@@ -31,6 +32,7 @@ class AppointmentController
         private readonly DonationPolicyRepository $policies,
         private readonly InventoryRepository $inventory,
         private readonly InventoryAlertService $alertSync,
+        private readonly AchievementService $achievements,
         private Logger $logger
     ) {
     }
@@ -296,6 +298,8 @@ class AppointmentController
                 (int) $stock['inventory']['units']
             );
 
+            $unlocked = $this->achievements->evaluateAfterDonation((int) $locked['donor_id']);
+
             $this->pdo->commit();
 
             $appointment = $this->appointments->findById($id);
@@ -307,6 +311,7 @@ class AppointmentController
                 'inventory' => $stock['inventory'],
                 'movement_id' => $stock['movement_id'],
                 'alert_sync' => $alertSync,
+                'achievements_unlocked' => $unlocked,
             ], 'Donación registrada e inventario actualizado.');
         } catch (PDOException $error) {
             if ($this->pdo->inTransaction()) {

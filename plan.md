@@ -51,12 +51,12 @@ Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./
 |------|-----------|
 | Auth (P0–P0c) | ✅ Cerrado: registro, confirmación email, sesión servidor, auth-guard |
 | Esquema MySQL | ✅ Tablas de dominio ya en `01_init.sql` + seed demo en `02_seed.sql` (centros, perfiles, citas, inventario, solicitudes, alertas, políticas, logros, notificaciones) |
-| BE dominio | ✅ P4–P8 (incluye notificaciones, políticas admin, auditoría); falta gamificación (P9) |
-| FE paneles | ✅ Shells P1–P3 + P4–P8 cableados; falta logros donante (P9) |
+| BE dominio | ✅ P4–P9 (dominio principal cerrado en el plan) |
+| FE paneles | ✅ Shells P1–P3 + P4–P9 cableados |
 
-**Implicación:** P9 asume esquema ya provisionado; trabajo duro en BE+FE de logros.
+**Implicación:** el mapa P0–P9 del plan está implementado; mejoras posteriores quedan fuera de fase.
 
-La siguiente fase a implementar es **P9**.
+Fases P0–P9: **cerradas** según este plan.
 
 ---
 
@@ -609,7 +609,7 @@ Trabajo DB típico: ampliar seed de notificaciones/auditoría si hace falta para
 
 ---
 
-## P9 — Logros (gamificación)
+## ✅ P9 — Logros (gamificación)
 
 **Objetivo:** insignias del panel donante al completar donaciones.
 
@@ -638,9 +638,9 @@ Solo ajustar seed/criterios si la evaluación en BE lo requiere.
 
 ### Listo cuando
 
-- [ ] Seed con catálogo básico
-- [ ] Completar donaciones desbloquea al menos un logro visible en API y FE
-- [ ] Donante demo ve su logro `first_donation` del seed
+- [x] Seed con catálogo básico
+- [x] Completar donaciones desbloquea al menos un logro visible en API y FE
+- [x] Donante demo ve su logro `first_donation` del seed
 
 **Desbloquea:** sección “Logros” del panel donante (README).
 
@@ -661,7 +661,7 @@ Solo ajustar seed/criterios si la evaluación en BE lo requiere.
 | ✅ P6 | Inventario + movimientos | Base CU2/CU3 | ✅ | ✅ | ✅ | ✅ |
 | ✅ P7 | Solicitudes + alertas + compatibles | CU2, CU3 | ✅ | ✅ | ✅ | ✅ |
 | ✅ P8 | Notificaciones + políticas + auditoría | CU2 completo + admin | ✅ | ✅ | ✅ | ✅ |
-| P9 | Logros / gamificación | Panel donante (logros) | ☐ | ☐ | ☐ | ☐ |
+| ✅ P9 | Logros / gamificación | Panel donante (logros) | ✅ | ✅ | ✅ | ✅ |
 
 Al cerrar una fase, marcar ✅ en el título y en las celdas de pilares del mapa.
 

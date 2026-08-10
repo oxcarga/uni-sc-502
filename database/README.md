@@ -180,6 +180,21 @@ SELECT id, action, entity_type, entity_id, detail FROM audit_log ORDER BY id DES
 
 **Flujo demo:** login `donante_o@test.com` → campana / panel (aviso de escasez O-) → `admin@test.com` → Configuración (políticas) → Auditoría.
 
+### P9 — logros
+
+```bash
+docker-compose exec db mysql -u pulso_user -ppulso_password pulso_solidario -e "
+SELECT code, name, criteria_type, criteria_value FROM achievements;
+SELECT u.email, a.code, da.progress, da.unlocked_at
+  FROM donor_achievements da
+  JOIN users u ON u.id = da.user_id
+  JOIN achievements a ON a.id = da.achievement_id;
+"
+```
+
+Seed: `donante@test.com` tiene `first_donation` desbloqueado (1 donacion demo).  
+**UI:** login donante → Panel → Logros. Para desbloquear en vivo: banco completa una cita de un donante sin ese logro (p. ej. `donante_o@test.com`).
+
 O en phpMyAdmin: http://localhost:3002 (`pulso_user` / `pulso_password`).
 
 ## Solución de problemas
