@@ -12,7 +12,8 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
   <link rel="stylesheet" href="../../assets/css/custom.css" />
   <script type="module">
-    import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`./donors.js?t=${Date.now()}`);
   </script>
 </head>
 
@@ -112,34 +113,45 @@
       </header>
 
       <main class="flex-grow-1" style="padding: 2rem 2.5rem">
-        <div class="mb-4">
-          <div class="d-flex align-items-center gap-2 mb-1">
-            <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Donantes</h1>
-            <span class="demo-badge">Demo</span>
+        <div class="page-sticky-bar">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Donantes</h1>
+            </div>
+            <p class="text-muted mb-0">
+              Compatibilidad exacta por tipo de sangre. El envío de avisos a donantes llega en P8.
+            </p>
           </div>
-          <p class="text-muted mb-0">
-            Listado de compatibilidad ilustrativo. La búsqueda real llega en P7.
-          </p>
+          <div id="donors-status" class="alert alert-info mb-0 py-2 px-3 d-none" role="status"
+            aria-live="polite" style="font-size: 0.875rem"></div>
         </div>
 
         <div class="row g-4 mb-4">
           <div class="col-lg-4">
-            <section class="coming-soon h-100" aria-labelledby="compat-soon">
-              <span class="demo-badge mb-3">Próximamente</span>
-              <h2 class="coming-soon__title" id="compat-soon">Filtro por compatibilidad</h2>
-              <p class="coming-soon__text">
-                Filtrar donantes elegibles según tipo de sangre en falta y políticas (P7/P8).
-              </p>
+            <section class="card p-3 h-100" aria-labelledby="compat-filter">
+              <h2 class="section-title mb-3" id="compat-filter">Filtro</h2>
+              <p class="text-muted mb-3" style="font-size: 0.875rem" id="compat-alert-hint">Cargando alertas…</p>
+              <form id="compat-form" class="d-flex flex-column gap-3">
+                <div>
+                  <label class="form-label fw-semibold" for="compat-blood-type">Tipo de sangre</label>
+                  <select class="form-select form-select-lg rounded-3" id="compat-blood-type" required></select>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="compat-eligible-only" checked />
+                  <label class="form-check-label" for="compat-eligible-only">Solo elegibles</label>
+                </div>
+                <button type="submit" class="btn btn-primary rounded-3 fw-semibold">Buscar</button>
+              </form>
             </section>
           </div>
           <div class="col-lg-8">
             <section class="card p-3 h-100" aria-labelledby="donors-table">
               <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-                <h2 class="section-title mb-0" id="donors-table">Donantes demo</h2>
-                <span class="demo-badge">Pendiente de API</span>
+                <h2 class="section-title mb-0" id="donors-table">Resultados</h2>
+                <span class="demo-badge" id="donors-count">—</span>
               </div>
               <div class="table-responsive">
-                <table class="table table-borderless align-middle mb-0">
+                <table class="table table-borderless align-middle mb-0" id="compatible-donors-table">
                   <thead>
                     <tr>
                       <th scope="col">Donante</th>
@@ -151,43 +163,7 @@
                   </thead>
                   <tbody>
                     <tr>
-                      <td>
-                        <div class="fw-semibold">Donante Demo</div>
-                        <div class="text-muted" style="font-size: 0.75rem">donante@test.com</div>
-                      </td>
-                      <td><span class="blood-badge blood-badge--teal">A+</span></td>
-                      <td class="text-muted" style="font-size: 0.875rem">Hace ~90 días</td>
-                      <td><span class="badge-soft badge-soft--green"><span class="dot"></span>Elegible</span></td>
-                      <td class="text-end">
-                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
-                          title="Pendiente de API (P7)">Contactar</button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="fw-semibold">Elena Rodríguez</div>
-                        <div class="text-muted" style="font-size: 0.75rem">ID demo</div>
-                      </td>
-                      <td><span class="blood-badge blood-badge--rose">O-</span></td>
-                      <td class="text-muted" style="font-size: 0.875rem">Hace 45 días</td>
-                      <td><span class="badge-soft badge-soft--green"><span class="dot"></span>Elegible</span></td>
-                      <td class="text-end">
-                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
-                          title="Pendiente de API (P7)">Contactar</button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="fw-semibold">Miguel Ángel Pérez</div>
-                        <div class="text-muted" style="font-size: 0.75rem">ID demo</div>
-                      </td>
-                      <td><span class="blood-badge">O+</span></td>
-                      <td class="text-muted" style="font-size: 0.875rem">Hace 20 días</td>
-                      <td><span class="badge-soft badge-soft--amber"><span class="dot"></span>En espera</span></td>
-                      <td class="text-end">
-                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
-                          title="Pendiente de API (P7)">Contactar</button>
-                      </td>
+                      <td colspan="5" class="text-muted text-center py-4">Cargando…</td>
                     </tr>
                   </tbody>
                 </table>

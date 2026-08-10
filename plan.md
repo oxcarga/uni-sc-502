@@ -51,12 +51,12 @@ Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./
 |------|-----------|
 | Auth (P0–P0c) | ✅ Cerrado: registro, confirmación email, sesión servidor, auth-guard |
 | Esquema MySQL | ✅ Tablas de dominio ya en `01_init.sql` + seed demo en `02_seed.sql` (centros, perfiles, citas, inventario, solicitudes, alertas, políticas, logros, notificaciones) |
-| BE dominio | ✅ Perfil/centros (P4) + citas/donaciones (P5) + inventario (P6); faltan solicitudes (P7+) |
-| FE paneles | ✅ Shells P1–P3 + P4–P6 cableados; faltan solicitudes (P7+) |
+| BE dominio | ✅ Perfil/centros (P4) + citas/donaciones (P5) + inventario (P6) + solicitudes/alertas (P7); faltan notificaciones/políticas admin (P8+) |
+| FE paneles | ✅ Shells P1–P3 + P4–P7 cableados; faltan notificaciones in-app (P8+) |
 
-**Implicación:** desde P7, el pilar DB casi siempre es *verificar / ajustar seed* (no inventar el esquema desde cero). El trabajo duro es **BE + FE**.
+**Implicación:** desde P8, el pilar DB casi siempre es *verificar / ajustar seed* (no inventar el esquema desde cero). El trabajo duro es **BE + FE**.
 
-La siguiente fase a implementar es **P7**.
+La siguiente fase a implementar es **P8**.
 
 ---
 
@@ -508,7 +508,7 @@ Ajustes solo si faltan índices/constraints detectados al implementar.
 
 ---
 
-## P7 — Solicitudes médicas y alertas
+## ✅ P7 — Solicitudes médicas y alertas
 
 **Objetivo:** CU2 (alerta crítica) y CU3 (solicitud hospitalaria).
 
@@ -551,10 +551,10 @@ Ajustes de seed solo para que el demo CU2/CU3 sea reproducible de un solo login 
 
 ### Listo cuando
 
-- [ ] Cola de solicitudes operable (FE + BE + DB)
-- [ ] Asignar unidades deja trazabilidad (movimiento + estado unidad + request)
-- [ ] Alerta crítica visible para el tipo en stock bajo
-- [ ] Listado de donantes compatibles usable en banco
+- [x] Cola de solicitudes operable (FE + BE + DB)
+- [x] Asignar unidades deja trazabilidad (movimiento + estado unidad + request)
+- [x] Alerta crítica visible para el tipo en stock bajo
+- [x] Listado de donantes compatibles usable en banco
 
 **Desbloquea:** CU2 y CU3 (sin push/notificaciones in-app aún).
 
@@ -659,7 +659,7 @@ Solo ajustar seed/criterios si la evaluación en BE lo requiere.
 | ✅ P4 | Perfil donante + centros (API + FE) | CU1 (perfil) | ✅ | ✅ | ✅ | ✅ |
 | ✅ P5 | Citas + donaciones | CU1 (agenda/historial) | ✅ | ✅ | ✅ | ✅ |
 | ✅ P6 | Inventario + movimientos | Base CU2/CU3 | ✅ | ✅ | ✅ | ✅ |
-| P7 | Solicitudes + alertas + compatibles | CU2, CU3 | ☐ | ☐ | ☐ | ☐ |
+| ✅ P7 | Solicitudes + alertas + compatibles | CU2, CU3 | ✅ | ✅ | ✅ | ✅ |
 | P8 | Notificaciones + políticas + auditoría | CU2 completo + admin | ☐ | ☐ | ☐ | ☐ |
 | P9 | Logros / gamificación | Panel donante (logros) | ☐ | ☐ | ☐ | ☐ |
 

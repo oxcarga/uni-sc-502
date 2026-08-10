@@ -8,6 +8,7 @@ use App\Repositories\BankProfileRepository;
 use App\Repositories\DonationCenterRepository;
 use App\Repositories\DonationPolicyRepository;
 use App\Repositories\InventoryRepository;
+use App\Services\InventoryAlertService;
 use App\Support\JsonResponse;
 use Monolog\Logger;
 use PDOException;
@@ -21,6 +22,7 @@ class InventoryController
         private readonly BankProfileRepository $bankProfiles,
         private readonly DonationCenterRepository $centers,
         private readonly DonationPolicyRepository $policies,
+        private readonly InventoryAlertService $alertSync,
         private Logger $logger
     ) {
     }
@@ -163,10 +165,12 @@ class InventoryController
 
             $thresholds = $this->policies->inventoryThresholds();
             $units = (int) $result['inventory']['units'];
+            $alertSync = $this->alertSync->syncForBloodType($centerId, $bloodType, $units);
             $payload = [
                 ...$result['inventory'],
                 'level' => $this->policies->inventoryLevel($units, $thresholds),
                 'movement_id' => $result['movement_id'],
+                'alert_sync' => $alertSync,
             ];
 
             $message = $kind === 'receipt' ? 'Recepción registrada.' : 'Ajuste registrado.';

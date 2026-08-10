@@ -113,24 +113,28 @@
       </header>
 
       <main class="flex-grow-1" style="padding: 2rem 2.5rem">
-        <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+        <div class="page-sticky-bar">
           <div>
             <div class="d-flex align-items-center gap-2 mb-1">
               <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Panel del banco</h1>
-              <span class="demo-badge">Demo</span>
             </div>
             <p class="text-muted mb-0">
-              Resumen operativo con inventario y citas del centro.
+              Resumen operativo: inventario, solicitudes hospitalarias y alertas.
             </p>
           </div>
           <div class="d-flex gap-2 flex-wrap">
             <a href="/dashboard/bank/inventory/" class="btn btn-outline-secondary rounded-3 fw-semibold">
               Ver inventario
             </a>
+            <a href="/dashboard/bank/donors/" class="btn btn-outline-secondary rounded-3 fw-semibold">
+              Donantes
+            </a>
             <a href="/dashboard/bank/appointments/" class="btn btn-primary rounded-3 fw-semibold">
               Ver citas
             </a>
           </div>
+          <div id="home-status" class="alert alert-info mb-0 py-2 px-3 d-none" role="status"
+            aria-live="polite" style="font-size: 0.875rem"></div>
         </div>
 
         <div class="d-flex align-items-center gap-2 mb-2">
@@ -150,49 +154,51 @@
         </div>
 
         <div class="row g-4 mb-4">
-          <div class="col-lg-4">
-            <section class="coming-soon h-100" aria-labelledby="requests-soon">
-              <span class="demo-badge mb-3">Próximamente</span>
-              <h2 class="coming-soon__title" id="requests-soon">Solicitudes</h2>
-              <p class="coming-soon__text">
-                Cola de solicitudes médicas y asignación de unidades (P7).
-              </p>
+          <div class="col-lg-8">
+            <section class="card p-3 h-100" aria-labelledby="requests-queue">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                <h2 class="section-title mb-0" id="requests-queue">Solicitudes médicas</h2>
+                <span class="demo-badge" id="home-requests-badge">—</span>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-borderless align-middle mb-0" id="home-requests-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Solicitud</th>
+                      <th scope="col">Tipo</th>
+                      <th scope="col">Cant.</th>
+                      <th scope="col">Prioridad</th>
+                      <th scope="col" class="text-end">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td colspan="5" class="text-muted text-center py-3">Cargando solicitudes…</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </section>
           </div>
           <div class="col-lg-4">
-            <section class="card shortage-card h-100 p-3" aria-labelledby="alerts-demo">
+            <section class="card shortage-card h-100 p-3" aria-labelledby="alerts-live">
               <div class="d-flex align-items-center justify-content-between mb-2">
-                <h2 class="shortage-title mb-0" id="alerts-demo">Stock crítico</h2>
+                <h2 class="shortage-title mb-0" id="alerts-live">Alertas activas</h2>
               </div>
               <p class="text-muted mb-3" style="font-size: 0.875rem">
-                Tipos bajo umbral. Alertas push / email llegan en P7–P8.
+                Aviso operativo (no cambia el stock). “Descartar” solo cierra la alerta;
+                el semáforo sigue crítico hasta recuperar unidades. Avisos a donantes en P8.
               </p>
-              <div id="home-critical-list">
+              <div id="home-alerts-list" class="mb-3">
                 <p class="text-muted mb-0" style="font-size: 0.875rem">Cargando…</p>
               </div>
-              <button type="button" class="btn btn-primary rounded-3 fw-semibold w-100" disabled
-                title="Disponible en P7/P8">
-                Lanzar alerta
-              </button>
-            </section>
-          </div>
-          <div class="col-lg-4">
-            <section class="card h-100 p-3" aria-labelledby="bank-shortcuts">
-              <h2 class="section-title mb-3" id="bank-shortcuts">Atajos</h2>
-              <div class="d-flex flex-column gap-2">
-                <a class="shortcut-link" href="/dashboard/bank/inventory/">
-                  <span class="shortcut-link__label">Inventario completo</span>
-                  <span class="shortcut-link__hint">8 tipos · movimientos</span>
-                </a>
-                <a class="shortcut-link" href="/dashboard/bank/donors/">
-                  <span class="shortcut-link__label">Donantes compatibles</span>
-                  <span class="shortcut-link__hint">UI demo · API en P7</span>
-                </a>
-                <a class="shortcut-link" href="/dashboard/bank/settings/">
-                  <span class="shortcut-link__label">Configuración</span>
-                  <span class="shortcut-link__hint">Datos del centro</span>
-                </a>
+              <h3 class="section-title mb-2" style="font-size: 0.9375rem">Stock crítico</h3>
+              <div id="home-critical-list" class="mb-3">
+                <p class="text-muted mb-0" style="font-size: 0.875rem">Cargando…</p>
               </div>
+              <a href="/dashboard/bank/donors/?blood_type=O-" class="btn btn-outline-secondary rounded-3 fw-semibold w-100">
+                Buscar donantes O-
+              </a>
             </section>
           </div>
         </div>

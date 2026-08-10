@@ -78,7 +78,8 @@ Contraseña para todos: `demo1234`
 
 | Rol | Correo | Panel |
 |-----|--------|-------|
-| Donante | `donante@test.com` | `/dashboard/donor/` |
+| Donante (A+) | `donante@test.com` | `/dashboard/donor/` |
+| Donante (O-) | `donante_o@test.com` | `/dashboard/donor/` |
 | Banco | `banco@test.com` | `/dashboard/bank/` |
 | Admin | `admin@test.com` | `/dashboard/admin/` |
 

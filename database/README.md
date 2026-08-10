@@ -151,6 +151,23 @@ Seed: O- (28) y AB- (40) en crítico (&lt;50). Completar una cita (P5) deja un `
 
 **Flujo demo (UI):** login `banco@test.com` → Inventario (semáforo + movimientos) → Registrar entrada / Ajustar stock.
 
+### P7 — solicitudes y alertas
+
+```bash
+docker-compose exec db mysql -u pulso_user -ppulso_password pulso_solidario -e "
+SELECT id, code, blood_type, quantity, priority, status FROM requests;
+SELECT id, blood_type, status, message FROM alerts;
+SELECT code, blood_type, status FROM blood_units WHERE blood_type = 'O-';
+SELECT u.email, dp.blood_type, dp.eligible
+  FROM users u JOIN donor_profiles dp ON dp.user_id = u.id
+  WHERE dp.blood_type = 'O-';
+"
+```
+
+Seed: solicitud `RE-9082` (O- ×4, pending), alerta activa O-, 8 unidades O- disponibles, donante `donante_o@test.com` / `demo1234`.
+
+**Flujo demo (UI):** login `banco@test.com` → Panel → Asignar solicitud → ver movimiento `assignment` en Inventario → Donantes (filtro O-).
+
 O en phpMyAdmin: http://localhost:3002 (`pulso_user` / `pulso_password`).
 
 ## Solución de problemas

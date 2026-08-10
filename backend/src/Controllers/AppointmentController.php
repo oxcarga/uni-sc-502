@@ -11,6 +11,7 @@ use App\Repositories\DonationPolicyRepository;
 use App\Repositories\DonationRepository;
 use App\Repositories\DonorProfileRepository;
 use App\Repositories\InventoryRepository;
+use App\Services\InventoryAlertService;
 use App\Support\JsonResponse;
 use Monolog\Logger;
 use PDO;
@@ -29,6 +30,7 @@ class AppointmentController
         private readonly BankProfileRepository $bankProfiles,
         private readonly DonationPolicyRepository $policies,
         private readonly InventoryRepository $inventory,
+        private readonly InventoryAlertService $alertSync,
         private Logger $logger
     ) {
     }
@@ -288,6 +290,12 @@ class AppointmentController
                 (int) $created['blood_unit']['id']
             );
 
+            $alertSync = $this->alertSync->syncForBloodType(
+                (int) $locked['center_id'],
+                (string) $bloodType,
+                (int) $stock['inventory']['units']
+            );
+
             $this->pdo->commit();
 
             $appointment = $this->appointments->findById($id);
@@ -298,6 +306,7 @@ class AppointmentController
                 'blood_unit' => $created['blood_unit'],
                 'inventory' => $stock['inventory'],
                 'movement_id' => $stock['movement_id'],
+                'alert_sync' => $alertSync,
             ], 'Donación registrada e inventario actualizado.');
         } catch (PDOException $error) {
             if ($this->pdo->inTransaction()) {
