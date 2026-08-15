@@ -117,10 +117,10 @@
           <div>
             <div class="d-flex align-items-center gap-2 mb-1">
               <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Donantes</h1>
-              <span class="demo-badge">Demo · filtros UI</span>
+              <span class="demo-badge">Gestión de donantes</span>
             </div>
             <p class="text-muted mb-0">
-              Listado mock. Activar/desactivar es solo en el navegador hasta la API admin.
+              Consulta y administra las cuentas de los donantes registrados.
             </p>
           </div>
           <button type="button" class="btn btn-primary rounded-3 fw-semibold" disabled
@@ -128,7 +128,7 @@
         </div>
 
         <div id="donors-status" class="alert alert-info mb-4" role="status" aria-live="polite">
-          Los cambios de cuenta son solo locales en el navegador. No se guardan en el servidor.
+          Cargando donantes...
         </div>
 
         <div class="row g-3 mb-4">
@@ -223,98 +223,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr data-active="1" data-eligible="1" data-blood="A+" data-name="donante donante" data-email="donante@test.com">
-                  <td>
-                    <div class="fw-semibold">Donante Demo</div>
-                    <div class="text-muted" style="font-size: 0.75rem">Seed · donante@test.com</div>
-                  </td>
-                  <td><span class="blood-badge blood-badge--teal">A+</span></td>
-                  <td>
-                    <div style="font-size: 0.875rem">8888-0000</div>
-                    <div class="text-muted" style="font-size: 0.75rem">donante@test.com</div>
-                  </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">~90 días</td>
-                  <td><span class="badge-soft badge-soft--green"><span class="dot"></span>Elegible</span></td>
-                  <td><span class="badge-soft badge-soft--teal donor-account-status"><span class="dot"></span>Activa</span></td>
-                  <td class="text-end">
-                    <div class="d-flex justify-content-end align-items-center gap-2">
-                      <div class="form-check form-switch m-0">
-                        <input class="form-check-input donor-active-toggle" type="checkbox" role="switch"
-                          aria-label="Activar cuenta Donante Demo" checked />
-                      </div>
-                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold btn-view-donor">Ver</button>
-                    </div>
-                  </td>
-                </tr>
-                <tr data-active="1" data-eligible="1" data-blood="O+" data-name="miguel angel perez" data-email="miguel@email.com">
-                  <td>
-                    <div class="fw-semibold">Miguel Ángel Pérez</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID demo #DN-001</div>
-                  </td>
-                  <td><span class="blood-badge blood-badge--teal">O+</span></td>
-                  <td>
-                    <div style="font-size: 0.875rem">8888-1122</div>
-                    <div class="text-muted" style="font-size: 0.75rem">miguel@email.com</div>
-                  </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">15 Jul 2026</td>
-                  <td><span class="badge-soft badge-soft--green"><span class="dot"></span>Elegible</span></td>
-                  <td><span class="badge-soft badge-soft--teal donor-account-status"><span class="dot"></span>Activa</span></td>
-                  <td class="text-end">
-                    <div class="d-flex justify-content-end align-items-center gap-2">
-                      <div class="form-check form-switch m-0">
-                        <input class="form-check-input donor-active-toggle" type="checkbox" role="switch"
-                          aria-label="Activar cuenta Miguel Ángel Pérez" checked />
-                      </div>
-                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold btn-view-donor">Ver</button>
-                    </div>
-                  </td>
-                </tr>
-                <tr data-active="1" data-eligible="1" data-blood="O-" data-name="elena rodriguez" data-email="elena@email.com">
-                  <td>
-                    <div class="fw-semibold">Elena Rodríguez</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID demo #DN-002</div>
-                  </td>
-                  <td><span class="blood-badge blood-badge--rose">O-</span></td>
-                  <td>
-                    <div style="font-size: 0.875rem">8700-3344</div>
-                    <div class="text-muted" style="font-size: 0.75rem">elena@email.com</div>
-                  </td>
-                  <td class="text-muted" style="font-size: 0.875rem">—</td>
-                  <td><span class="badge-soft badge-soft--green"><span class="dot"></span>Elegible</span></td>
-                  <td><span class="badge-soft badge-soft--teal donor-account-status"><span class="dot"></span>Activa</span></td>
-                  <td class="text-end">
-                    <div class="d-flex justify-content-end align-items-center gap-2">
-                      <div class="form-check form-switch m-0">
-                        <input class="form-check-input donor-active-toggle" type="checkbox" role="switch"
-                          aria-label="Activar cuenta Elena Rodríguez" checked />
-                      </div>
-                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold btn-view-donor">Ver</button>
-                    </div>
-                  </td>
-                </tr>
-                <tr data-active="0" data-eligible="0" data-blood="B+" data-name="diego fernandez" data-email="diego@email.com">
-                  <td>
-                    <div class="fw-semibold">Diego Fernández</div>
-                    <div class="text-muted" style="font-size: 0.75rem">ID demo #DN-008</div>
-                  </td>
-                  <td><span class="blood-badge">B+</span></td>
-                  <td>
-                    <div style="font-size: 0.875rem">8600-7788</div>
-                    <div class="text-muted" style="font-size: 0.75rem">diego@email.com</div>
-                  </td>
-                  <td class="fw-semibold" style="font-size: 0.875rem">02 Ene 2026</td>
-                  <td><span class="badge-soft badge-soft--slate"><span class="dot"></span>No elegible</span></td>
-                  <td><span class="badge-soft badge-soft--slate donor-account-status"><span class="dot"></span>Inactiva</span></td>
-                  <td class="text-end">
-                    <div class="d-flex justify-content-end align-items-center gap-2">
-                      <div class="form-check form-switch m-0">
-                        <input class="form-check-input donor-active-toggle" type="checkbox" role="switch"
-                          aria-label="Activar cuenta Diego Fernández" />
-                      </div>
-                      <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold btn-view-donor">Ver</button>
-                    </div>
-                  </td>
-                </tr>
+                
               </tbody>
             </table>
           </div>
@@ -331,7 +240,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body pt-0">
-          <p class="demo-badge mb-3">Demo · sin API</p>
+          
           <dl class="row mb-0" style="font-size: 0.9375rem">
             <dt class="col-4 text-muted">Nombre</dt>
             <dd class="col-8 fw-semibold" id="detail-name">—</dd>

@@ -128,6 +128,10 @@ class UserController
                 'email' => strtolower(trim((string) $body['email'])),
             ];
 
+            if (array_key_exists('active', $body)) {
+                $payload['active'] = (bool) $body['active'];
+            }
+
             if ($requirePassword) {
                 $payload['password_hash'] = password_hash((string) $body['password'], PASSWORD_DEFAULT);
             }
