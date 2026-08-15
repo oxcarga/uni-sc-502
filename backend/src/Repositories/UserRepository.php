@@ -21,7 +21,26 @@ class UserRepository
     public function findAll(): array
     {
         $query = $this->pdo->query(
-            'SELECT ' . self::SELECT_PUBLIC . ' FROM users ORDER BY id ASC'
+            'SELECT
+                u.id,
+                u.first_name,
+                u.last_name,
+                u.email,
+                u.role,
+                u.active,
+                u.email_confirmed,
+                u.email_confirmed_at,
+                u.created_at,
+                u.updated_at,
+                dp.blood_type,
+                dp.phone,
+                dp.province,
+                dp.canton,
+                dp.eligible,
+                dp.last_donation_at
+            FROM users u
+            LEFT JOIN donor_profiles dp ON dp.user_id = u.id
+            ORDER BY u.id ASC'
         );
 
         return $query->fetchAll();
