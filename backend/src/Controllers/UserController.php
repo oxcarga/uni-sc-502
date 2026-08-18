@@ -71,7 +71,7 @@ class UserController
     public function create(Request $request, Response $response): Response
     {
         $body = (array) $request->getParsedBody();
-        $validation = $this->validateUserData($body, requirePassword: true);
+        $validation = $this->validateUserData($body, requirePassword: true, requirePasswordConfirm: true);
 
         if ($validation !== null) {
             $this->logger->warning('Datos de usuario inválidos.', ['validation' => $validation]);
@@ -191,13 +191,19 @@ class UserController
         }
     }
 
-    private function validateUserData(array $body, bool $requirePassword): ?string
-    {
+    private function validateUserData(
+        array $body,
+        bool $requirePassword,
+        bool $requirePasswordConfirm = false
+    ): ?string {
         $firstName = trim((string) ($body['first_name'] ?? ''));
         $lastName = trim((string) ($body['last_name'] ?? ''));
         $email = trim((string) ($body['email'] ?? ''));
         $password = (string) ($body['password'] ?? '');
+        $passwordConfirm = (string) ($body['password_confirm'] ?? $body['confirm_password'] ?? '');
         $bloodType = isset($body['blood_type']) ? trim((string) $body['blood_type']) : null;
+        $hasPasswordConfirm = array_key_exists('password_confirm', $body)
+            || array_key_exists('confirm_password', $body);
 
         if ($firstName === '') {
             return 'El nombre es obligatorio.';
@@ -218,6 +224,10 @@ class UserController
 
             if (strlen($password) < self::MIN_PASSWORD_LENGTH) {
                 return 'La contraseña debe tener al menos ' . self::MIN_PASSWORD_LENGTH . ' caracteres.';
+            }
+
+            if (($requirePasswordConfirm || $hasPasswordConfirm) && $password !== $passwordConfirm) {
+                return 'Las contraseñas no coinciden.';
             }
         }
 
