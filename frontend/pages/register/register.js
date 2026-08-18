@@ -12,6 +12,8 @@ const successEmail = document.getElementById('register-success-email');
 const mailhogTip = document.getElementById('register-mailhog-tip');
 const resendBtn = document.getElementById('register-resend');
 const resendStatus = document.getElementById('register-resend-status');
+const passwordInput = document.getElementById('password');
+const passwordConfirmInput = document.getElementById('passwordConfirm');
 
 let registeredEmail = '';
 let isLocal = false;
@@ -32,6 +34,9 @@ if (resendBtn) {
   resendBtn.addEventListener('click', handleResend);
 }
 
+passwordInput?.addEventListener('input', syncPasswordMatchValidity);
+passwordConfirmInput?.addEventListener('input', syncPasswordMatchValidity);
+
 /**
  * Manejador del evento submit del formulario de registro.
  * @param {Event} event - El evento submit.
@@ -39,8 +44,22 @@ if (resendBtn) {
 async function handleSubmit(event) {
   event.preventDefault();
   clearError();
+  syncPasswordMatchValidity();
+
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
 
   const data = Object.fromEntries(new FormData(form).entries());
+  const password = String(data.password ?? '');
+  const passwordConfirm = String(data.passwordConfirm ?? '');
+
+  if (password !== passwordConfirm) {
+    showError('Las contraseñas no coinciden.');
+    return;
+  }
+
   const email = String(data.email ?? '').trim();
 
   try {
@@ -48,7 +67,8 @@ async function handleSubmit(event) {
       first_name: String(data.firstName ?? '').trim(),
       last_name: String(data.lastName ?? '').trim(),
       email,
-      password: String(data.password ?? ''),
+      password,
+      password_confirm: passwordConfirm,
     });
 
     registeredEmail = email;
@@ -90,6 +110,19 @@ function showSuccess(email) {
 
   if (successBox) {
     successBox.classList.remove('d-none');
+  }
+}
+
+function passwordsMatch() {
+  return (passwordInput?.value ?? '') === (passwordConfirmInput?.value ?? '');
+}
+
+function syncPasswordMatchValidity() {
+  if (!passwordConfirmInput) return;
+  if (passwordConfirmInput.value && !passwordsMatch()) {
+    passwordConfirmInput.setCustomValidity('Las contraseñas no coinciden.');
+  } else {
+    passwordConfirmInput.setCustomValidity('');
   }
 }
 
