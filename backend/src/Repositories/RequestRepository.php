@@ -76,6 +76,15 @@ class RequestRepository
         return $row;
     }
 
+    public function countPending(): int
+    {
+    $query = $this->pdo->query(
+        "SELECT COUNT(*) FROM requests WHERE status = 'pending'"
+    );
+
+    return (int) $query->fetchColumn();
+    }
+
     public function markAssigned(int $id, ?string $completedAt = null): void
     {
         $query = $this->pdo->prepare(
