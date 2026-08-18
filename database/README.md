@@ -5,10 +5,13 @@ Scripts SQL para el entorno local con Docker. El servicio `db` en `docker-compos
 ```yaml
 db:
   volumes:
-    - ./database:/docker-entrypoint-initdb.d
+    - ./database/01_init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    - ./database/02_seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
 ```
 
-MySQL crea la base de datos `pulso_solidario` (variable `MYSQL_DATABASE`) y, si el volumen `mysql_data` está vacío, ejecuta también los `.sql` de esta carpeta **en orden alfabético** (solo la primera vez).
+MySQL crea la base de datos `pulso_solidario` (variable `MYSQL_DATABASE`) y, si el volumen `mysql_data` está vacío, ejecuta esos `.sql` **en orden alfabético** (solo la primera vez).
+
+> Se montan los archivos uno por uno en lugar de la carpeta completa: el entrypoint de MySQL también ejecuta cualquier `.sh` que encuentre en `/docker-entrypoint-initdb.d`, y `provision.sh` no debe correr ahí. Si agregas un `03_*.sql`, recuerda añadir su línea al `docker-compose.yml`.
 
 En **cada** `docker-compose up`, el contenedor `backend` ejecuta `provision.sh` antes de arrancar Apache (vía `docker-entrypoint.sh`), de modo que esquema y datos de ejemplo quedan siempre aplicados de forma idempotente.
 

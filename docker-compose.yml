@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     build:
@@ -55,7 +53,10 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./database:/docker-entrypoint-initdb.d
+      # Solo los .sql: si se monta el directorio completo, el entrypoint de MySQL
+      # también ejecuta provision.sh y un CRLF ahí aborta la inicialización.
+      - ./database/01_init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ./database/02_seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
     networks:
       - pulso-network
     restart: unless-stopped

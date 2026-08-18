@@ -60,14 +60,25 @@ Control del inventario de sangre:
 
 2. Los directorios se crean automáticamente. ¡Solo agrega tus archivos!
 
-### Nota para Windows
+### Nota para Windows 
 
 El proyecto corre igual en Windows: basta **Docker Desktop** y ejecutar `docker-compose up -d` desde PowerShell o CMD. No hace falta abrir WSL ni Git Bash — los scripts `.sh` (`docker-entrypoint.sh`, `database/provision.sh`) se ejecutan **dentro de los contenedores Linux**, nunca en el host.
 
-Dos advertencias:
-
-- **Clona el repo con Git ≥ 2.10.** El `.gitattributes` fuerza finales de línea LF en `.sh`, `.sql` y `.conf`. Si esos archivos se guardan con CRLF, el contenedor de backend y la inicialización de MySQL fallan con `no such file or directory`. Si ya tenías el repo clonado antes de este cambio, normalízalo con `git rm --cached -r . && git reset --hard`.
 - **Puerto 3306 ocupado.** Si tienes MySQL, XAMPP o Laragon corriendo en Windows, detenlos o cambia el mapeo del servicio `db` en `docker-compose.yml`.
+
+#### Si ves `env: 'bash\r': No such file or directory`
+
+Significa que Git guardó los scripts con finales de línea CRLF y el contenedor busca un intérprete llamado `bash\r`. El `.gitattributes` lo previene en clones nuevos, y los contenedores ahora normalizan los scripts al arrancar, pero un repositorio clonado **antes** de ese arreglo conserva los archivos en CRLF. Para recuperarlo:
+
+```powershell
+git pull
+git rm --cached -r .
+git reset --hard
+docker-compose down -v
+docker-compose up -d --build
+```
+
+El `--build` es obligatorio: el `docker-entrypoint.sh` viaja dentro de la imagen, así que sin reconstruir se sigue usando la versión vieja.
 
 ### Iniciar el Proyecto con Docker
 
