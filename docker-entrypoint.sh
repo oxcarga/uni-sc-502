@@ -3,8 +3,10 @@ set -e
 
 echo "Starting Pulso Solidario Backend Server..."
 
-if [[ -x /database/provision.sh ]]; then
-  /database/provision.sh
+# Se invoca con bash porque el bit de ejecución no sobrevive el bind mount
+# en algunos hosts (Windows), y sin él la DB quedaría sin provisionar en silencio.
+if [[ -f /database/provision.sh ]]; then
+  bash /database/provision.sh
 fi
 
 echo "Container initialization complete! Starting Apache..."

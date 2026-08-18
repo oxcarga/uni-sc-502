@@ -56,8 +56,18 @@ Control del inventario de sangre:
    ```bash
    cp .env.example .env
    ```
+   En Windows (PowerShell): `Copy-Item .env.example .env`
 
 2. Los directorios se crean automáticamente. ¡Solo agrega tus archivos!
+
+### Nota para Windows
+
+El proyecto corre igual en Windows: basta **Docker Desktop** y ejecutar `docker-compose up -d` desde PowerShell o CMD. No hace falta abrir WSL ni Git Bash — los scripts `.sh` (`docker-entrypoint.sh`, `database/provision.sh`) se ejecutan **dentro de los contenedores Linux**, nunca en el host.
+
+Dos advertencias:
+
+- **Clona el repo con Git ≥ 2.10.** El `.gitattributes` fuerza finales de línea LF en `.sh`, `.sql` y `.conf`. Si esos archivos se guardan con CRLF, el contenedor de backend y la inicialización de MySQL fallan con `no such file or directory`. Si ya tenías el repo clonado antes de este cambio, normalízalo con `git rm --cached -r . && git reset --hard`.
+- **Puerto 3306 ocupado.** Si tienes MySQL, XAMPP o Laragon corriendo en Windows, detenlos o cambia el mapeo del servicio `db` en `docker-compose.yml`.
 
 ### Iniciar el Proyecto con Docker
 

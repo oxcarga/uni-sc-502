@@ -1,0 +1,19 @@
+* text=auto eol=lf
+
+# Se ejecutan dentro de contenedores Linux: con CRLF el shebang se vuelve
+# "bash\r" y no arrancan ni el backend ni el initdb de MySQL.
+*.sh text eol=lf
+*.sql text eol=lf
+*.conf text eol=lf
+Dockerfile text eol=lf
+.env.example text eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.svg text eol=lf
+*.ico binary
+*.woff binary
+*.woff2 binary
