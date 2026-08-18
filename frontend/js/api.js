@@ -159,6 +159,7 @@ export const bankApi = {
     const qs = query.toString();
     return apiFetch(`/bank/donors/compatible${qs ? `?${qs}` : ''}`);
   },
+  getCenter: () => apiFetch('/bank/center'),
 };
 
 export const centersApi = {
@@ -169,6 +170,18 @@ export const centersApi = {
     return apiFetch(`/centers${qs ? `?${qs}` : ''}`);
   },
   get: (id) => apiFetch(`/centers/${id}`),
+  create: (data) =>
+    apiFetch('/centers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
+  update: (id, data) =>
+    apiFetch(`/centers/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
 };
 
 export const notificationsApi = {

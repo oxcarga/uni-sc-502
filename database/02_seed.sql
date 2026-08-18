@@ -3,7 +3,7 @@
 SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
 -- Hash generado con: password_hash('demo1234', PASSWORD_DEFAULT)
 -- Los usuarios demo ya tienen email_confirmed = 1 (pueden iniciar sesión sin el flujo de email).
--- Tras 01_init.sql los IDs demos suelen ser: 1=donante, 2=banco, 3=admin, centro=1.
+-- Tras 01_init.sql los IDs demos suelen ser: 1=donante, 2=banco, 3=admin, centros 1 (activo) y 2 (inactivo).
 
 -- ---------------------------------------------------------------------------
 -- Usuarios
@@ -27,14 +27,23 @@ INSERT IGNORE INTO donation_centers (
   lat, lng, contact_name, contact_phone, contact_email,
   open_time, close_time, open_days, daily_capacity, process_minutes,
   accept_walk_ins, active
-) VALUES (
-  1, 'BK-001', 'Hospital Regional - Centro de Sangre',
-  'Centro de extracción con estacionamiento y acceso para personas con movilidad reducida.',
-  'Paseo Colón, San José', 'San José', 'San José', 'San José',
-  9.9333000, -84.0833000, 'María Solano', '2257-0000', 'centro@hospitalregional.cr',
-  '08:00:00', '16:00:00', 'Lunes a viernes', 24, 45,
-  1, 1
-);
+) VALUES
+  (
+    1, 'BK-001', 'Hospital Regional - Centro de Sangre',
+    'Centro de extracción con estacionamiento y acceso para personas con movilidad reducida.',
+    'Paseo Colón, San José', 'San José', 'San José', 'San José',
+    9.9333000, -84.0833000, 'María Solano', '2257-0000', 'centro@hospitalregional.cr',
+    '08:00:00', '16:00:00', 'Lunes a viernes', 24, 45,
+    1, 1
+  ),
+  (
+    2, 'BK-002', 'Hospital Max Peralta - Banco de Sangre',
+    'Centro satélite inactivo para demos de activación (P11).',
+    'Avenida 1, Cartago', 'Cartago', 'Cartago', 'Cartago',
+    9.8644000, -83.9194000, 'Carlos Méndez', '2550-0000', 'centro@maxperalta.cr',
+    '07:00:00', '15:00:00', 'Lunes a sábado', 16, 40,
+    1, 0
+  );
 
 INSERT IGNORE INTO donor_profiles (
   user_id, blood_type, birth_date, phone, province, canton, address,

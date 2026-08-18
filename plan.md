@@ -15,7 +15,7 @@
 **Motor:** MySQL 8.0 · BD `pulso_solidario`  
 **Convención:** tablas/columnas, claves JSON, roles y rutas HTTP en inglés (p. ej. `users`, `first_name`, `/api/auth/confirm-email`).  
 **Rutas FE internas:** `/dashboard/{donor,bank,admin}/` (no `/panel/`).  
-**Última actualización:** 2026-08-18 (P10 cerrado).
+**Última actualización:** 2026-08-18 (P11 cerrado).
 
 Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./database/README.md) · ERD: [database/ERD.md](./database/ERD.md).
 
@@ -24,7 +24,7 @@ Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./
 ## Cómo usar este plan
 
 1. Implementar **una fase a la vez**, en orden:  
-   `P0 → P0b → P0c → P1 → P2 → P3 → P4 → P5 → P6 → P7 → P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15`.
+   `P0 → P0b → P0c → P1 → P2 → P3 → P4 → P5 → P6 → P7 → P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15 → P16`.
 2. En cada fase cubrir los **4 pilares** (DB, BE, FE, Config). Si un pilar no aplica, dejar la subsección con `Sin cambios` y una línea de por qué.
 3. Tras cambios de esquema: re-provisionar (`database/provision.sh` o `docker compose down -v && up -d`).
 4. Al cerrar una fase: marcar checklist, poner ✅ al inicio del título `## Px` y en el mapa, y pasar a la siguiente.
@@ -50,19 +50,20 @@ Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./
 | Área | Situación |
 |------|-----------|
 | Auth (P0–P0c) | ✅ Cerrado. El alta pública de donante es `POST /api/users` (así está implementado; login/sesión van en `/api/auth/*`). Confirmación de correo, sesión servidor y auth-guard listos. |
-| Esquema MySQL | ✅ Tablas de dominio en `01_init.sql` + seed demo en `02_seed.sql` (centros, perfiles, citas, inventario, solicitudes, alertas, políticas, logros, notificaciones). Seed incluye donante `active = 0`. |
-| BE dominio | ✅ P4–P10 (MVP + gobierno admin de cuentas) |
-| FE paneles | ✅ Shells P1–P3 + flujos donante/banco P4–P9; admin: home KPIs, donantes (activar/desactivar), políticas y auditoría. Bancos (write) aún demo local (P11) |
-| Backlog | P11–P15 pendientes (centros write, notificaciones UX, elegibilidad/impacto, ciclo solicitudes/trazabilidad, reportes) |
+| Esquema MySQL | ✅ Tablas de dominio en `01_init.sql` + seed demo en `02_seed.sql` (centros, perfiles, citas, inventario, solicitudes, alertas, políticas, logros, notificaciones). Seed incluye donante `active = 0` y centro `BK-002` inactivo. |
+| BE dominio | ✅ P4–P11 (MVP + gobierno admin de cuentas y centros) |
+| FE paneles | ✅ Shells P1–P3 + flujos donante/banco P4–P9; admin: home KPIs, donantes, bancos (create/edit/activar), políticas y auditoría; banco: settings persistentes |
+| Backlog | P12–P16 pendientes (notificaciones UX, elegibilidad/impacto, ciclo solicitudes/trazabilidad, reportes, cambio de rol admin) |
 
-**Implicación:** P0–P10 cerrados. Siguiente: P11 (escritura de centros + settings de banco).
+**Implicación:** P0–P11 cerrados. Siguiente: P12 (campana de notificaciones en todos los shells + prefs de despacho).
 
-Fases P0–P10: **cerradas**. Fases P11–P15: **pendientes**.
+Fases P0–P11: **cerradas**. Fases P12–P16: **pendientes**.
 
 **Huecos menores (no bloquean P10):**
 
 - Campana in-app (`notifications-ui.js`) solo se monta si existe `#notif-bell` (hoy: home donante). El resto de shells tiene el botón deshabilitado “Próximamente” (P12).
 - `POST /api/users` sigue siendo el alta pública (intencional). `GET/PUT/DELETE /api/users` exigen sesión **admin**.
+- **Cambio de rol (P16):** `PATCH /api/admin/users/{id}` ya acepta `role` y audita `user.role_change`, pero el panel admin **no** expone esa acción (solo activar/desactivar donantes). Además, promover a `bank` no crea `bank_profiles` ni pide `center_id`, así que la cuenta no podría operar el panel banco.
 
 ---
 
@@ -679,7 +680,7 @@ Seed: donante inactivo `donante_inactivo@test.com` (`active = 0`, correo confirm
 ### FE
 
 1. Home admin: KPIs desde `GET /api/admin/dashboard`; actividad reciente desde `GET /api/admin/audit-log` (últimas 5 filas + enlace a `/audit/`). Políticas enlazan a `/settings/`; reportes y campana siguen “Próximamente” (P15 / P12).
-2. `/dashboard/admin/donors/`: `adminApi.listUsers({ role: 'donor' })` + toggle `PATCH /api/admin/users/{id}`. “Nuevo donante” sigue deshabilitado (alta = registro público).
+2. `/dashboard/admin/donors/`: `adminApi.listUsers({ role: 'donor' })` + toggle `PATCH /api/admin/users/{id}` **solo `active`**. “Nuevo donante” sigue deshabilitado (alta = registro público). Cambio de rol (`donor` → `bank`/`admin`) **no está en UI**; se cierra en P16 (incluye vincular centro).
 3. `adminApi.listUsers` / `patchUser` en `frontend/js/api.js`.
 
 ### Config
@@ -699,7 +700,7 @@ Seed: donante inactivo `donante_inactivo@test.com` (`active = 0`, correo confirm
 
 ---
 
-## P11 — Escritura de centros + settings de banco
+## ✅ P11 — Escritura de centros + settings de banco
 
 **Objetivo:** create/edit/activar centros (deferido desde P4) y persistir settings del banco.
 
@@ -711,23 +712,25 @@ Seed: donante inactivo `donante_inactivo@test.com` (`active = 0`, correo confirm
 
 **Sin cambios** de esquema: `donation_centers`, `bank_profiles`.
 
-Seed: mantener al menos un centro inactivo o segundo centro si ayuda a demos de toggle.
+Seed: `BK-001` activo (Hospital Regional) y `BK-002` inactivo (Hospital Max Peralta) para demos de toggle.
 
 ### BE
 
-1. `POST /api/centers` y `PUT /api/centers/{id}` (o bajo `/api/admin/centers`) — nombre, dirección, contacto, `active`, etc.
+1. `POST /api/centers` y `PUT /api/centers/{id}` — nombre, dirección, contacto, `active`, etc.
 2. Permisos: **admin** create/edit/activar cualquiera; **bank** solo actualizar campos permitidos de *su* centro (settings).
 3. Auditar: `center.create`, `center.update`, `center.activate` / `center.deactivate`.
+4. `GET /api/bank/center` — centro ligado al usuario banco (`bank_profiles`).
 
 | Método | Ruta | Rol |
 |--------|------|-----|
 | `POST` | `/api/centers` | admin |
 | `PUT` | `/api/centers/{id}` | admin (completo); bank (solo su centro, campos limitados) |
+| `GET` | `/api/bank/center` | bank |
 
 ### FE
 
-1. `/dashboard/admin/banks/`: hoy lista `GET /api/centers?all=1`; toggle y “Editar” / “Nuevo banco” son demo local (`disabled` / no persiste). Hay que persistir contra API.
-2. `/dashboard/bank/settings/`: formulario **no se guarda** (mensaje explícito en `settings.js`). Persistir vía API del centro del banco.
+1. `/dashboard/admin/banks/`: lista `GET /api/centers?all=1`; toggle y “Editar” / “Nuevo banco” persisten contra API.
+2. `/dashboard/bank/settings/`: carga `GET /api/bank/center` y guarda `PUT /api/centers/{id}` (campos de su centro).
 3. Mensajes de error/éxito con alert sticky donde aplique.
 
 ### Config
@@ -737,10 +740,10 @@ Seed: mantener al menos un centro inactivo o segundo centro si ayuda a demos de 
 
 ### Listo cuando
 
-- [ ] Admin puede crear/editar/activar un centro y verlo en listados (`?all=1`)
-- [ ] Toggle activo en FE admin persiste (ya no es demo local)
-- [ ] Banco guarda settings de su centro
-- [ ] Cambios sensibles aparecen en `audit_log`
+- [x] Admin puede crear/editar/activar un centro y verlo en listados (`?all=1`)
+- [x] Toggle activo en FE admin persiste (ya no es demo local)
+- [x] Banco guarda settings de su centro
+- [x] Cambios sensibles aparecen en `audit_log`
 
 **Desbloquea:** “Bancos registrados” del README + settings de banco reales.
 
@@ -907,6 +910,83 @@ Seed: mantener al menos un centro inactivo o segundo centro si ayuda a demos de 
 
 ---
 
+## P16 — Admin: cambio de rol de cuentas
+
+**Objetivo:** que el admin pueda promover una cuenta registrada como donante a banco (u otro rol), vinculándola a un centro cuando corresponda, desde el panel.
+
+**Contexto (hoy):** el registro público (`POST /api/users`) **siempre** crea `role = donor` + `donor_profiles`. No hay alta pública de banco. P10 dejó `PATCH /api/admin/users/{id}` con campo `role` y auditoría `user.role_change`, pero:
+
+1. El FE de `/dashboard/admin/donors/` solo lista `role=donor` y solo persiste `active`.
+2. El PATCH **no** escribe `bank_profiles`. Un usuario con `role = bank` sin fila en `bank_profiles` no puede usar inventario, citas, solicitudes ni settings (`findCenterIdByUserId` → 404 “No hay un centro asociado”).
+3. No hay página de “usuarios” de todos los roles; Bancos gestiona **centros**, no cuentas `bank`.
+
+**Roles:** `admin` (único operador). La cuenta destino pasa a `donor` | `bank` | `admin`.
+
+**Flujo canónico:** usuario se registra → confirma correo → admin abre Donantes → “Cambiar rol” → `bank` + centro → la cuenta entra al panel `/dashboard/bank/` en el siguiente `GET /api/auth/me` (la sesión guarda solo `user_id`; el rol se lee de BD).
+
+### DB
+
+**Sin cambios** de esquema: `users.role`, `bank_profiles` (`user_id`, `center_id`), `donor_profiles`, `audit_log`.
+
+Reglas de integridad en app (transacción):
+
+1. `donor` → `bank`: exigir `center_id` de un centro existente; **upsert** `bank_profiles`. Conservar `donor_profiles` (historial clínico; no borrar).
+2. `bank` → `donor`: `role = donor`; **borrar** `bank_profiles` (si no, un re-promote usaría un centro obsoleto). Asegurar `donor_profiles` (`ensureForUser` si falta).
+3. Cualquier rol → `admin`: no exige centro. Si deja de ser `bank`, borrar `bank_profiles`.
+4. `bank` → `bank` con otro `center_id`: actualizar `bank_profiles.center_id` (reasignar centro).
+5. Seguir sin dejar el sistema sin un admin activo (ya en P10).
+
+Seed: **sin cambios** obligatorios (el demo ya tiene un `bank` ligado). Opcional: no hace falta un usuario extra si el flujo de prueba es registrar uno nuevo.
+
+### BE
+
+Extender `PATCH /api/admin/users/{id}` (no hace falta ruta nueva):
+
+| Campo | Cuándo |
+|-------|--------|
+| `role` | `donor` \| `bank` \| `admin` |
+| `center_id` | **obligatorio** si el rol resultante es `bank`; ignorado si no |
+| `active` | igual que P10 |
+
+1. Validar `center_id` (existe; preferible centro `active = 1` al promover).
+2. Transacción: `users.role` + upsert/delete `bank_profiles` + `ensureForUser` si queda `donor`.
+3. Auditar `user.role_change` con `from`, `to`, `center_id` si aplica. Si solo cambia el centro de un banco, auditar igual (p. ej. `to: bank` + `center_id` nuevo) o `user.center_assign`.
+4. Ampliar `BankProfileRepository`: `upsert(user_id, center_id)`, `deleteByUserId`.
+5. `GET /api/admin/users`: incluir `center_id` / nombre del centro cuando el usuario es `bank` (JOIN `bank_profiles` + `donation_centers`) para que el FE muestre el vínculo.
+
+Respuestas 422 claras: rol inválido, `center_id` faltante al promover a banco, centro inexistente, último admin.
+
+### FE
+
+1. En `/dashboard/admin/donors/` (flujo principal: las cuentas nuevas viven ahí):
+   - Acción por fila **Cambiar rol** (además de Ver y el toggle activo).
+   - Modal: selector de rol (`donor` / `bank` / `admin`); si `bank`, selector de centro (`GET /api/centers?all=1`).
+   - Submit → `adminApi.patchUser(id, { role, center_id })`. Al pasar a `bank`/`admin`, quitar la fila de la tabla de donantes y feedback de éxito.
+2. Listado usable de cuentas **banco** (para reasignar centro o devolver a donante):
+   - Opción A (preferida, menos páginas): sección o filtro en Donantes “Todas las cuentas” / filtro por rol, **o**
+   - Opción B: bloque “Cuentas del centro” en `/dashboard/admin/banks/` (detalle del centro).
+   - Elegir una; no duplicar CRUD de centros (eso es P11).
+3. No permitir auto-degradarse si es el último admin (el API ya rechaza; mostrar el mensaje).
+4. Alert sticky según DESIGN.md.
+
+### Config
+
+1. Documentar el flujo demo en `backend/README.md` / `database/README.md`: registrar donante → confirmar → admin cambia a `bank` + centro seed → login → `/dashboard/bank/`.
+2. `Sin cambios` de Compose/Nginx. Sin re-provision salvo que se toque seed.
+
+### Listo cuando
+
+- [ ] Admin puede cambiar `donor` → `bank` eligiendo un centro, desde el panel
+- [ ] Tras el cambio, esa cuenta opera el panel banco (hay `bank_profiles`)
+- [ ] Admin puede devolver `bank` → `donor` (se elimina `bank_profiles`; sigue existiendo `donor_profiles`)
+- [ ] El PATCH sin `center_id` al promover a banco responde 422 (no deja bancos huérfanos)
+- [ ] El cambio queda en `audit_log` (`user.role_change`)
+- [ ] Sigue sin poder quedarse el sistema sin un admin activo
+
+**Desbloquea:** onboarding de personal de banco sin alta pública distinta (el registro sigue siendo donante; el admin asigna el rol).
+
+---
+
 ## Mapa fase → entrega → pilares
 
 | Fase | Entrega | Roles | Casos | DB | BE | FE | Config |
@@ -924,15 +1004,16 @@ Seed: mantener al menos un centro inactivo o segundo centro si ayuda a demos de 
 | ✅ P8 | Notificaciones + políticas + auditoría | donor, bank, admin | CU2 completo + admin | ✅ | ✅ | ✅ | ✅ |
 | ✅ P9 | Logros / gamificación | donor | Panel donante (logros) | ✅ | ✅ | ✅ | ✅ |
 | ✅ P10 | Admin home KPIs + gestión usuarios | admin | Panel admin (gobierno) | ✅ | ✅ | ✅ | ✅ |
-| P11 | Escritura centros + settings banco | admin, bank | Admin bancos / bank settings | — | — | — | — |
+| ✅ P11 | Escritura centros + settings banco | admin, bank | Admin bancos / bank settings | ✅ | ✅ | ✅ | ✅ |
 | P12 | Notificaciones UX + prefs | donor, bank, admin | Todos los paneles | — | — | — | — |
 | P13 | Elegibilidad + impacto donante | donor | CU1 (polish) | — | — | — | — |
 | P14 | Ciclo solicitudes + no-show + traza | bank, admin | CU2/CU3 + trazabilidad | — | — | — | — |
 | P15 | Reportes admin | admin | Panel admin (analítica) | — | — | — | — |
+| P16 | Admin cambio de rol (+ vincular centro) | admin | Gobierno de cuentas (promote a banco) | — | — | — | — |
 
 Al cerrar una fase, marcar ✅ en el título y en las celdas de pilares del mapa.
 
-**Lectura del mapa:** P1–P3 son FE-first (DB/BE a menudo `Sin cambios`). P4–P9 asumen esquema ya provisionado y concentran BE+FE; DB solo si hay ajuste de seed/constraints. P10 cierra gobierno admin de cuentas. P11–P15 son backlog: escritura de centros, polish de notificaciones/donante, ciclo de solicitudes y reportes.
+**Lectura del mapa:** P1–P3 son FE-first (DB/BE a menudo `Sin cambios`). P4–P9 asumen esquema ya provisionado y concentran BE+FE; DB solo si hay ajuste de seed/constraints. P10 cierra gobierno admin de cuentas (activar/desactivar). P11 cierra escritura de centros y settings de banco. P12–P16 son backlog: polish de notificaciones/donante, ciclo de solicitudes, reportes y **cambio de rol con vínculo a centro**.
 
 ---
 
@@ -969,7 +1050,7 @@ Detalle de columnas: [database/ERD.md](./database/ERD.md).
 5. No persistir derivados de UI (color de stock, “vidas salvadas” si es fórmula).
 6. PII/médicos: no loguear en claro; solo hash de passwords y de tokens de verificación.
 7. Inventario siempre en transacción con su movimiento.
-8. Seed de demo: 3 roles + 1 centro + stock mixto (1 tipo crítico) + 1 solicitud pendiente + políticas + logros — mantener coherente al tocar `02_seed.sql`.
+8. Seed de demo: 3 roles + 2 centros (1 inactivo) + stock mixto (1 tipo crítico) + 1 solicitud pendiente + políticas + logros — mantener coherente al tocar `02_seed.sql`.
 9. Misma fase = mismos nombres en SQL, repositorio, JSON y (si aplica) labels FE.
 10. Cada fase cierra con los 4 pilares revisados; Config incluye docs de cómo probar en Docker.
 11. Rutas internas FE: `/dashboard/{donor,bank,admin}/…`. No reintroducir `/panel/`.
@@ -985,7 +1066,7 @@ Detalle de columnas: [database/ERD.md](./database/ERD.md).
 
 ## Fuera de alcance (no implementar en P0–P15)
 
-Queda **fuera** incluso del backlog P10–P15:
+Queda **fuera** incluso del backlog P11–P16:
 
 - HL7/FHIR, OAuth de terceros, compliance HIPAA/GDPR completo, sync realtime (usar polling REST).
 - App móvil nativa, push FCM/APNs (notificaciones in-app: P8 + ampliación UX en P12).

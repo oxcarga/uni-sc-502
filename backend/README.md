@@ -337,14 +337,19 @@ El alta de donantes en el FE sigue siendo `POST /users`. El gobierno de cuentas 
 
 `blood_type` vive en `donor_profiles`, no en `users`.
 
-### Centros (P4)
+### Centros (P4 + P11)
 
 | Método | Ruta | Notas |
 |--------|------|-------|
 | `GET` | `/centers` | Autenticado; solo activos. Admin: `?all=1` incluye inactivos |
-| `GET` | `/centers/{id}` | Detalle; admin puede ver inactivos |
+| `GET` | `/centers/{id}` | Detalle; admin ve inactivos; banco ve el suyo aunque esté inactivo |
+| `POST` | `/centers` | **Admin.** Crea centro (`name` + `address` requeridos). `code` opcional (se genera `BK-NNN`). Audita `center.create` |
+| `PUT` | `/centers/{id}` | **Admin** (cualquier campo, incluido `active`); **bank** solo su centro y campos de settings (no `active` ni `code`). Audita `center.update` / `center.activate` / `center.deactivate` |
+| `GET` | `/bank/center` | **Bank.** Centro ligado en `bank_profiles` |
 
-Escritura de centros (crear/editar/activar): **P11** — `CenterController` solo tiene `index` y `show`.
+Código duplicado → 409. Donante no puede escribir.
+
+**Flujo demo P11:** login `admin@test.com` → Bancos → activar `BK-002` (Hospital Max Peralta, inactivo en seed) → Auditoría (`center.activate`). Editar o crear un centro. Login `banco@test.com` → Configuración → guardar teléfono/horario. Re-provision para cargar `BK-002` si el volumen es anterior a P11.
 
 ### Admin gobierno (P8 + P10)
 
@@ -406,7 +411,7 @@ Tras cada movimiento de stock se sincroniza alerta crítica (`created` / `resolv
 | `POST` | `/notifications/{id}/read` | Marcar leída |
 
 Al **crear** una alerta crítica se notifican donantes compatibles con `notify_blood_match`.  
-Auditoría en: `policy.update`, `request.assign`. Prefs `notify_appointments` / `notify_nearby` aún no despachan (P12).
+Auditoría en: `policy.update`, `request.assign`, `user.*` (P10), `center.create` / `center.update` / `center.activate` / `center.deactivate` (P11). Prefs `notify_appointments` / `notify_nearby` aún no despachan (P12).
 
 ### Logros (P9)
 
@@ -422,7 +427,6 @@ Al completar una cita (`POST /bank/appointments/{id}/complete`) se recalcula pro
 
 | Fase | Rutas previstas |
 |------|-----------------|
-| P11 | `POST /centers`, `PUT /centers/{id}` |
 | P13 | campos derivados en `GET /donor/profile` y/o `GET /donor/impact` |
 | P14 | `POST /bank/requests`, transiciones de estado, `no_show` en citas, `GET /bank/blood-units` |
 | P15 | `GET /admin/reports/summary` |
