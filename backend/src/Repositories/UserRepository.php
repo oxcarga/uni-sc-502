@@ -135,13 +135,17 @@ class UserRepository
     {
         $role = $data['role'] ?? 'donor';
         $bloodType = $data['blood_type'] ?? null;
+        $phone = $data['phone'] ?? null;
+        $emailConfirmed = array_key_exists('email_confirmed', $data)
+            ? (bool) $data['email_confirmed']
+            : false;
 
         $this->pdo->beginTransaction();
 
         try {
             $query = $this->pdo->prepare(
-                'INSERT INTO users (first_name, last_name, email, password_hash, role, email_confirmed)
-                 VALUES (:first_name, :last_name, :email, :password_hash, :role, :email_confirmed)'
+                'INSERT INTO users (first_name, last_name, email, password_hash, role, email_confirmed, email_confirmed_at)
+                 VALUES (:first_name, :last_name, :email, :password_hash, :role, :email_confirmed, :email_confirmed_at)'
             );
             $query->execute([
                 'first_name' => $data['first_name'],
@@ -149,21 +153,21 @@ class UserRepository
                 'email' => $data['email'],
                 'password_hash' => $data['password_hash'],
                 'role' => $role,
-                'email_confirmed' => array_key_exists('email_confirmed', $data)
-                    ? ((int) (bool) $data['email_confirmed'])
-                    : 0,
+                'email_confirmed' => $emailConfirmed ? 1 : 0,
+                'email_confirmed_at' => $emailConfirmed ? date('Y-m-d H:i:s') : null,
             ]);
 
             $userId = (int) $this->pdo->lastInsertId();
 
             if ($role === 'donor') {
                 $profile = $this->pdo->prepare(
-                    'INSERT INTO donor_profiles (user_id, blood_type)
-                     VALUES (:user_id, :blood_type)'
+                    'INSERT INTO donor_profiles (user_id, blood_type, phone)
+                     VALUES (:user_id, :blood_type, :phone)'
                 );
                 $profile->execute([
                     'user_id' => $userId,
-                    'blood_type' => $bloodType !== '' ? $bloodType : null,
+                    'blood_type' => $bloodType !== null && $bloodType !== '' ? $bloodType : null,
+                    'phone' => $phone !== null && $phone !== '' ? $phone : null,
                 ]);
             }
 

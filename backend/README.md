@@ -326,7 +326,7 @@ Con Slim, las rutas no dependen de archivos `.php` individuales. Prefijo: `/api/
 | `PUT` | `/users/{id}` | Update legado. **Solo admin**. El panel usa `PATCH /admin/users/{id}` |
 | `DELETE` | `/users/{id}` | **Solo admin** |
 
-El alta de donantes en el FE sigue siendo `POST /users`. El gobierno de cuentas (activar/desactivar) va por `/admin/users`.
+El alta pública de donantes sigue siendo `POST /users` (exige confirmar correo). El panel admin crea cuentas listas para iniciar sesión con `POST /admin/users`. El gobierno de cuentas (activar/desactivar) va por `PATCH /admin/users/{id}`.
 
 ### Donante — perfil (P4)
 
@@ -357,6 +357,7 @@ Código duplicado → 409. Donante no puede escribir.
 |--------|------|-------|
 | `GET` | `/admin/dashboard` | Rol `admin`. KPIs: centros (`banks`), donantes, alertas activas, solicitudes `pending` |
 | `GET` | `/admin/users` | Rol `admin`. Query: `role`, `active` (`0`/`1`), `q` |
+| `POST` | `/admin/users` | Rol `admin`. Alta de donante (`role = donor`, correo ya confirmado). Body: `first_name`, `last_name`, `email`, `password`; opcionales `blood_type`, `phone`. Audita `user.create` |
 | `PATCH` | `/admin/users/{id}` | Rol `admin`. Body: `active` y/o `role`. No deja el sistema sin un admin activo. Audita `user.activate` / `user.deactivate` / `user.role_change` |
 | `GET` | `/admin/policies` | Políticas globales + umbrales derivados |
 | `PUT` | `/admin/policies` | Body: `inventory_*`, `donor_interval_days` (enteros > 0). Audita `policy.update` |

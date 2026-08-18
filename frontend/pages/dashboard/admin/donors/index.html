@@ -120,15 +120,14 @@
               <span class="demo-badge">Gestión de donantes</span>
             </div>
             <p class="text-muted mb-0">
-              Consulta y administra las cuentas de los donantes registrados.
+              Crea cuentas de donantes y activa o desactiva las existentes.
             </p>
           </div>
-          <button type="button" class="btn btn-primary rounded-3 fw-semibold" disabled
-            title="El alta de donantes es por el registro público">Nuevo donante</button>
-        </div>
-
-        <div id="donors-status" class="alert alert-info mb-4" role="status" aria-live="polite">
-          Cargando donantes...
+          <button type="button" class="btn btn-primary rounded-3 fw-semibold" id="btn-new-donor">
+            Nuevo donante
+          </button>
+          <div id="donors-status" class="alert alert-info mb-0 py-2 px-3 d-none" role="status"
+            aria-live="polite" style="font-size: 0.875rem"></div>
         </div>
 
         <div class="row g-3 mb-4">
@@ -258,6 +257,71 @@
             <dd class="col-8" id="detail-account">—</dd>
           </dl>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="donorModal" tabindex="-1" aria-labelledby="donorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0" style="border-radius: 1.25rem">
+        <form id="donor-form">
+          <div class="modal-header border-0">
+            <h2 class="modal-title section-title mb-0" id="donorModalLabel">Nuevo donante</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body pt-0">
+            <div id="donor-form-status" class="alert alert-danger py-2 px-3 d-none" role="alert"
+              aria-live="assertive" style="font-size: 0.875rem"></div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" for="donor-first-name">Nombre</label>
+                <input type="text" class="form-control form-control-lg rounded-3" id="donor-first-name"
+                  required maxlength="100" autocomplete="given-name" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" for="donor-last-name">Apellido</label>
+                <input type="text" class="form-control form-control-lg rounded-3" id="donor-last-name"
+                  required maxlength="100" autocomplete="family-name" />
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold" for="donor-email">Correo</label>
+                <input type="email" class="form-control form-control-lg rounded-3" id="donor-email"
+                  required maxlength="100" autocomplete="email" />
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold" for="donor-password">Contraseña</label>
+                <input type="password" class="form-control form-control-lg rounded-3" id="donor-password"
+                  required minlength="8" maxlength="72" autocomplete="new-password" />
+                <div class="form-text">Mínimo 8 caracteres. La cuenta queda lista para iniciar sesión.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" for="donor-phone">Teléfono</label>
+                <input type="tel" class="form-control form-control-lg rounded-3" id="donor-phone"
+                  maxlength="40" autocomplete="tel" placeholder="Opcional" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold" for="donor-blood">Tipo de sangre</label>
+                <select class="form-select form-select-lg rounded-3" id="donor-blood">
+                  <option value="">Sin especificar</option>
+                  <option>O+</option>
+                  <option>O-</option>
+                  <option>A+</option>
+                  <option>A-</option>
+                  <option>B+</option>
+                  <option>B-</option>
+                  <option>AB+</option>
+                  <option>AB-</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary rounded-3 fw-semibold" id="donor-form-submit">
+              Crear donante
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

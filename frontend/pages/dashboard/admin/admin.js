@@ -1,6 +1,7 @@
 import { adminApi } from '/js/api.js';
 
 const ACTION_LABELS = {
+  'user.create': 'Creó una cuenta',
   'user.activate': 'Activó una cuenta',
   'user.deactivate': 'Desactivó una cuenta',
   'user.role_change': 'Cambió un rol',

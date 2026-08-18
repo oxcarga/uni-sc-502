@@ -1,7 +1,8 @@
-import { adminApi } from '/js/api.js';
+const { adminApi } = await import(`/js/api.js?t=${Date.now()}`);
 
 const statusEl = document.getElementById('donors-status');
 const table = document.getElementById('admin-donors-table');
+const tbody = table?.querySelector('tbody');
 const kpiTotal = document.getElementById('kpi-total');
 const kpiActive = document.getElementById('kpi-active');
 const kpiInactive = document.getElementById('kpi-inactive');
@@ -13,6 +14,71 @@ const filterAccount = document.getElementById('filterAccount');
 const filterEligible = document.getElementById('filterEligible');
 const filterClear = document.getElementById('filterClear');
 const detailModalEl = document.getElementById('donorDetailModal');
+const btnNewDonor = document.getElementById('btn-new-donor');
+const createModalEl = document.getElementById('donorModal');
+const form = document.getElementById('donor-form');
+const formStatusEl = document.getElementById('donor-form-status');
+const formSubmitBtn = document.getElementById('donor-form-submit');
+const fieldFirstName = document.getElementById('donor-first-name');
+const fieldLastName = document.getElementById('donor-last-name');
+const fieldEmail = document.getElementById('donor-email');
+const fieldPassword = document.getElementById('donor-password');
+const fieldPhone = document.getElementById('donor-phone');
+const fieldBlood = document.getElementById('donor-blood');
+
+const STATUS_AUTO_HIDE_MS = 7000;
+const STATUS_FADE_MS = 400;
+let statusHideTimer = null;
+let statusFadeTimer = null;
+let donors = [];
+
+function clearStatusTimers() {
+  if (statusHideTimer) clearTimeout(statusHideTimer);
+  if (statusFadeTimer) clearTimeout(statusFadeTimer);
+  statusHideTimer = null;
+  statusFadeTimer = null;
+}
+
+function hideStatus() {
+  if (!statusEl) return;
+  clearStatusTimers();
+  statusEl.classList.add('is-fading');
+  statusFadeTimer = setTimeout(() => {
+    statusEl.classList.add('d-none');
+    statusEl.classList.remove('is-fading');
+    statusEl.textContent = '';
+  }, STATUS_FADE_MS);
+}
+
+function showStatus(message, type = 'info') {
+  if (!statusEl) return;
+  clearStatusTimers();
+  statusEl.textContent = message;
+  statusEl.classList.remove('d-none', 'is-fading', 'alert-success', 'alert-danger', 'alert-info');
+  statusEl.classList.add(`alert-${type}`);
+  if (type !== 'danger') {
+    statusHideTimer = setTimeout(hideStatus, STATUS_AUTO_HIDE_MS);
+  }
+}
+
+function showFormStatus(message) {
+  if (!formStatusEl) return;
+  if (!message) {
+    formStatusEl.classList.add('d-none');
+    formStatusEl.textContent = '';
+    return;
+  }
+  formStatusEl.textContent = message;
+  formStatusEl.classList.remove('d-none');
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
+}
 
 function formatDate(value) {
   if (!value) return '—';
@@ -26,20 +92,32 @@ function formatDate(value) {
   return date.toLocaleDateString('es-CR');
 }
 
-function renderDonors(donors) {
-  const tbody = table?.querySelector('tbody');
+function isEligible(donor) {
+  return donor.eligible === true || donor.eligible === 1 || donor.eligible === '1';
+}
 
+function renderDonors(list) {
   if (!tbody) return;
+
+  if (list.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-muted text-center py-4">No hay donantes registrados.</td>
+      </tr>`;
+    refreshKpis();
+    return;
+  }
 
   tbody.innerHTML = '';
 
-  donors.forEach((donor) => {
+  list.forEach((donor) => {
     const fullName = `${donor.first_name ?? ''} ${donor.last_name ?? ''}`.trim();
     const bloodType = donor.blood_type ?? '—';
     const phone = donor.phone ?? '—';
-    const eligible = donor.eligible === true || donor.eligible === 1 || donor.eligible === '1';
+    const eligible = isEligible(donor);
     const active = Boolean(donor.active);
     const lastDonation = formatDate(donor.last_donation_at);
+    const email = donor.email ?? '';
 
     const row = document.createElement('tr');
 
@@ -50,25 +128,25 @@ function renderDonors(donors) {
     row.dataset.eligible = eligible ? '1' : '0';
     row.dataset.blood = bloodType;
     row.dataset.name = fullName.toLowerCase();
-    row.dataset.email = String(donor.email ?? '').toLowerCase();
+    row.dataset.email = email.toLowerCase();
 
     row.innerHTML = `
       <td>
-        <div class="fw-semibold">${fullName || '—'}</div>
-        <div class="text-muted" style="font-size: 0.75rem">${donor.email ?? '—'}</div>
+        <div class="fw-semibold">${escapeHtml(fullName || '—')}</div>
+        <div class="text-muted" style="font-size: 0.75rem">${escapeHtml(email || '—')}</div>
       </td>
 
       <td>
-        <span class="blood-badge">${bloodType}</span>
+        <span class="blood-badge">${escapeHtml(bloodType)}</span>
       </td>
 
       <td>
-        <div style="font-size: 0.875rem">${phone}</div>
-        <div class="text-muted" style="font-size: 0.75rem">${donor.email ?? '—'}</div>
+        <div style="font-size: 0.875rem">${escapeHtml(phone)}</div>
+        <div class="text-muted" style="font-size: 0.75rem">${escapeHtml(email || '—')}</div>
       </td>
 
       <td class="fw-semibold" style="font-size: 0.875rem">
-        ${lastDonation}
+        ${escapeHtml(lastDonation)}
       </td>
 
       <td>
@@ -92,7 +170,7 @@ function renderDonors(donors) {
               class="form-check-input donor-active-toggle"
               type="checkbox"
               role="switch"
-              aria-label="Activar cuenta ${fullName}"
+              aria-label="Activar cuenta ${escapeHtml(fullName)}"
               ${active ? 'checked' : ''}
             />
           </div>
@@ -109,7 +187,18 @@ function renderDonors(donors) {
     tbody.appendChild(row);
   });
 
-  refreshKpis();
+  applyFilters();
+}
+
+function upsertDonor(donor) {
+  const index = donors.findIndex((item) => Number(item.id) === Number(donor.id));
+  if (index >= 0) {
+    donors[index] = donor;
+  } else {
+    donors.push(donor);
+  }
+  donors.sort((a, b) => Number(a.id) - Number(b.id));
+  renderDonors(donors);
 }
 
 async function loadDonors() {
@@ -117,7 +206,7 @@ async function loadDonors() {
     showStatus('Cargando donantes...', 'info');
 
     const result = await adminApi.listUsers({ role: 'donor' });
-    const donors = Array.isArray(result.data?.users) ? result.data.users : [];
+    donors = Array.isArray(result.data?.users) ? result.data.users : [];
 
     renderDonors(donors);
 
@@ -129,13 +218,6 @@ async function loadDonors() {
     console.error('Error al cargar donantes:', error);
     showStatus('No se pudieron cargar los donantes.', 'danger');
   }
-}
-
-function showStatus(message, type = 'info') {
-  if (!statusEl) return;
-  statusEl.textContent = message;
-  statusEl.classList.remove('d-none', 'alert-success', 'alert-danger', 'alert-info');
-  statusEl.classList.add(`alert-${type}`);
 }
 
 function setRowActive(row, active) {
@@ -150,7 +232,7 @@ function setRowActive(row, active) {
 }
 
 function refreshKpis() {
-  const rows = [...(table?.querySelectorAll('tbody tr') ?? [])];
+  const rows = [...(table?.querySelectorAll('tbody tr[data-id]') ?? [])];
   const visible = rows.filter((row) => row.style.display !== 'none');
   const active = visible.filter((row) => row.dataset.active === '1').length;
   const eligible = visible.filter((row) => row.dataset.eligible === '1').length;
@@ -168,19 +250,19 @@ function applyFilters() {
   const account = filterAccount?.value ?? '';
   const eligible = filterEligible?.value ?? '';
 
-  table?.querySelectorAll('tbody tr').forEach((row) => {
+  table?.querySelectorAll('tbody tr[data-id]').forEach((row) => {
     const name = row.dataset.name ?? '';
     const email = row.dataset.email ?? '';
     const rowBlood = row.dataset.blood ?? '';
     const active = row.dataset.active === '1';
-    const isEligible = row.dataset.eligible === '1';
+    const isEligibleRow = row.dataset.eligible === '1';
 
     const matchesSearch = !q || name.includes(q) || email.includes(q);
     const matchesBlood = !blood || rowBlood === blood;
     const matchesAccount =
       !account || (account === 'active' && active) || (account === 'inactive' && !active);
     const matchesEligible =
-      !eligible || (eligible === 'yes' && isEligible) || (eligible === 'no' && !isEligible);
+      !eligible || (eligible === 'yes' && isEligibleRow) || (eligible === 'no' && !isEligibleRow);
 
     row.style.display =
       matchesSearch && matchesBlood && matchesAccount && matchesEligible ? '' : 'none';
@@ -211,6 +293,37 @@ function openDonorDetail(row) {
   window.bootstrap.Modal.getOrCreateInstance(detailModalEl).show();
 }
 
+function resetCreateForm() {
+  form?.reset();
+  showFormStatus('');
+  if (formSubmitBtn) formSubmitBtn.disabled = false;
+}
+
+function openCreateModal() {
+  if (!createModalEl || !window.bootstrap) return;
+  resetCreateForm();
+  window.bootstrap.Modal.getOrCreateInstance(createModalEl).show();
+}
+
+function closeCreateModal() {
+  if (!createModalEl || !window.bootstrap) return;
+  window.bootstrap.Modal.getOrCreateInstance(createModalEl).hide();
+}
+
+function collectCreatePayload() {
+  const bloodType = fieldBlood?.value?.trim() ?? '';
+  const phone = fieldPhone?.value?.trim() ?? '';
+
+  return {
+    first_name: fieldFirstName?.value?.trim() ?? '',
+    last_name: fieldLastName?.value?.trim() ?? '',
+    email: fieldEmail?.value?.trim() ?? '',
+    password: fieldPassword?.value ?? '',
+    phone: phone || undefined,
+    blood_type: bloodType || undefined,
+  };
+}
+
 table?.addEventListener('change', async (event) => {
   const toggle = event.target.closest('.donor-active-toggle');
   if (!toggle) return;
@@ -232,6 +345,9 @@ table?.addEventListener('change', async (event) => {
     await adminApi.patchUser(id, {
       active: newActive,
     });
+
+    const local = donors.find((item) => String(item.id) === String(id));
+    if (local) local.active = newActive;
 
     setRowActive(row, newActive);
     refreshKpis();
@@ -260,6 +376,26 @@ table?.addEventListener('click', (event) => {
   if (!viewBtn) return;
   const row = viewBtn.closest('tr');
   if (row) openDonorDetail(row);
+});
+
+btnNewDonor?.addEventListener('click', openCreateModal);
+
+form?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (formSubmitBtn) formSubmitBtn.disabled = true;
+  showFormStatus('');
+
+  try {
+    const payload = await adminApi.createUser(collectCreatePayload());
+    const created = payload?.data;
+    if (created) upsertDonor(created);
+    closeCreateModal();
+    showStatus(payload?.message || 'Donante creado.', 'success');
+  } catch (error) {
+    showFormStatus(error?.message || 'No se pudo crear el donante.');
+  } finally {
+    if (formSubmitBtn) formSubmitBtn.disabled = false;
+  }
 });
 
 filterSearch?.addEventListener('input', applyFilters);
