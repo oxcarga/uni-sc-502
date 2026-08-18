@@ -39,7 +39,7 @@ Control del inventario de sangre:
 - Trazabilidad de unidades de sangre
 - Reporte de compatibilidad de donantes
 
-> **Estado de implementación (2026-08-18):** el MVP (auth, paneles donante/banco, inventario, solicitudes, políticas, auditoría, logros) está cerrado en **P0–P9** de [plan.md](plan.md). **P10** está cerrado: KPIs del home admin, gestión de donantes (activar/desactivar con auditoría) y CRUD `/api/users` protegido (el alta pública sigue en `POST /api/users`). Escritura de centros, campana de notificaciones en todos los shells, elegibilidad/impacto, ciclo completo de solicitudes + trazabilidad y reportes están en **P11–P15**. No hay portal de hospital ni roles `nurse`/`doctor` (solo `donor`, `bank`, `admin`).
+> **Estado de implementación (2026-08-18):** el MVP (auth, paneles donante/banco, inventario, solicitudes, políticas, auditoría, logros) está cerrado en **P0–P9** de [plan.md](plan.md). **P10–P11** están cerrados: KPIs y gestión de donantes (admin), escritura de centros (crear/editar/activar) y settings persistentes del banco. Campana de notificaciones en todos los shells, elegibilidad/impacto, ciclo completo de solicitudes + trazabilidad, reportes y cambio de rol admin están en **P12–P16**. No hay portal de hospital ni roles `nurse`/`doctor` (solo `donor`, `bank`, `admin`).
 
 ---
 
@@ -162,7 +162,7 @@ npx http-server frontend
 - **Reportes**: placeholder “Próximamente” (P15)
 - **Configuración**: Políticas de donación e intervalos (✅ P8 — `/dashboard/admin/settings/`)
 - **Registro de auditoría**: Cambios con marca de tiempo y usuario (✅ P8 + P10 — `/dashboard/admin/audit/`)
-- **Bancos Registrados**: listado live (`GET /api/centers?all=1`); create/edit/activar aún demo local (P11)
+- **Bancos Registrados**: create/edit/activar vía `POST/PUT /api/centers` (✅ P11; deja `audit_log`)
 
 ### 2. **Panel del Donante**
 
@@ -187,7 +187,7 @@ npx http-server frontend
 - **Solicitudes de Centros Médicos**: cola y asignación (`pending → assigned`) (✅; P14 create + ciclo `in_transit`/`completed`/`cancelled`)
 - **Compatibilidad de Donantes**: Búsqueda por tipo de sangre (✅)
 - **Reporte de Trazabilidad**: no hay página ni API de unidades (P14)
-- **Settings del centro**: formulario UI; **no persiste** (P11)
+- **Settings del centro**: carga y guarda vía `GET /api/bank/center` + `PUT /api/centers/{id}` (✅ P11)
 - **Citas del centro**: listar + Completar (✅ P5); marcar `no_show` (P14)
 
 ---

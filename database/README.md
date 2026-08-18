@@ -206,7 +206,19 @@ O en phpMyAdmin: http://localhost:3002 (`pulso_user` / `pulso_password`).
 
 **Flujo demo (UI):** login `admin@test.com` → Panel (KPIs) → Donantes → filtro Cuenta = Inactiva (`Luis Mora`) → activar/desactivar otro donante → Auditoría.
 
-## Solución de problemas
+### P11 — escritura de centros
+
+El seed incluye `BK-001` (activo, Hospital Regional) y `BK-002` (inactivo, Hospital Max Peralta).
+
+```bash
+docker-compose exec db mysql -u pulso_user -ppulso_password pulso_solidario -e "
+SELECT id, code, name, active FROM donation_centers ORDER BY id;
+SELECT action, entity_type, entity_id, detail FROM audit_log
+  WHERE action LIKE 'center.%' ORDER BY id DESC LIMIT 10;
+"
+```
+
+**Flujo demo (UI):** login `admin@test.com` → Bancos → activar Max Peralta / editar o crear un centro → Auditoría. Login `banco@test.com` → Configuración → guardar datos del Hospital Regional.
 
 **La tabla `users` no existe / faltan tablas nuevas**
 

@@ -187,6 +187,8 @@ $container->set(
     CenterController::class,
     fn ($c) => new CenterController(
         $c->get(DonationCenterRepository::class),
+        $c->get(BankProfileRepository::class),
+        $c->get(AuditLogRepository::class),
         $c->get(LoggerInterface::class)
     )
 );

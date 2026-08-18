@@ -9,6 +9,10 @@ use Slim\App;
 return function (App $app) {
     $app->get('/centers', [CenterController::class, 'index'])
         ->add(AuthMiddleware::class);
+    $app->post('/centers', [CenterController::class, 'create'])
+        ->add(AuthMiddleware::class);
     $app->get('/centers/{id}', [CenterController::class, 'show'])
+        ->add(AuthMiddleware::class);
+    $app->put('/centers/{id}', [CenterController::class, 'update'])
         ->add(AuthMiddleware::class);
 };

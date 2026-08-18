@@ -119,14 +119,15 @@
               <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Bancos</h1>
             </div>
             <p class="text-muted mb-0">
-              Lectura desde <code>GET /api/centers?all=1</code>. Crear/editar centros queda aplazado.
+              Crea, edita y activa los centros de donación afiliados.
             </p>
           </div>
-          <button type="button" class="btn btn-primary rounded-3 fw-semibold" disabled
-            title="Escritura de centros aplazada">Nuevo banco</button>
+          <button type="button" class="btn btn-primary rounded-3 fw-semibold" id="btn-new-bank">
+            Nuevo banco
+          </button>
+          <div id="banks-status" class="alert alert-info mb-0 py-2 px-3 d-none" role="status"
+            aria-live="polite" style="font-size: 0.875rem"></div>
         </div>
-
-        <div id="banks-status" class="alert alert-info mb-4 d-none" role="status" aria-live="polite"></div>
 
         <div class="row g-3 mb-4">
           <div class="col-sm-6 col-xl-4">
@@ -204,6 +205,92 @@
           </div>
         </section>
       </main>
+    </div>
+  </div>
+
+  <div class="modal fade" id="bankModal" tabindex="-1" aria-labelledby="bankModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow">
+        <form id="bank-form">
+          <div class="modal-header border-0">
+            <h2 class="modal-title fs-5 fw-bold" id="bankModalLabel">Nuevo banco</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div id="bank-form-status" class="alert alert-danger py-2 px-3 d-none" role="alert"
+              aria-live="assertive" style="font-size: 0.875rem"></div>
+            <input type="hidden" id="bank-id" />
+            <div class="row g-3">
+              <div class="col-md-8">
+                <label class="form-label fw-semibold" for="bank-name">Nombre</label>
+                <input type="text" class="form-control form-control-lg rounded-3" id="bank-name" required maxlength="150" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" for="bank-code">Código</label>
+                <input type="text" class="form-control form-control-lg rounded-3" id="bank-code" maxlength="20"
+                  placeholder="Opcional" />
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold" for="bank-address">Dirección</label>
+                <input type="text" class="form-control form-control-lg rounded-3" id="bank-address" required maxlength="255" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" for="bank-province">Provincia</label>
+                <input type="text" class="form-control form-control-lg rounded-3" id="bank-province" maxlength="80" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" for="bank-canton">Cantón</label>
+                <input type="text" class="form-control form-control-lg rounded-3" id="bank-canton" maxlength="80" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" for="bank-region">Región</label>
+                <input type="text" class="form-control form-control-lg rounded-3" id="bank-region" maxlength="80" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" for="bank-contact-name">Contacto</label>
+                <input type="text" class="form-control form-control-lg rounded-3" id="bank-contact-name" maxlength="120" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" for="bank-contact-phone">Teléfono</label>
+                <input type="tel" class="form-control form-control-lg rounded-3" id="bank-contact-phone" maxlength="40" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" for="bank-contact-email">Correo</label>
+                <input type="email" class="form-control form-control-lg rounded-3" id="bank-contact-email" maxlength="120" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" for="bank-open-time">Apertura</label>
+                <input type="time" class="form-control form-control-lg rounded-3" id="bank-open-time" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" for="bank-close-time">Cierre</label>
+                <input type="time" class="form-control form-control-lg rounded-3" id="bank-close-time" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold" for="bank-open-days">Días de atención</label>
+                <input type="text" class="form-control form-control-lg rounded-3" id="bank-open-days" maxlength="120"
+                  placeholder="Lunes a viernes" />
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-switch mt-2">
+                  <input class="form-check-input" type="checkbox" role="switch" id="bank-walk-ins" checked />
+                  <label class="form-check-label fw-semibold" for="bank-walk-ins">Acepta donantes sin cita</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-switch mt-2">
+                  <input class="form-check-input" type="checkbox" role="switch" id="bank-active" checked />
+                  <label class="form-check-label fw-semibold" for="bank-active">Centro activo</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-outline-secondary rounded-3" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary rounded-3 fw-semibold" id="bank-form-submit">Guardar</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 

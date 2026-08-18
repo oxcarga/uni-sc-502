@@ -11,12 +11,73 @@ const filterSearch = document.getElementById('filterSearch');
 const filterStatus = document.getElementById('filterStatus');
 const filterRegion = document.getElementById('filterRegion');
 const filterClear = document.getElementById('filterClear');
+const btnNewBank = document.getElementById('btn-new-bank');
+const modalEl = document.getElementById('bankModal');
+const form = document.getElementById('bank-form');
+const formStatusEl = document.getElementById('bank-form-status');
+const formSubmitBtn = document.getElementById('bank-form-submit');
+const modalTitle = document.getElementById('bankModalLabel');
+const fieldId = document.getElementById('bank-id');
+const fieldName = document.getElementById('bank-name');
+const fieldCode = document.getElementById('bank-code');
+const fieldAddress = document.getElementById('bank-address');
+const fieldProvince = document.getElementById('bank-province');
+const fieldCanton = document.getElementById('bank-canton');
+const fieldRegion = document.getElementById('bank-region');
+const fieldContactName = document.getElementById('bank-contact-name');
+const fieldContactPhone = document.getElementById('bank-contact-phone');
+const fieldContactEmail = document.getElementById('bank-contact-email');
+const fieldOpenTime = document.getElementById('bank-open-time');
+const fieldCloseTime = document.getElementById('bank-close-time');
+const fieldOpenDays = document.getElementById('bank-open-days');
+const fieldWalkIns = document.getElementById('bank-walk-ins');
+const fieldActive = document.getElementById('bank-active');
+
+const STATUS_AUTO_HIDE_MS = 7000;
+const STATUS_FADE_MS = 400;
+let statusHideTimer = null;
+let statusFadeTimer = null;
+let centers = [];
+let editSnapshot = '';
+
+function clearStatusTimers() {
+  if (statusHideTimer) clearTimeout(statusHideTimer);
+  if (statusFadeTimer) clearTimeout(statusFadeTimer);
+  statusHideTimer = null;
+  statusFadeTimer = null;
+}
+
+function hideStatus() {
+  if (!statusEl) return;
+  clearStatusTimers();
+  statusEl.classList.add('is-fading');
+  statusFadeTimer = setTimeout(() => {
+    statusEl.classList.add('d-none');
+    statusEl.classList.remove('is-fading');
+    statusEl.textContent = '';
+  }, STATUS_FADE_MS);
+}
 
 function showStatus(message, type = 'info') {
   if (!statusEl) return;
+  clearStatusTimers();
   statusEl.textContent = message;
-  statusEl.classList.remove('d-none', 'alert-success', 'alert-danger', 'alert-info');
+  statusEl.classList.remove('d-none', 'is-fading', 'alert-success', 'alert-danger', 'alert-info');
   statusEl.classList.add(`alert-${type}`);
+  if (type !== 'danger') {
+    statusHideTimer = setTimeout(hideStatus, STATUS_AUTO_HIDE_MS);
+  }
+}
+
+function showFormStatus(message) {
+  if (!formStatusEl) return;
+  if (!message) {
+    formStatusEl.classList.add('d-none');
+    formStatusEl.textContent = '';
+    return;
+  }
+  formStatusEl.textContent = message;
+  formStatusEl.classList.remove('d-none');
 }
 
 function escapeHtml(value) {
@@ -25,6 +86,11 @@ function escapeHtml(value) {
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;');
+}
+
+function toTimeInput(value) {
+  if (!value) return '';
+  return String(value).slice(0, 5);
 }
 
 function setRowActive(row, active) {
@@ -39,7 +105,7 @@ function setRowActive(row, active) {
 }
 
 function refreshKpis() {
-  const rows = [...(table?.querySelectorAll('tbody tr') ?? [])];
+  const rows = [...(table?.querySelectorAll('tbody tr[data-bank-id]') ?? [])];
   const visible = rows.filter((row) => row.style.display !== 'none');
   const active = visible.filter((row) => row.dataset.active === '1').length;
   const inactive = visible.length - active;
@@ -55,7 +121,7 @@ function applyFilters() {
   const status = filterStatus?.value ?? '';
   const region = filterRegion?.value ?? '';
 
-  table?.querySelectorAll('tbody tr').forEach((row) => {
+  table?.querySelectorAll('tbody tr[data-bank-id]').forEach((row) => {
     const name = row.dataset.name ?? '';
     const rowRegion = row.dataset.region ?? '';
     const active = row.dataset.active === '1';
@@ -71,9 +137,9 @@ function applyFilters() {
   refreshKpis();
 }
 
-function populateRegionFilter(centers) {
+function populateRegionFilter(list) {
   if (!filterRegion) return;
-  const regions = [...new Set(centers.map((c) => c.region || c.province).filter(Boolean))].sort();
+  const regions = [...new Set(list.map((c) => c.region || c.province).filter(Boolean))].sort();
   const current = filterRegion.value;
   filterRegion.innerHTML =
     '<option value="">Todas</option>' +
@@ -81,10 +147,10 @@ function populateRegionFilter(centers) {
   if (regions.includes(current)) filterRegion.value = current;
 }
 
-function renderCenters(centers) {
+function renderCenters(list) {
   if (!tableBody) return;
 
-  if (centers.length === 0) {
+  if (list.length === 0) {
     tableBody.innerHTML = `
       <tr>
         <td colspan="5" class="text-muted text-center py-4">No hay centros en la base de datos.</td>
@@ -93,7 +159,7 @@ function renderCenters(centers) {
     return;
   }
 
-  tableBody.innerHTML = centers
+  tableBody.innerHTML = list
     .map((center) => {
       const active = Boolean(center.active);
       const region = center.region || center.province || '';
@@ -117,33 +183,181 @@ function renderCenters(centers) {
               <input class="form-check-input bank-active-toggle" type="checkbox" role="switch"
                 aria-label="Activar ${escapeHtml(center.name)}" ${active ? 'checked' : ''} />
             </div>
-            <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold" disabled
-              title="Escritura de centros aplazada">Editar</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 fw-semibold btn-edit-bank">
+              Editar
+            </button>
           </div>
         </td>
       </tr>`;
     })
     .join('');
 
-  populateRegionFilter(centers);
+  populateRegionFilter(list);
   applyFilters();
 }
 
-table?.addEventListener('change', (event) => {
+function upsertCenter(center) {
+  const index = centers.findIndex((item) => item.id === center.id);
+  if (index >= 0) {
+    centers[index] = center;
+  } else {
+    centers.push(center);
+  }
+  centers.sort((a, b) => String(a.name).localeCompare(String(b.name), 'es'));
+  renderCenters(centers);
+}
+
+function formSnapshot() {
+  return JSON.stringify({
+    name: fieldName?.value?.trim() ?? '',
+    code: fieldCode?.value?.trim() ?? '',
+    address: fieldAddress?.value?.trim() ?? '',
+    province: fieldProvince?.value?.trim() ?? '',
+    canton: fieldCanton?.value?.trim() ?? '',
+    region: fieldRegion?.value?.trim() ?? '',
+    contact_name: fieldContactName?.value?.trim() ?? '',
+    contact_phone: fieldContactPhone?.value?.trim() ?? '',
+    contact_email: fieldContactEmail?.value?.trim() ?? '',
+    open_time: fieldOpenTime?.value ?? '',
+    close_time: fieldCloseTime?.value ?? '',
+    open_days: fieldOpenDays?.value?.trim() ?? '',
+    accept_walk_ins: Boolean(fieldWalkIns?.checked),
+    active: Boolean(fieldActive?.checked),
+  });
+}
+
+function syncModalDirty() {
+  if (!formSubmitBtn) return;
+  const isCreate = !(fieldId?.value);
+  formSubmitBtn.disabled = isCreate ? false : formSnapshot() === editSnapshot;
+}
+
+function fillForm(center) {
+  if (fieldId) fieldId.value = center?.id ? String(center.id) : '';
+  if (fieldName) fieldName.value = center?.name ?? '';
+  if (fieldCode) fieldCode.value = center?.code ?? '';
+  if (fieldAddress) fieldAddress.value = center?.address ?? '';
+  if (fieldProvince) fieldProvince.value = center?.province ?? '';
+  if (fieldCanton) fieldCanton.value = center?.canton ?? '';
+  if (fieldRegion) fieldRegion.value = center?.region ?? '';
+  if (fieldContactName) fieldContactName.value = center?.contact_name ?? '';
+  if (fieldContactPhone) fieldContactPhone.value = center?.contact_phone ?? '';
+  if (fieldContactEmail) fieldContactEmail.value = center?.contact_email ?? '';
+  if (fieldOpenTime) fieldOpenTime.value = toTimeInput(center?.open_time);
+  if (fieldCloseTime) fieldCloseTime.value = toTimeInput(center?.close_time);
+  if (fieldOpenDays) fieldOpenDays.value = center?.open_days ?? '';
+  if (fieldWalkIns) fieldWalkIns.checked = center ? Boolean(center.accept_walk_ins) : true;
+  if (fieldActive) fieldActive.checked = center ? Boolean(center.active) : true;
+  editSnapshot = formSnapshot();
+  syncModalDirty();
+}
+
+function collectFormPayload() {
+  return {
+    name: fieldName?.value?.trim() ?? '',
+    code: fieldCode?.value?.trim() || null,
+    address: fieldAddress?.value?.trim() ?? '',
+    province: fieldProvince?.value?.trim() || null,
+    canton: fieldCanton?.value?.trim() || null,
+    region: fieldRegion?.value?.trim() || null,
+    contact_name: fieldContactName?.value?.trim() || null,
+    contact_phone: fieldContactPhone?.value?.trim() || null,
+    contact_email: fieldContactEmail?.value?.trim() || null,
+    open_time: fieldOpenTime?.value || null,
+    close_time: fieldCloseTime?.value || null,
+    open_days: fieldOpenDays?.value?.trim() || null,
+    accept_walk_ins: Boolean(fieldWalkIns?.checked),
+    active: Boolean(fieldActive?.checked),
+  };
+}
+
+function openModal(center = null) {
+  if (!modalEl || !window.bootstrap) return;
+  showFormStatus('');
+  fillForm(center);
+  if (modalTitle) {
+    modalTitle.textContent = center ? 'Editar banco' : 'Nuevo banco';
+  }
+  if (formSubmitBtn) {
+    formSubmitBtn.textContent = center ? 'Guardar cambios' : 'Crear banco';
+  }
+  window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+}
+
+function closeModal() {
+  if (!modalEl || !window.bootstrap) return;
+  window.bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+}
+
+table?.addEventListener('change', async (event) => {
   const toggle = event.target.closest('.bank-active-toggle');
   if (!toggle) return;
 
   const row = toggle.closest('tr');
   if (!row) return;
 
+  const id = Number(row.dataset.bankId);
   const name = row.querySelector('.fw-semibold')?.textContent?.trim() ?? 'Banco';
-  const active = toggle.checked;
-  setRowActive(row, active);
-  refreshKpis();
-  showStatus(
-    `Demo local: ${name} marcado como ${active ? 'activo' : 'inactivo'} (no se guardó; escritura aplazada).`,
-    'info'
-  );
+  const newActive = toggle.checked;
+  const previousActive = row.dataset.active === '1';
+
+  toggle.disabled = true;
+  try {
+    const payload = await centersApi.update(id, { active: newActive });
+    const updated = payload?.data;
+    if (updated) upsertCenter(updated);
+    else {
+      setRowActive(row, newActive);
+      const local = centers.find((item) => item.id === id);
+      if (local) local.active = newActive;
+      refreshKpis();
+    }
+    showStatus(
+      `${name} quedó ${newActive ? 'activo' : 'inactivo'}.`,
+      'success'
+    );
+  } catch (error) {
+    setRowActive(row, previousActive);
+    refreshKpis();
+    showStatus(error?.message || `No se pudo actualizar ${name}.`, 'danger');
+  } finally {
+    toggle.disabled = false;
+  }
+});
+
+table?.addEventListener('click', (event) => {
+  const editBtn = event.target.closest('.btn-edit-bank');
+  if (!editBtn) return;
+  const row = editBtn.closest('tr');
+  const id = Number(row?.dataset.bankId);
+  const center = centers.find((item) => item.id === id);
+  if (center) openModal(center);
+});
+
+btnNewBank?.addEventListener('click', () => openModal(null));
+
+form?.addEventListener('input', syncModalDirty);
+form?.addEventListener('change', syncModalDirty);
+
+form?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const id = fieldId?.value ? Number(fieldId.value) : 0;
+  const body = collectFormPayload();
+  if (formSubmitBtn) formSubmitBtn.disabled = true;
+  showFormStatus('');
+
+  try {
+    const payload = id
+      ? await centersApi.update(id, body)
+      : await centersApi.create(body);
+    const saved = payload?.data;
+    if (saved) upsertCenter(saved);
+    closeModal();
+    showStatus(payload?.message || (id ? 'Centro actualizado.' : 'Centro creado.'), 'success');
+  } catch (error) {
+    showFormStatus(error?.message || 'No se pudo guardar el centro.');
+    syncModalDirty();
+  }
 });
 
 filterSearch?.addEventListener('input', applyFilters);
@@ -158,12 +372,8 @@ filterClear?.addEventListener('click', () => {
 
 try {
   const payload = await centersApi.list({ all: true });
-  const centers = Array.isArray(payload?.data) ? payload.data : [];
+  centers = Array.isArray(payload?.data) ? payload.data : [];
   renderCenters(centers);
-  showStatus(
-    `Listado desde GET /api/centers?all=1 · ${centers.length} centro(s). La escritura (crear/editar) queda aplazada.`,
-    'info'
-  );
 } catch (error) {
   showStatus(error?.message || 'No se pudieron cargar los centros.', 'danger');
 }

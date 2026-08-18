@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Controllers\AlertController;
 use App\Controllers\AppointmentController;
 use App\Controllers\BankDonorController;
+use App\Controllers\CenterController;
 use App\Controllers\InventoryController;
 use App\Controllers\RequestController;
 use App\Middleware\AuthMiddleware;
@@ -36,5 +37,8 @@ return function (App $app) {
         ->add(AuthMiddleware::class);
 
     $app->get('/bank/donors/compatible', [BankDonorController::class, 'compatible'])
+        ->add(AuthMiddleware::class);
+
+    $app->get('/bank/center', [CenterController::class, 'mine'])
         ->add(AuthMiddleware::class);
 };
