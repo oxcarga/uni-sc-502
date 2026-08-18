@@ -29,7 +29,10 @@ COPY apache-api.conf /etc/apache2/conf-available/api.conf
 RUN a2enconf api
 
 # Copy entrypoint script
+# El sed quita los CR: si el repo se clonó en Windows sin respetar .gitattributes,
+# el shebang quedaría como "bash\r" y el contenedor no arrancaría.
 COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 CMD ["/usr/local/bin/docker-entrypoint.sh"]
