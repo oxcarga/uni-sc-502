@@ -150,11 +150,10 @@
               <h1 class="headline fw-bold mb-0" style="font-size: 2rem">
                 Administración
               </h1>
-              <span class="demo-badge">Demo</span>
             </div>
 
             <p class="text-muted mb-0">
-              Resumen del ecosistema. KPIs mock hasta cablear APIs de gobierno (P8).
+              Resumen en vivo del ecosistema: centros, donantes, alertas y solicitudes abiertas.
             </p>
           </div>
 
@@ -172,6 +171,8 @@
 
         </div>
 
+        <p id="dashboard-status" class="alert alert-danger d-none mb-4" role="status"></p>
+
         <div class="row g-4 mb-4">
 
           <div class="col-sm-6 col-xl-3">
@@ -186,7 +187,7 @@
               </div>
 
               <div class="text-muted mt-1" style="font-size: 0.8125rem">
-                Demo · listado UI
+                Centros registrados
               </div>
             </article>
           </div>
@@ -203,7 +204,7 @@
               </div>
 
               <div class="text-muted mt-1" style="font-size: 0.8125rem">
-                Demo · listado UI
+                Cuentas con rol donante
               </div>
             </article>
           </div>
@@ -220,7 +221,7 @@
               </div>
 
               <div class="text-muted mt-1" style="font-size: 0.8125rem">
-                Seed · O- crítico
+                Stock crítico sin resolver
               </div>
             </article>
           </div>
@@ -237,7 +238,7 @@
               </div>
 
               <div class="text-muted mt-1" style="font-size: 0.8125rem">
-                Seed · cola en P7
+                Pendientes de asignar
               </div>
             </article>
           </div>
@@ -261,7 +262,7 @@
                     Gestionar bancos
                   </span>
                   <span class="shortcut-link__hint">
-                    Centros · filtros demo
+                    Listado de centros (escritura en P11)
                   </span>
                 </a>
 
@@ -270,7 +271,7 @@
                     Gestionar donantes
                   </span>
                   <span class="shortcut-link__hint">
-                    Cuentas · elegibilidad demo
+                    Activar o desactivar cuentas
                   </span>
                 </a>
 
@@ -279,7 +280,7 @@
                     Políticas y config
                   </span>
                   <span class="shortcut-link__hint">
-                    Stub · P8
+                    Umbrales e intervalo de donación
                   </span>
                 </a>
 
@@ -288,7 +289,7 @@
                     Auditoría
                   </span>
                   <span class="shortcut-link__hint">
-                    Stub · P8
+                    Cambios de cuentas y políticas
                   </span>
                 </a>
 
@@ -305,11 +306,11 @@
               <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
 
                 <h2 class="section-title mb-0" id="seed-snapshot">
-                  Snapshot del seed
+                  Cuentas demo
                 </h2>
 
                 <span class="demo-badge">
-                  No es dato en vivo
+                  Local
                 </span>
 
               </div>
@@ -330,32 +331,15 @@
 
                     <tr>
                       <td class="fw-semibold">
-                        Solicitud demo
+                        Admin
                       </td>
 
                       <td class="text-muted" style="font-size: 0.875rem">
-                        RE-9082 · O- · crítica
+                        admin@test.com / demo1234
                       </td>
 
                       <td>
-                        <span class="badge-soft badge-soft--amber">
-                          <span class="dot"></span>
-                          Pendiente
-                        </span>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="fw-semibold">
-                        Alerta stock
-                      </td>
-
-                      <td class="text-muted" style="font-size: 0.875rem">
-                        O- bajo umbral &lt;50
-                      </td>
-
-                      <td>
-                        <span class="badge-soft badge-soft--rose">
+                        <span class="badge-soft badge-soft--teal">
                           <span class="dot"></span>
                           Activa
                         </span>
@@ -364,17 +348,34 @@
 
                     <tr>
                       <td class="fw-semibold">
-                        Cuenta admin
+                        Donante inactivo
                       </td>
 
                       <td class="text-muted" style="font-size: 0.875rem">
-                        admin@test.com
+                        donante_inactivo@test.com
+                      </td>
+
+                      <td>
+                        <span class="badge-soft badge-soft--slate">
+                          <span class="dot"></span>
+                          No entra
+                        </span>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td class="fw-semibold">
+                        Donante O−
+                      </td>
+
+                      <td class="text-muted" style="font-size: 0.875rem">
+                        donante_o@test.com / demo1234
                       </td>
 
                       <td>
                         <span class="badge-soft badge-soft--teal">
                           <span class="dot"></span>
-                          Sesión
+                          Activa
                         </span>
                       </td>
                     </tr>
@@ -406,7 +407,7 @@
               </h2>
 
               <p class="coming-soon__text">
-                Estadísticas nacionales/regionales cuando existan APIs de reporting.
+                Estadísticas nacionales y por centro (P15).
               </p>
 
             </section>
@@ -415,21 +416,14 @@
 
           <div class="col-md-4">
 
-            <section class="coming-soon h-100" aria-labelledby="policies-soon">
-
-              <span class="demo-badge mb-3">
-                Próximamente
-              </span>
-
-              <h2 class="coming-soon__title" id="policies-soon">
-                Políticas
-              </h2>
-
-              <p class="coming-soon__text">
-                Umbrales de inventario e intervalos de donación (P8).
+            <a href="/dashboard/admin/settings/" class="card h-100 p-3 text-decoration-none"
+              aria-labelledby="policies-live">
+              <span class="card-eyebrow mb-2">Listo</span>
+              <h2 class="section-title mb-2" id="policies-live">Políticas</h2>
+              <p class="text-muted mb-0" style="font-size: 0.875rem">
+                Umbrales de inventario e intervalo entre donaciones.
               </p>
-
-            </section>
+            </a>
 
           </div>
 
@@ -446,7 +440,7 @@
               </h2>
 
               <p class="coming-soon__text">
-                Avisos de gobierno y difusión a donantes (P8).
+                Campana in-app en el panel admin (P12).
               </p>
 
             </section>

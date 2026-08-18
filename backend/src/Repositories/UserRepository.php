@@ -13,6 +13,10 @@ class UserRepository
     private const ROLES = ['donor', 'bank', 'admin'];
     private const SELECT_PUBLIC =
         'id, first_name, last_name, email, role, active, email_confirmed, email_confirmed_at, created_at, updated_at';
+    private const SELECT_ADMIN_LIST =
+        'u.id, u.first_name, u.last_name, u.email, u.role, u.active,
+         u.email_confirmed, u.email_confirmed_at, u.created_at, u.updated_at,
+         dp.blood_type, dp.phone, dp.province, dp.canton, dp.eligible, dp.last_donation_at';
 
     public function __construct(private readonly PDO $pdo)
     {
@@ -21,29 +25,87 @@ class UserRepository
     public function findAll(): array
     {
         $query = $this->pdo->query(
-            'SELECT
-                u.id,
-                u.first_name,
-                u.last_name,
-                u.email,
-                u.role,
-                u.active,
-                u.email_confirmed,
-                u.email_confirmed_at,
-                u.created_at,
-                u.updated_at,
-                dp.blood_type,
-                dp.phone,
-                dp.province,
-                dp.canton,
-                dp.eligible,
-                dp.last_donation_at
-            FROM users u
-            LEFT JOIN donor_profiles dp ON dp.user_id = u.id
-            ORDER BY u.id ASC'
+            'SELECT ' . self::SELECT_ADMIN_LIST . '
+             FROM users u
+             LEFT JOIN donor_profiles dp ON dp.user_id = u.id
+             ORDER BY u.id ASC'
         );
 
-        return $query->fetchAll();
+        return array_map([$this, 'toAdminListItem'], $query->fetchAll());
+    }
+
+    /**
+     * Listado para gobierno admin. Filtros opcionales: role, active, q (nombre/email).
+     *
+     * @param array{role?: string, active?: bool, q?: string} $filters
+     * @return list<array<string, mixed>>
+     */
+    public function findForAdmin(array $filters = []): array
+    {
+        $sql = 'SELECT ' . self::SELECT_ADMIN_LIST . '
+                FROM users u
+                LEFT JOIN donor_profiles dp ON dp.user_id = u.id
+                WHERE 1 = 1';
+        $params = [];
+
+        $role = trim((string) ($filters['role'] ?? ''));
+        if ($role !== '') {
+            $sql .= ' AND u.role = :role';
+            $params['role'] = $role;
+        }
+
+        if (array_key_exists('active', $filters) && is_bool($filters['active'])) {
+            $sql .= ' AND u.active = :active';
+            $params['active'] = $filters['active'] ? 1 : 0;
+        }
+
+        $search = trim((string) ($filters['q'] ?? ''));
+        if ($search !== '') {
+            $sql .= ' AND (
+                u.first_name LIKE :q
+                OR u.last_name LIKE :q
+                OR u.email LIKE :q
+                OR CONCAT(u.first_name, \' \', u.last_name) LIKE :q
+            )';
+            $params['q'] = '%' . $search . '%';
+        }
+
+        $sql .= ' ORDER BY u.id ASC';
+        $query = $this->pdo->prepare($sql);
+        $query->execute($params);
+
+        return array_map([$this, 'toAdminListItem'], $query->fetchAll());
+    }
+
+    public function countByRole(string $role): int
+    {
+        $query = $this->pdo->prepare('SELECT COUNT(*) FROM users WHERE role = :role');
+        $query->execute(['role' => $role]);
+
+        return (int) $query->fetchColumn();
+    }
+
+    public function countActiveAdmins(): int
+    {
+        $query = $this->pdo->query(
+            "SELECT COUNT(*) FROM users WHERE role = 'admin' AND active = 1"
+        );
+
+        return (int) $query->fetchColumn();
+    }
+
+    public function findAdminById(int $id): ?array
+    {
+        $query = $this->pdo->prepare(
+            'SELECT ' . self::SELECT_ADMIN_LIST . '
+             FROM users u
+             LEFT JOIN donor_profiles dp ON dp.user_id = u.id
+             WHERE u.id = :id'
+        );
+        $query->execute(['id' => $id]);
+        $row = $query->fetch();
+
+        return $row ? self::toAdminListItem($row) : null;
     }
 
     public function findById(int $id): ?array
@@ -227,6 +289,17 @@ class UserRepository
         }
 
         return $user;
+    }
+
+    /** @param array<string, mixed> $user */
+    public static function toAdminListItem(array $user): array
+    {
+        $public = self::toPublic($user);
+        if (array_key_exists('eligible', $public)) {
+            $public['eligible'] = (bool) $public['eligible'];
+        }
+
+        return $public;
     }
 
     public static function toSession(array $user): array

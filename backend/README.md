@@ -45,29 +45,33 @@ docker exec -it pulso-solidario-backend bash -c "cd /var/www/backend && composer
 
 ```
 backend/
-├── public/                    # Única carpeta expuesta publicamente
-│   ├── .htaccess              # Reescritura de URLs hacia index.php
+├── public/
+│   ├── .htaccess
 │   └── index.php              # Front controller (punto de entrada)
 ├── src/
 │   ├── Routes/
-│   │   ├── users.php          # Rutas de usuarios
-│   │   ├── donations.php      # Rutas de donaciones
-│   │   └── bloodbank.php      # Rutas del banco de sangre
+│   │   ├── index.php          # GET / y GET /config
+│   │   ├── auth.php
+│   │   ├── users.php          # CRUD legado (hoy público)
+│   │   ├── donor.php
+│   │   ├── bank.php
+│   │   ├── centers.php
+│   │   ├── notifications.php
+│   │   └── admin.php
 │   ├── Controllers/
-│   │   ├── UserController.php
-│   │   └── DonationController.php
+│   ├── Repositories/
+│   ├── Services/
 │   ├── Middleware/
-│   │   ├── AuthMiddleware.php
-│   │   └── CorsMiddleware.php
-│   ├── Services/              # Lógica de negocio
+│   │   └── AuthMiddleware.php
+│   ├── Support/               # JsonResponse, Session, Logger, SmtpMailer
 │   └── Database/
-│       └── Connection.php     # Conexión PDO
-├── config/
-│   └── settings.php           # Configuración de la aplicación
+│       └── Connection.php
 ├── composer.json
 ├── composer.lock
-└── vendor/                    # Dependencias (generado por Composer)
+└── vendor/
 ```
+
+No hay `src/Routes/donations.php` ni `bloodbank.php`: donaciones e inventario viven en `donor.php` / `bank.php`.
 
 ### Carpeta `public/` y exposición del api
 
@@ -305,10 +309,24 @@ Con Slim, las rutas no dependen de archivos `.php` individuales. Prefijo: `/api/
 
 | Método | Ruta | Notas |
 |--------|------|-------|
-| `POST` | `/auth/register` | Registro |
+| `POST` | `/users` | Registro público de donante (`role = donor`). El alta vive aquí, no en `/auth/*` |
 | `POST` | `/auth/login` | Login → cookie de sesión |
 | `POST` | `/auth/logout` | Cierra sesión |
 | `GET` | `/auth/me` | Usuario autenticado |
+| `POST`/`GET` | `/auth/confirm-email` | Token de un solo uso |
+| `POST` | `/auth/resend-confirmation` | Respuesta genérica |
+
+### Usuarios (legado + registro)
+
+| Método | Ruta | Notas |
+|--------|------|-------|
+| `POST` | `/users` | Registro público de donante (`role = donor`). Sin sesión |
+| `GET` | `/users` | Lista + JOIN perfil. **Solo admin** (sesión) |
+| `GET` | `/users/{id}` | **Solo admin** |
+| `PUT` | `/users/{id}` | Update legado. **Solo admin**. El panel usa `PATCH /admin/users/{id}` |
+| `DELETE` | `/users/{id}` | **Solo admin** |
+
+El alta de donantes en el FE sigue siendo `POST /users`. El gobierno de cuentas (activar/desactivar) va por `/admin/users`.
 
 ### Donante — perfil (P4)
 
@@ -326,7 +344,20 @@ Con Slim, las rutas no dependen de archivos `.php` individuales. Prefijo: `/api/
 | `GET` | `/centers` | Autenticado; solo activos. Admin: `?all=1` incluye inactivos |
 | `GET` | `/centers/{id}` | Detalle; admin puede ver inactivos |
 
-Escritura de centros (crear/editar) queda aplazada.
+Escritura de centros (crear/editar/activar): **P11** — `CenterController` solo tiene `index` y `show`.
+
+### Admin gobierno (P8 + P10)
+
+| Método | Ruta | Notas |
+|--------|------|-------|
+| `GET` | `/admin/dashboard` | Rol `admin`. KPIs: centros (`banks`), donantes, alertas activas, solicitudes `pending` |
+| `GET` | `/admin/users` | Rol `admin`. Query: `role`, `active` (`0`/`1`), `q` |
+| `PATCH` | `/admin/users/{id}` | Rol `admin`. Body: `active` y/o `role`. No deja el sistema sin un admin activo. Audita `user.activate` / `user.deactivate` / `user.role_change` |
+| `GET` | `/admin/policies` | Políticas globales + umbrales derivados |
+| `PUT` | `/admin/policies` | Body: `inventory_*`, `donor_interval_days` (enteros > 0). Audita `policy.update` |
+| `GET` | `/admin/audit-log` | Últimos registros (`?limit=`) |
+
+**Flujo demo P10:** login `admin@test.com` → home (KPIs en vivo) → Donantes → desactivar `donante_inactivo@test.com` o un donante activo → Auditoría (`user.deactivate`). Re-provision si el seed inactivo aún no está en el volumen.
 
 ### Citas y donaciones (P5)
 
@@ -373,12 +404,9 @@ Tras cada movimiento de stock se sincroniza alerta crítica (`created` / `resolv
 |--------|------|-------|
 | `GET` | `/notifications` | Propias del usuario; incluye `unread_count` |
 | `POST` | `/notifications/{id}/read` | Marcar leída |
-| `GET` | `/admin/policies` | Políticas globales + umbrales derivados |
-| `PUT` | `/admin/policies` | Body: `inventory_*`, `donor_interval_days` (enteros > 0) |
-| `GET` | `/admin/audit-log` | Últimos registros (`?limit=`) |
 
 Al **crear** una alerta crítica se notifican donantes compatibles con `notify_blood_match`.  
-Auditoría en: `policy.update`, `request.assign`.
+Auditoría en: `policy.update`, `request.assign`. Prefs `notify_appointments` / `notify_nearby` aún no despachan (P12).
 
 ### Logros (P9)
 
@@ -390,15 +418,21 @@ Al completar una cita (`POST /bank/appointments/{id}/complete`) se recalcula pro
 
 **Demo:** `donante@test.com` ya tiene `first_donation` en el seed. Completar más donaciones avanza `hero_5` / `legend_10`.
 
-### Otras rutas (plantilla / legado)
+### Endpoints que aún no existen (backlog)
+
+| Fase | Rutas previstas |
+|------|-----------------|
+| P11 | `POST /centers`, `PUT /centers/{id}` |
+| P13 | campos derivados en `GET /donor/profile` y/o `GET /donor/impact` |
+| P14 | `POST /bank/requests`, transiciones de estado, `no_show` en citas, `GET /bank/blood-units` |
+| P15 | `GET /admin/reports/summary` |
+
+### Otras rutas
 
 | Ruta Slim | URL | Método |
 |-----------|-----|--------|
 | `/` | http://localhost:3001/api/ | GET |
-| `/users` | http://localhost:3001/api/users | GET / POST |
-| `/users/{id}` | http://localhost:3001/api/users/1 | GET |
-| `/donations` | http://localhost:3001/api/donations | GET |
-| `/bloodbank/inventory` | http://localhost:3001/api/bloodbank/inventory | GET |
+| `/config` | http://localhost:3001/api/config | GET (`environment` para tips de Mailhog) |
 
 ## Llamar al backend desde el frontend
 

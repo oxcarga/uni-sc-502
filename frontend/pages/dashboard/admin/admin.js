@@ -11,6 +11,11 @@ async function loadDashboard() {
     document.querySelector('#kpi-requests').textContent = data.pending_requests ?? 0;
   } catch (error) {
     console.error('Error al cargar dashboard admin:', error);
+    const status = document.querySelector('#dashboard-status');
+    if (status) {
+      status.textContent = 'No se pudo cargar el resumen. Recarga la página o revisa la sesión.';
+      status.classList.remove('d-none');
+    }
   }
 }
 

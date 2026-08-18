@@ -32,6 +32,11 @@ class UserController
 
     public function index(Request $request, Response $response): Response
     {
+        $denied = $this->requireAdmin($request, $response);
+        if ($denied !== null) {
+            return $denied;
+        }
+
         try {
             $users = array_map(
                 static fn (array $user): array => UserRepository::toPublic($user),
@@ -47,6 +52,11 @@ class UserController
 
     public function show(Request $request, Response $response, array $args): Response
     {
+        $denied = $this->requireAdmin($request, $response);
+        if ($denied !== null) {
+            return $denied;
+        }
+
         $id = (int) $args['id'];
         $user = $this->users->findById($id);
 
@@ -105,6 +115,11 @@ class UserController
 
     public function update(Request $request, Response $response, array $args): Response
     {
+        $denied = $this->requireAdmin($request, $response);
+        if ($denied !== null) {
+            return $denied;
+        }
+
         $id = (int) $args['id'];
 
         if ($this->users->findById($id) === null) {
@@ -156,6 +171,11 @@ class UserController
 
     public function delete(Request $request, Response $response, array $args): Response
     {
+        $denied = $this->requireAdmin($request, $response);
+        if ($denied !== null) {
+            return $denied;
+        }
+
         $id = (int) $args['id'];
 
         try {
@@ -218,5 +238,18 @@ class UserController
         $driverCode = (int) ($error->errorInfo[1] ?? 0);
 
         return $sqlState === self::ERROR_CODE_EMAIL_DUPLICATED || $driverCode === 1062;
+    }
+
+    private function requireAdmin(Request $request, Response $response): ?Response
+    {
+        $auth = $request->getAttribute('auth_user');
+        if (!is_array($auth)) {
+            return JsonResponse::error($response, 'No autenticado.', 401);
+        }
+        if (($auth['role'] ?? '') !== 'admin') {
+            return JsonResponse::error($response, 'Solo administradores.', 403);
+        }
+
+        return null;
     }
 }

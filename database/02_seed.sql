@@ -15,7 +15,8 @@ INSERT IGNORE INTO users (
   ('Donante', 'Donante', 'donante@test.com', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'donor', 1, 1),
   ('Banco', 'Banco', 'banco@test.com', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'bank', 1, 1),
   ('Admin', 'Admin', 'admin@test.com', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'admin', 1, 1),
-  ('Elena', 'Rodríguez', 'donante_o@test.com', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'donor', 1, 1);
+  ('Elena', 'Rodríguez', 'donante_o@test.com', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'donor', 1, 1),
+  ('Luis', 'Mora', 'donante_inactivo@test.com', '$2y$12$gKR6uwOWhmvxk8gBxkiyu.6VjxtIoe5oAd37wA0Bqnujcjf7GxO0.', 'donor', 0, 1);
 
 -- ---------------------------------------------------------------------------
 -- Centro + perfiles
@@ -58,6 +59,18 @@ SELECT
   1, 1, 1
 FROM users u
 WHERE u.email = 'donante_o@test.com';
+
+INSERT IGNORE INTO donor_profiles (
+  user_id, blood_type, birth_date, phone, province, canton, address,
+  medical_history, eligible, last_donation_at,
+  notify_nearby, notify_appointments, notify_blood_match
+)
+SELECT
+  u.id, 'B+', '1988-11-04', '8666-0000', 'Alajuela', 'Alajuela', 'Centro',
+  NULL, 0, DATE_SUB(CURDATE(), INTERVAL 20 DAY),
+  0, 1, 0
+FROM users u
+WHERE u.email = 'donante_inactivo@test.com';
 
 INSERT IGNORE INTO bank_profiles (user_id, center_id)
 SELECT u.id, 1
