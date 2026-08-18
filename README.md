@@ -39,7 +39,7 @@ Control del inventario de sangre:
 - Trazabilidad de unidades de sangre
 - Reporte de compatibilidad de donantes
 
-> **Estado de implementación:** el MVP (auth, paneles donante/banco, inventario, solicitudes, políticas, auditoría, logros) está en las fases **P0–P9** de [plan.md](plan.md). Gobierno admin completo (KPIs en vivo, usuarios, escritura de centros), campana de notificaciones en todos los shells, elegibilidad/impacto, ciclo completo de solicitudes + trazabilidad y reportes están en el backlog **P10–P15**. No hay portal de hospital ni roles `nurse`/`doctor` (solo `donor`, `bank`, `admin`).
+> **Estado de implementación (2026-08-18):** el MVP (auth, paneles donante/banco, inventario, solicitudes, políticas, auditoría, logros) está cerrado en **P0–P9** de [plan.md](plan.md). **P10** está cerrado: KPIs del home admin, gestión de donantes (activar/desactivar con auditoría) y CRUD `/api/users` protegido (el alta pública sigue en `POST /api/users`). Escritura de centros, campana de notificaciones en todos los shells, elegibilidad/impacto, ciclo completo de solicitudes + trazabilidad y reportes están en **P11–P15**. No hay portal de hospital ni roles `nurse`/`doctor` (solo `donor`, `bank`, `admin`).
 
 ---
 
@@ -82,6 +82,7 @@ Contraseña para todos: `demo1234`
 |-----|--------|-------|
 | Donante (A+) | `donante@test.com` | `/dashboard/donor/` |
 | Donante (O-) | `donante_o@test.com` | `/dashboard/donor/` |
+| Donante (inactivo) | `donante_inactivo@test.com` | No inicia sesión (`active = 0`) |
 | Banco | `banco@test.com` | `/dashboard/bank/` |
 | Admin | `admin@test.com` | `/dashboard/admin/` |
 
@@ -156,12 +157,12 @@ npx http-server frontend
 ### 1. **Panel de Administración General** 
 
 **Secciones principales:**
-- **Panel principal**: Indicadores clave (P10: KPIs en vivo; hoy mock en home)
-- **Gestión de Usuarios**: Tabla con filtros y activar/desactivar / rol (P10; UI demo hasta entonces)
-- **Reportes**: Donaciones por mes, tipos de sangre, volumen por centro (P15)
+- **Panel principal**: KPIs en vivo (`GET /api/admin/dashboard`) — centros, donantes, alertas, solicitudes abiertas (✅ P10)
+- **Gestión de Usuarios**: listado y activar/desactivar vía `GET/PATCH /api/admin/users` (✅ P10; deja `audit_log`)
+- **Reportes**: placeholder “Próximamente” (P15)
 - **Configuración**: Políticas de donación e intervalos (✅ P8 — `/dashboard/admin/settings/`)
-- **Registro de auditoría**: Cambios con marca de tiempo y usuario (✅ P8 — `/dashboard/admin/audit/`)
-- **Bancos Registrados**: Listado live; create/edit/activar (P11)
+- **Registro de auditoría**: Cambios con marca de tiempo y usuario (✅ P8 + P10 — `/dashboard/admin/audit/`)
+- **Bancos Registrados**: listado live (`GET /api/centers?all=1`); create/edit/activar aún demo local (P11)
 
 ### 2. **Panel del Donante**
 
@@ -169,10 +170,10 @@ npx http-server frontend
 - **Mi Perfil**: Información personal, grupo sanguíneo, antecedentes médicos (✅)
 - **Historial de Donaciones**: Listado de donaciones con fechas y ubicaciones (✅)
 - **Agendar Donación**: Fecha, hora y centro preferido (✅)
-- **Elegibilidad**: Verificador según criterios/políticas (P13)
-- **Mi Impacto**: Unidades / vidas estimadas (P13)
+- **Elegibilidad**: badge en home desde `donor_profiles.eligible`; card “Próximamente” y recálculo por intervalo (P13)
+- **Mi Impacto**: card “Próximamente” (P13)
 - **Logros**: Insignias por hitos de donación (✅ P9)
-- **Notificaciones**: Campana in-app (✅ en home; P12 en todo el shell + más tipos)
+- **Notificaciones**: campana in-app en el **home** del donante (✅ P8); resto de páginas del shell y paneles banco/admin: botón “Próximamente” (P12)
 
 ### 3. **Gestión de Banco de Sangre** 
 
@@ -183,10 +184,11 @@ npx http-server frontend
   - Rojo: Disponibilidad crítica (<50 unidades)
 - **Alertas Activas**: Notificaciones de donaciones requeridas urgentemente (✅)
 - **Movimientos de Inventario**: Historial de recepciones y asignaciones (✅)
-- **Solicitudes de Centros Médicos**: Cola y asignación (✅ list/assign; P14 create + ciclo `in_transit`/`completed`)
+- **Solicitudes de Centros Médicos**: cola y asignación (`pending → assigned`) (✅; P14 create + ciclo `in_transit`/`completed`/`cancelled`)
 - **Compatibilidad de Donantes**: Búsqueda por tipo de sangre (✅)
-- **Reporte de Trazabilidad**: Unidad desde donación hasta asignación (P14)
-- **Settings del centro**: Persistencia de datos del banco (P11)
+- **Reporte de Trazabilidad**: no hay página ni API de unidades (P14)
+- **Settings del centro**: formulario UI; **no persiste** (P11)
+- **Citas del centro**: listar + Completar (✅ P5); marcar `no_show` (P14)
 
 ---
 
@@ -302,12 +304,15 @@ Administrador
 
 ## 📚 Referencias y Documentación
 
+- [plan.md](plan.md) - Fases de implementación (P0–P15) y estado real vs backlog
 - [DESIGN.md](DESIGN.md) - Sistema de diseño: tokens, tipografía y componentes
 - [DOCKER.md](DOCKER.md) - Entorno Docker: servicios, volúmenes y configuración avanzada
+- [backend/README.md](backend/README.md) - Catálogo de endpoints de la API
+- [database/README.md](database/README.md) - Esquema, seed y provision
 - [Documentación de Bootstrap 5](https://getbootstrap.com/docs/5.0/)
 - [MDN Web Docs — Accesibilidad](https://developer.mozilla.org/en-US/docs/Web/Accessibility)
 - [Sistema Material Design](https://m3.material.io/)
 
 ---
 
-**Última actualización**: 23 de junio de 2026
+**Última actualización**: 18 de agosto de 2026

@@ -11,13 +11,16 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
   <link rel="stylesheet" href="../assets/css/custom.css" />
+
   <script type="module">
-    import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`/js/auth-guard.js?t=${Date.now()}`);
+    await import(`./admin.js?t=${Date.now()}`);
   </script>
 </head>
 
 <body class="d-none" data-required-role="admin">
   <div class="app-shell">
+
     <aside class="sidebar">
       <div class="d-flex align-items-center gap-2 mb-4 px-1">
         <span class="avatar-initials avatar-initials-lg" style="background-color: #b90538">
@@ -26,6 +29,7 @@
               d="M12 21s-7-4.35-9.5-8.5C.5 9 2 5 5.5 5 7.5 5 9 6.5 12 9c3-2.5 4.5-4 6.5-4C22 5 23.5 9 21.5 12.5 19 16.65 12 21 12 21Z" />
           </svg>
         </span>
+
         <div>
           <div class="sidebar-brand-name">Pulso Solidario</div>
           <div class="sidebar-brand-sub">Administración</div>
@@ -33,6 +37,7 @@
       </div>
 
       <nav class="nav flex-column gap-1" aria-label="Navegación principal">
+
         <a class="nav-link active" href="/dashboard/admin/" aria-current="page">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             aria-hidden="true">
@@ -43,6 +48,7 @@
           </svg>
           Panel
         </a>
+
         <a class="nav-link" href="/dashboard/admin/banks/">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             aria-hidden="true">
@@ -50,6 +56,7 @@
           </svg>
           Bancos
         </a>
+
         <a class="nav-link" href="/dashboard/admin/donors/">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             aria-hidden="true">
@@ -59,6 +66,7 @@
           </svg>
           Donantes
         </a>
+
         <a class="nav-link mt-2" href="/dashboard/admin/settings/">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             aria-hidden="true">
@@ -68,6 +76,7 @@
           </svg>
           Configuración
         </a>
+
         <a class="nav-link" href="/dashboard/admin/audit/">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             aria-hidden="true">
@@ -76,181 +85,333 @@
           </svg>
           Auditoría
         </a>
+
       </nav>
     </aside>
 
     <div class="app-main">
+
       <header class="topbar">
-        <span class="topbar-title">Hola, <span id="dashboard-greeting-name">…</span></span>
+        <span class="topbar-title">
+          Hola, <span id="dashboard-greeting-name">…</span>
+        </span>
+
         <div class="d-flex align-items-center gap-3">
+
           <button class="icon-btn" type="button" disabled
-            aria-label="Notificaciones (próximamente)" title="Notificaciones — Próximamente">
+            aria-label="Notificaciones (próximamente)"
+            title="Notificaciones — Próximamente">
+
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               aria-hidden="true">
               <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
+
           </button>
+
           <div class="dropdown">
-            <button type="button" id="dashboard-user-initials"
+
+            <button type="button"
+              id="dashboard-user-initials"
               class="avatar-initials avatar-initials-lg border-0 user-menu-toggle"
-              style="background-color: #00685f" aria-expanded="false"
-              aria-label="Menú de usuario">…</button>
+              style="background-color: #00685f"
+              aria-expanded="false"
+              aria-label="Menú de usuario">
+              …
+            </button>
+
             <div class="dropdown-menu dropdown-menu-end user-menu shadow border-0 p-0"
               aria-labelledby="dashboard-user-initials">
+
               <div class="user-menu__header">
                 <div id="dashboard-user-name" class="fw-semibold text-truncate">…</div>
                 <div id="dashboard-user-role" class="text-muted" style="font-size: 0.75rem">…</div>
               </div>
+
               <div class="dropdown-divider m-0"></div>
+
               <button type="button" id="dashboard-logout" class="dropdown-item user-menu__logout">
                 Cerrar sesión
               </button>
+
             </div>
           </div>
+
         </div>
       </header>
 
       <main class="flex-grow-1" style="padding: 2rem 2.5rem">
+
         <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+
           <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-              <h1 class="headline fw-bold mb-0" style="font-size: 2rem">Administración</h1>
-              <span class="demo-badge">Demo</span>
+              <h1 class="headline fw-bold mb-0" style="font-size: 2rem">
+                Administración
+              </h1>
             </div>
+
             <p class="text-muted mb-0">
-              Resumen del ecosistema. KPIs mock hasta cablear APIs de gobierno (P8).
+              Resumen en vivo del ecosistema: centros, donantes, alertas y solicitudes abiertas.
             </p>
           </div>
+
           <div class="d-flex gap-2 flex-wrap">
-            <a href="/dashboard/admin/banks/" class="btn btn-outline-secondary rounded-3 fw-semibold">Bancos</a>
-            <a href="/dashboard/admin/donors/" class="btn btn-primary rounded-3 fw-semibold">Donantes</a>
+            <a href="/dashboard/admin/banks/"
+              class="btn btn-outline-secondary rounded-3 fw-semibold">
+              Bancos
+            </a>
+
+            <a href="/dashboard/admin/donors/"
+              class="btn btn-primary rounded-3 fw-semibold">
+              Donantes
+            </a>
           </div>
+
         </div>
 
+        <p id="dashboard-status" class="alert alert-danger d-none mb-4" role="status"></p>
+
         <div class="row g-4 mb-4">
+
           <div class="col-sm-6 col-xl-3">
             <article class="card p-3 h-100">
               <span class="card-eyebrow mb-2">Bancos afiliados</span>
-              <div class="headline fw-bold" style="font-size: 1.75rem">6</div>
-              <div class="text-muted mt-1" style="font-size: 0.8125rem">Demo · listado UI</div>
+
+              <div
+                class="headline fw-bold"
+                style="font-size: 1.75rem"
+                id="kpi-banks">
+                0
+              </div>
+
+              <div class="text-muted mt-1" style="font-size: 0.8125rem">
+                Centros registrados
+              </div>
             </article>
           </div>
+
           <div class="col-sm-6 col-xl-3">
             <article class="card p-3 h-100">
               <span class="card-eyebrow mb-2">Donantes</span>
-              <div class="headline fw-bold" style="font-size: 1.75rem">8</div>
-              <div class="text-muted mt-1" style="font-size: 0.8125rem">Demo · listado UI</div>
+
+              <div
+                class="headline fw-bold"
+                style="font-size: 1.75rem"
+                id="kpi-donors">
+                0
+              </div>
+
+              <div class="text-muted mt-1" style="font-size: 0.8125rem">
+                Cuentas con rol donante
+              </div>
             </article>
           </div>
+
           <div class="col-sm-6 col-xl-3">
             <article class="card p-3 h-100">
               <span class="card-eyebrow mb-2">Alertas activas</span>
-              <div class="headline fw-bold" style="font-size: 1.75rem; color: #b90538">1</div>
-              <div class="text-muted mt-1" style="font-size: 0.8125rem">Seed · O- crítico</div>
+
+              <div
+                class="headline fw-bold"
+                style="font-size: 1.75rem; color: #b90538"
+                id="kpi-alerts">
+                0
+              </div>
+
+              <div class="text-muted mt-1" style="font-size: 0.8125rem">
+                Stock crítico sin resolver
+              </div>
             </article>
           </div>
+
           <div class="col-sm-6 col-xl-3">
             <article class="card p-3 h-100">
               <span class="card-eyebrow mb-2">Solicitudes</span>
-              <div class="headline fw-bold" style="font-size: 1.75rem">1</div>
-              <div class="text-muted mt-1" style="font-size: 0.8125rem">Seed · cola en P7</div>
+
+              <div
+                class="headline fw-bold"
+                style="font-size: 1.75rem"
+                id="kpi-requests">
+                0
+              </div>
+
+              <div class="text-muted mt-1" style="font-size: 0.8125rem">
+                Pendientes de asignar
+              </div>
             </article>
           </div>
+
         </div>
 
         <div class="row g-4 mb-4">
+
           <div class="col-lg-5">
+
             <section class="card h-100 p-3" aria-labelledby="admin-shortcuts">
-              <h2 class="section-title mb-3" id="admin-shortcuts">Atajos</h2>
+
+              <h2 class="section-title mb-3" id="admin-shortcuts">
+                Atajos
+              </h2>
+
               <div class="d-flex flex-column gap-2">
+
                 <a class="shortcut-link" href="/dashboard/admin/banks/">
-                  <span class="shortcut-link__label">Gestionar bancos</span>
-                  <span class="shortcut-link__hint">Centros · filtros demo</span>
+                  <span class="shortcut-link__label">
+                    Gestionar bancos
+                  </span>
+                  <span class="shortcut-link__hint">
+                    Listado de centros (escritura en P11)
+                  </span>
                 </a>
+
                 <a class="shortcut-link" href="/dashboard/admin/donors/">
-                  <span class="shortcut-link__label">Gestionar donantes</span>
-                  <span class="shortcut-link__hint">Cuentas · elegibilidad demo</span>
+                  <span class="shortcut-link__label">
+                    Gestionar donantes
+                  </span>
+                  <span class="shortcut-link__hint">
+                    Activar o desactivar cuentas
+                  </span>
                 </a>
+
                 <a class="shortcut-link" href="/dashboard/admin/settings/">
-                  <span class="shortcut-link__label">Políticas y config</span>
-                  <span class="shortcut-link__hint">Stub · P8</span>
+                  <span class="shortcut-link__label">
+                    Políticas y config
+                  </span>
+                  <span class="shortcut-link__hint">
+                    Umbrales e intervalo de donación
+                  </span>
                 </a>
+
                 <a class="shortcut-link" href="/dashboard/admin/audit/">
-                  <span class="shortcut-link__label">Auditoría</span>
-                  <span class="shortcut-link__hint">Stub · P8</span>
+                  <span class="shortcut-link__label">
+                    Auditoría
+                  </span>
+                  <span class="shortcut-link__hint">
+                    Cambios de cuentas y políticas
+                  </span>
                 </a>
+
               </div>
+
             </section>
+
           </div>
+
           <div class="col-lg-7">
-            <section class="card p-3 h-100" aria-labelledby="seed-snapshot">
+
+            <section class="card p-3 h-100" aria-labelledby="recent-audit">
+
               <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-                <h2 class="section-title mb-0" id="seed-snapshot">Snapshot del seed</h2>
-                <span class="demo-badge">No es dato en vivo</span>
+
+                <h2 class="section-title mb-0" id="recent-audit">
+                  Actividad reciente
+                </h2>
+
+                <span id="home-audit-count" class="demo-badge">—</span>
+
               </div>
+
               <div class="table-responsive">
+
                 <table class="table table-borderless align-middle mb-0">
+
                   <thead>
                     <tr>
-                      <th scope="col">Concepto</th>
-                      <th scope="col">Detalle</th>
-                      <th scope="col">Estado</th>
+                      <th scope="col">Cuándo</th>
+                      <th scope="col">Quién</th>
+                      <th scope="col">Acción</th>
                     </tr>
                   </thead>
-                  <tbody>
+
+                  <tbody id="home-audit-body">
                     <tr>
-                      <td class="fw-semibold">Solicitud demo</td>
-                      <td class="text-muted" style="font-size: 0.875rem">RE-9082 · O- · crítica</td>
-                      <td><span class="badge-soft badge-soft--amber"><span class="dot"></span>Pendiente</span></td>
-                    </tr>
-                    <tr>
-                      <td class="fw-semibold">Alerta stock</td>
-                      <td class="text-muted" style="font-size: 0.875rem">O- bajo umbral &lt;50</td>
-                      <td><span class="badge-soft badge-soft--rose"><span class="dot"></span>Activa</span></td>
-                    </tr>
-                    <tr>
-                      <td class="fw-semibold">Cuenta admin</td>
-                      <td class="text-muted" style="font-size: 0.875rem">admin@test.com</td>
-                      <td><span class="badge-soft badge-soft--teal"><span class="dot"></span>Sesión</span></td>
+                      <td colspan="3" class="text-muted text-center py-3">Cargando…</td>
                     </tr>
                   </tbody>
+
                 </table>
+
               </div>
+
+              <a href="/dashboard/admin/audit/" class="btn btn-outline-secondary rounded-3 fw-semibold w-100 mt-3">
+                Ver auditoría
+              </a>
+
             </section>
+
           </div>
+
         </div>
 
         <div class="row g-4">
+
           <div class="col-md-4">
+
             <section class="coming-soon h-100" aria-labelledby="reports-soon">
-              <span class="demo-badge mb-3">Próximamente</span>
-              <h2 class="coming-soon__title" id="reports-soon">Reportes</h2>
-              <p class="coming-soon__text">Estadísticas nacionales/regionales cuando existan APIs de reporting.</p>
+
+              <span class="demo-badge mb-3">
+                Próximamente
+              </span>
+
+              <h2 class="coming-soon__title" id="reports-soon">
+                Reportes
+              </h2>
+
+              <p class="coming-soon__text">
+                Estadísticas nacionales y por centro (P15).
+              </p>
+
             </section>
+
           </div>
+
           <div class="col-md-4">
-            <section class="coming-soon h-100" aria-labelledby="policies-soon">
-              <span class="demo-badge mb-3">Próximamente</span>
-              <h2 class="coming-soon__title" id="policies-soon">Políticas</h2>
-              <p class="coming-soon__text">Umbrales de inventario e intervalos de donación (P8).</p>
-            </section>
+
+            <a href="/dashboard/admin/settings/" class="card h-100 p-3 text-decoration-none"
+              aria-labelledby="policies-live">
+              <span class="card-eyebrow mb-2">Listo</span>
+              <h2 class="section-title mb-2" id="policies-live">Políticas</h2>
+              <p class="text-muted mb-0" style="font-size: 0.875rem">
+                Umbrales de inventario e intervalo entre donaciones.
+              </p>
+            </a>
+
           </div>
+
           <div class="col-md-4">
+
             <section class="coming-soon h-100" aria-labelledby="notif-soon">
-              <span class="demo-badge mb-3">Próximamente</span>
-              <h2 class="coming-soon__title" id="notif-soon">Notificaciones</h2>
-              <p class="coming-soon__text">Avisos de gobierno y difusión a donantes (P8).</p>
+
+              <span class="demo-badge mb-3">
+                Próximamente
+              </span>
+
+              <h2 class="coming-soon__title" id="notif-soon">
+                Notificaciones
+              </h2>
+
+              <p class="coming-soon__text">
+                Campana in-app en el panel admin (P12).
+              </p>
+
             </section>
+
           </div>
+
         </div>
+
       </main>
+
     </div>
+
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
+
 </body>
 
 </html>

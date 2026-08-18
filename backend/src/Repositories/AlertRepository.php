@@ -67,6 +67,15 @@ class AlertRepository
         return $row ? $this->normalize($row) : null;
     }
 
+    public function countActive(): int
+    {
+    $query = $this->pdo->query(
+        "SELECT COUNT(*) FROM alerts WHERE status = 'active'"
+    );
+
+    return (int) $query->fetchColumn();
+    }
+
     public function create(
         int $centerId,
         string $bloodType,

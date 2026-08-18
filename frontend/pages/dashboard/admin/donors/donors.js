@@ -1,4 +1,4 @@
-import { usersApi } from '/js/api.js';
+import { adminApi } from '/js/api.js';
 
 const statusEl = document.getElementById('donors-status');
 const table = document.getElementById('admin-donors-table');
@@ -116,9 +116,8 @@ async function loadDonors() {
   try {
     showStatus('Cargando donantes...', 'info');
 
-    const result = await usersApi.list();
-    const users = Array.isArray(result.data) ? result.data : [];
-    const donors = users.filter((user) => user.role === 'donor');
+    const result = await adminApi.listUsers({ role: 'donor' });
+    const donors = Array.isArray(result.data?.users) ? result.data.users : [];
 
     renderDonors(donors);
 
@@ -222,7 +221,6 @@ table?.addEventListener('change', async (event) => {
   const id = row.dataset.id;
   const firstName = row.dataset.firstName ?? '';
   const lastName = row.dataset.lastName ?? '';
-  const email = row.dataset.email ?? '';
   const name = `${firstName} ${lastName}`.trim() || 'Donante';
 
   const newActive = toggle.checked;
@@ -231,10 +229,7 @@ table?.addEventListener('change', async (event) => {
   toggle.disabled = true;
 
   try {
-    await usersApi.update(id, {
-      first_name: firstName,
-      last_name: lastName,
-      email,
+    await adminApi.patchUser(id, {
       active: newActive,
     });
 
@@ -252,7 +247,7 @@ table?.addEventListener('change', async (event) => {
     refreshKpis();
 
     showStatus(
-      `No se pudo actualizar la cuenta de ${name}.`,
+      error?.message || `No se pudo actualizar la cuenta de ${name}.`,
       'danger'
     );
   } finally {

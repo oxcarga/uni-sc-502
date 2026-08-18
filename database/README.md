@@ -87,7 +87,9 @@ Contraseña: `demo1234`
 
 | Correo | Rol |
 |--------|-----|
-| `donante@test.com` | `donor` |
+| `donante@test.com` | `donor` (A+) |
+| `donante_o@test.com` | `donor` (O−, para demo CU2) |
+| `donante_inactivo@test.com` | `donor` (`active = 0`; no inicia sesión) |
 | `banco@test.com` | `bank` |
 | `admin@test.com` | `admin` |
 
@@ -196,6 +198,13 @@ Seed: `donante@test.com` tiene `first_donation` desbloqueado (1 donacion demo).
 **UI:** login donante → Panel → Logros. Para desbloquear en vivo: banco completa una cita de un donante sin ese logro (p. ej. `donante_o@test.com`).
 
 O en phpMyAdmin: http://localhost:3002 (`pulso_user` / `pulso_password`).
+
+### P10 — admin dashboard y usuarios
+
+`GET /api/admin/dashboard` cuenta centros, donantes, alertas `active` y solicitudes `pending`.  
+`GET /api/admin/users?role=donor` lista donantes (incluye inactivos). `PATCH /api/admin/users/{id}` con `{ "active": false }` deja fila en `audit_log`.
+
+**Flujo demo (UI):** login `admin@test.com` → Panel (KPIs) → Donantes → filtro Cuenta = Inactiva (`Luis Mora`) → activar/desactivar otro donante → Auditoría.
 
 ## Solución de problemas
 

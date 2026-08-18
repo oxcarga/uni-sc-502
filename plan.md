@@ -15,7 +15,7 @@
 **Motor:** MySQL 8.0 · BD `pulso_solidario`  
 **Convención:** tablas/columnas, claves JSON, roles y rutas HTTP en inglés (p. ej. `users`, `first_name`, `/api/auth/confirm-email`).  
 **Rutas FE internas:** `/dashboard/{donor,bank,admin}/` (no `/panel/`).  
-**Última actualización:** 2026-08-09
+**Última actualización:** 2026-08-18 (P10 cerrado).
 
 Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./database/README.md) · ERD: [database/ERD.md](./database/ERD.md).
 
@@ -49,15 +49,20 @@ Operación Docker/provision: [DOCKER.md](./DOCKER.md) · [database/README.md](./
 
 | Área | Situación |
 |------|-----------|
-| Auth (P0–P0c) | ✅ Cerrado: registro, confirmación email, sesión servidor, auth-guard |
-| Esquema MySQL | ✅ Tablas de dominio ya en `01_init.sql` + seed demo en `02_seed.sql` (centros, perfiles, citas, inventario, solicitudes, alertas, políticas, logros, notificaciones) |
-| BE dominio | ✅ P4–P9 (MVP de dominio cerrado) |
-| FE paneles | ✅ Shells P1–P3 + flujos donante/banco P4–P9; admin: políticas + auditoría vivos; home/donantes/bancos (write) aún mock o parcial |
-| Backlog | P10–P15 pendientes (gobierno admin, centros write, notificaciones UX, elegibilidad/impacto, ciclo solicitudes/trazabilidad, reportes) |
+| Auth (P0–P0c) | ✅ Cerrado. El alta pública de donante es `POST /api/users` (así está implementado; login/sesión van en `/api/auth/*`). Confirmación de correo, sesión servidor y auth-guard listos. |
+| Esquema MySQL | ✅ Tablas de dominio en `01_init.sql` + seed demo en `02_seed.sql` (centros, perfiles, citas, inventario, solicitudes, alertas, políticas, logros, notificaciones). Seed incluye donante `active = 0`. |
+| BE dominio | ✅ P4–P10 (MVP + gobierno admin de cuentas) |
+| FE paneles | ✅ Shells P1–P3 + flujos donante/banco P4–P9; admin: home KPIs, donantes (activar/desactivar), políticas y auditoría. Bancos (write) aún demo local (P11) |
+| Backlog | P11–P15 pendientes (centros write, notificaciones UX, elegibilidad/impacto, ciclo solicitudes/trazabilidad, reportes) |
 
-**Implicación:** MVP P0–P9 cerrado; backlog de gobierno y polish en P10–P15.
+**Implicación:** P0–P10 cerrados. Siguiente: P11 (escritura de centros + settings de banco).
 
-Fases P0–P9: **cerradas**. Fases P10–P15: **pendientes**.
+Fases P0–P10: **cerradas**. Fases P11–P15: **pendientes**.
+
+**Huecos menores (no bloquean P10):**
+
+- Campana in-app (`notifications-ui.js`) solo se monta si existe `#notif-bell` (hoy: home donante). El resto de shells tiene el botón deshabilitado “Próximamente” (P12).
+- `POST /api/users` sigue siendo el alta pública (intencional). `GET/PUT/DELETE /api/users` exigen sesión **admin**.
 
 ---
 
@@ -647,7 +652,7 @@ Solo ajustar seed/criterios si la evaluación en BE lo requiere.
 
 ---
 
-## P10 — Admin home + gestión de usuarios
+## ✅ P10 — Admin home + gestión de usuarios
 
 **Objetivo:** KPIs reales en el home admin y gestión persistente de cuentas (activar/desactivar, rol), con auditoría.
 
@@ -655,41 +660,40 @@ Solo ajustar seed/criterios si la evaluación en BE lo requiere.
 
 ### DB
 
-**Sin cambios** de esquema: usar `users.active`, `users.role`, `audit_log`.
+**Sin cambios** de esquema: `users.active`, `users.role`, `audit_log`.
 
-Ampliar seed solo si hacen falta más usuarios demo para filtros (p. ej. donante inactivo).
+Seed: donante inactivo `donante_inactivo@test.com` (`active = 0`, correo confirmado; no puede iniciar sesión).
 
 ### BE
 
-1. `GET /api/admin/stats` (o agregados equivalentes) — conteos: centros, donantes/usuarios, alertas activas, solicitudes abiertas.
-2. `GET /api/admin/users` — listado con filtros `role`, `active`, búsqueda por nombre/email.
-3. `PATCH /api/admin/users/{id}` — campos `active` y/o `role` (reglas: no degradar el último admin; no auto-desactivarse sin otro admin).
-4. Escribir `audit_log`: `user.activate`, `user.deactivate`, `user.role_change`.
-5. Endurecer `/api/users`: retirar o proteger con auth+admin las mutaciones legacy; el alta pública queda solo en `/api/auth/register`.
+| Método | Ruta | Rol / notas |
+|--------|------|-------------|
+| `GET` | `/api/admin/dashboard` | admin. `banks` = `COUNT(donation_centers)`, `donors` = usuarios `donor`, alertas activas, solicitudes `pending` |
+| `GET` | `/api/admin/users` | admin. Filtros `role`, `active` (`0`/`1`), `q` (nombre/email). JOIN a `donor_profiles` |
+| `PATCH` | `/api/admin/users/{id}` | admin. Solo `active` y/o `role`. No deja el sistema sin un admin activo. Audita `user.activate` / `user.deactivate` / `user.role_change` |
+| `POST` | `/api/users` | Público: alta de donante (registro) |
+| `GET`/`PUT`/`DELETE` | `/api/users`… | Sesión **admin** (legado; el panel usa las rutas `/admin/users`) |
 
-| Método | Ruta | Rol |
-|--------|------|-----|
-| `GET` | `/api/admin/stats` | admin |
-| `GET` | `/api/admin/users` | admin |
-| `PATCH` | `/api/admin/users/{id}` | admin |
+`AdminDashboardController` y `AdminUserController` están registrados en el contenedor DI de `public/index.php`.
 
 ### FE
 
-1. `frontend/pages/dashboard/admin/home.js` (+ cablear `index.html`): KPIs desde API; quitar números mock y copy “Stub · P8” / “Próximamente” de políticas/auditoría (ya viven en `/settings/` y `/audit/`).
-2. Cablear `/dashboard/admin/donors/` a `GET/PATCH` admin users; persistir toggle activo; quitar filas HTML hardcodeadas.
-3. Extender `adminApi` en `frontend/js/api.js`.
+1. Home admin: KPIs desde `GET /api/admin/dashboard`; actividad reciente desde `GET /api/admin/audit-log` (últimas 5 filas + enlace a `/audit/`). Políticas enlazan a `/settings/`; reportes y campana siguen “Próximamente” (P15 / P12).
+2. `/dashboard/admin/donors/`: `adminApi.listUsers({ role: 'donor' })` + toggle `PATCH /api/admin/users/{id}`. “Nuevo donante” sigue deshabilitado (alta = registro público).
+3. `adminApi.listUsers` / `patchUser` en `frontend/js/api.js`.
 
 ### Config
 
-1. Documentar endpoints y flujo de prueba (login `admin@test.com` → home KPIs → activar/desactivar donante → ver fila en auditoría) en `backend/README.md`.
-2. `Sin cambios` de Compose/Nginx.
+1. Endpoints y flujo de prueba en `backend/README.md` / `database/README.md`.
+2. `Sin cambios` de Compose/Nginx. Re-provision para cargar el donante inactivo del seed.
 
 ### Listo cuando
 
-- [ ] Home admin muestra conteos en vivo (no mock del seed)
-- [ ] Listado de donantes/usuarios viene de API
-- [ ] Activar/desactivar (y cambio de rol si se expone) persiste y deja `audit_log`
-- [ ] Mutaciones públicas de `/api/users` no permiten gobierno de cuentas sin auth
+- [x] Home admin muestra conteos en vivo (`GET /api/admin/dashboard`; centros, no usuarios `bank`)
+- [x] Listado de donantes viene de `GET /api/admin/users`
+- [x] Activar/desactivar persiste, exige admin y deja `audit_log`
+- [x] `GET`/`PUT`/`DELETE /api/users` no funcionan sin sesión admin; el alta pública queda en `POST /api/users`
+- [x] Seed con donante `active = 0` para el filtro
 
 **Desbloquea:** gestión de usuarios del panel admin (README) + P11 (centros) con shell admin coherente.
 
@@ -722,8 +726,8 @@ Seed: mantener al menos un centro inactivo o segundo centro si ayuda a demos de 
 
 ### FE
 
-1. `/dashboard/admin/banks/`: toggle activo y edición persisten; habilitar “Nuevo banco” / “Editar” contra API (UX formularios según DESIGN.md).
-2. `/dashboard/bank/settings/`: formulario persiste vía API del centro del banco; quitar aviso de “no se guarda”.
+1. `/dashboard/admin/banks/`: hoy lista `GET /api/centers?all=1`; toggle y “Editar” / “Nuevo banco” son demo local (`disabled` / no persiste). Hay que persistir contra API.
+2. `/dashboard/bank/settings/`: formulario **no se guarda** (mensaje explícito en `settings.js`). Persistir vía API del centro del banco.
 3. Mensajes de error/éxito con alert sticky donde aplique.
 
 ### Config
@@ -763,9 +767,9 @@ Seed: mantener al menos un centro inactivo o segundo centro si ayuda a demos de 
 
 ### FE
 
-1. Montar `frontend/js/notifications-ui.js` en shells admin, banco y subpáginas donante (no solo home donante).
-2. Quitar botones “Notificaciones — Próximamente”.
-3. Preferencias de perfil siguen siendo la fuente de verdad para opt-out.
+1. Montar campana: `auth-guard.js` ya carga `notifications-ui.js` si existe `#notif-bell`. Hoy solo el **home donante** la tiene. Falta el markup en admin, banco y subpáginas donante.
+2. Quitar botones “Notificaciones — Próximamente” (casi todos los dashboards).
+3. Preferencias de perfil siguen siendo la fuente de verdad para opt-out. Hoy solo se respeta `notify_blood_match` en escasez (`NotificationDispatchService`).
 
 ### Config
 
@@ -800,8 +804,8 @@ Seed: mantener al menos un centro inactivo o segundo centro si ayuda a demos de 
 
 ### FE
 
-1. En `frontend/pages/dashboard/donor/index.html` (+ `home.js`): cards Elegibilidad y Mi impacto con datos API.
-2. Copiar clara: fecha estimada de próxima elegibilidad si aún no puede donar.
+1. En `frontend/pages/dashboard/donor/index.html` (+ `home.js`): cards Elegibilidad e Impacto siguen en “Próximamente”. El home sí muestra un badge de `profile.eligible` (flag en BD, no derivado del intervalo).
+2. Copiar clara: fecha estimada de próxima elegibilidad si aún no puede donar. El agendar cita **sí** valida `donor_interval_days` contra `last_donation_at`; el flag `eligible` se pone en `0` al completar y **no se restaura** al vencer el intervalo.
 
 ### Config
 
@@ -840,9 +844,10 @@ Seed: mantener al menos un centro inactivo o segundo centro si ayuda a demos de 
 
 ### FE
 
-1. Panel banco: crear solicitud; botones de avance de estado; marcar cita `no_show`.
-2. Vista simple de trazabilidad (detalle de unidad o tabla filtrable).
-3. Opcional: admin lectura multi-centro de cola (reutilizar APIs con `center_id` o list-all).
+1. Panel banco: hoy solo lista + **Asignar** (`pending → assigned`). Crear solicitud, transiciones y `no_show` no existen en UI ni API.
+2. Citas banco: solo botón Completar. El KPI de `no_show` se muestra pero no hay acción.
+3. Vista simple de trazabilidad (detalle de unidad o tabla filtrable). `BloodUnitRepository` solo cubre lock/assign, no listado de traza.
+4. Opcional: admin lectura multi-centro de cola (reutilizar APIs con `center_id` o list-all).
 
 ### Config
 
@@ -918,7 +923,7 @@ Seed: mantener al menos un centro inactivo o segundo centro si ayuda a demos de 
 | ✅ P7 | Solicitudes + alertas + compatibles | bank (admin API) | CU2, CU3 | ✅ | ✅ | ✅ | ✅ |
 | ✅ P8 | Notificaciones + políticas + auditoría | donor, bank, admin | CU2 completo + admin | ✅ | ✅ | ✅ | ✅ |
 | ✅ P9 | Logros / gamificación | donor | Panel donante (logros) | ✅ | ✅ | ✅ | ✅ |
-| P10 | Admin home KPIs + gestión usuarios | admin | Panel admin (gobierno) | — | — | — | — |
+| ✅ P10 | Admin home KPIs + gestión usuarios | admin | Panel admin (gobierno) | ✅ | ✅ | ✅ | ✅ |
 | P11 | Escritura centros + settings banco | admin, bank | Admin bancos / bank settings | — | — | — | — |
 | P12 | Notificaciones UX + prefs | donor, bank, admin | Todos los paneles | — | — | — | — |
 | P13 | Elegibilidad + impacto donante | donor | CU1 (polish) | — | — | — | — |
@@ -927,7 +932,7 @@ Seed: mantener al menos un centro inactivo o segundo centro si ayuda a demos de 
 
 Al cerrar una fase, marcar ✅ en el título y en las celdas de pilares del mapa.
 
-**Lectura del mapa:** P1–P3 son FE-first (DB/BE a menudo `Sin cambios`). P4–P9 asumen esquema ya provisionado y concentran BE+FE; DB solo si hay ajuste de seed/constraints. P10–P15 son backlog post-MVP: gobierno admin, polish de notificaciones/donante, ciclo de solicitudes y reportes.
+**Lectura del mapa:** P1–P3 son FE-first (DB/BE a menudo `Sin cambios`). P4–P9 asumen esquema ya provisionado y concentran BE+FE; DB solo si hay ajuste de seed/constraints. P10 cierra gobierno admin de cuentas. P11–P15 son backlog: escritura de centros, polish de notificaciones/donante, ciclo de solicitudes y reportes.
 
 ---
 

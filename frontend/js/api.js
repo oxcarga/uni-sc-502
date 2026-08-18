@@ -325,6 +325,50 @@ export const notificationsApi = {
 };
 
 export const adminApi = {
+  getDashboard: () =>
+    apiFetch('/admin/dashboard'),
+
+  listUsers: (params = {}) => {
+    const query = new URLSearchParams();
+
+    if (params.role) {
+      query.set('role', params.role);
+    }
+
+    if (
+      params.active === true
+      || params.active === 1
+      || params.active === '1'
+    ) {
+      query.set('active', '1');
+    } else if (
+      params.active === false
+      || params.active === 0
+      || params.active === '0'
+    ) {
+      query.set('active', '0');
+    }
+
+    if (params.q) {
+      query.set('q', params.q);
+    }
+
+    const qs = query.toString();
+
+    return apiFetch(
+      `/admin/users${qs ? `?${qs}` : ''}`
+    );
+  },
+
+  patchUser: (id, data) =>
+    apiFetch(`/admin/users/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    }),
+
   getPolicies: () =>
     apiFetch('/admin/policies'),
 

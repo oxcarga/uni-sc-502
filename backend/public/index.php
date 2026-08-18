@@ -5,7 +5,9 @@ declare(strict_types=1);
 
 use App\Controllers\AchievementController;
 use App\Controllers\AdminAuditController;
+use App\Controllers\AdminDashboardController;
 use App\Controllers\AdminPolicyController;
+use App\Controllers\AdminUserController;
 use App\Controllers\AlertController;
 use App\Controllers\AppointmentController;
 use App\Controllers\AuthController;
@@ -258,6 +260,24 @@ $container->set(
     NotificationController::class,
     fn ($c) => new NotificationController(
         $c->get(NotificationRepository::class),
+        $c->get(LoggerInterface::class)
+    )
+);
+$container->set(
+    AdminDashboardController::class,
+    fn ($c) => new AdminDashboardController(
+        $c->get(UserRepository::class),
+        $c->get(DonationCenterRepository::class),
+        $c->get(AlertRepository::class),
+        $c->get(RequestRepository::class),
+        $c->get(LoggerInterface::class)
+    )
+);
+$container->set(
+    AdminUserController::class,
+    fn ($c) => new AdminUserController(
+        $c->get(UserRepository::class),
+        $c->get(AuditLogRepository::class),
         $c->get(LoggerInterface::class)
     )
 );

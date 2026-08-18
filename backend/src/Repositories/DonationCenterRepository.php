@@ -37,6 +37,11 @@ class DonationCenterRepository
         );
     }
 
+    public function countAll(): int
+    {
+        return (int) $this->pdo->query('SELECT COUNT(*) FROM donation_centers')->fetchColumn();
+    }
+
     public function findById(int $id, bool $activeOnly = true): ?array
     {
         $sql = 'SELECT ' . self::SELECT . ' FROM donation_centers WHERE id = :id';
