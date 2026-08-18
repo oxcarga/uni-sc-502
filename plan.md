@@ -678,7 +678,7 @@ Seed: donante inactivo `donante_inactivo@test.com` (`active = 0`, correo confirm
 
 ### FE
 
-1. Home admin: KPIs desde `GET /api/admin/dashboard`; copy en vivo (sin “mock P8”). Políticas enlazan a `/settings/`; reportes y campana siguen “Próximamente” (P15 / P12).
+1. Home admin: KPIs desde `GET /api/admin/dashboard`; actividad reciente desde `GET /api/admin/audit-log` (últimas 5 filas + enlace a `/audit/`). Políticas enlazan a `/settings/`; reportes y campana siguen “Próximamente” (P15 / P12).
 2. `/dashboard/admin/donors/`: `adminApi.listUsers({ role: 'donor' })` + toggle `PATCH /api/admin/users/{id}`. “Nuevo donante” sigue deshabilitado (alta = registro público).
 3. `adminApi.listUsers` / `patchUser` en `frontend/js/api.js`.
 
