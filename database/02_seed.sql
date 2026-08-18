@@ -1,5 +1,6 @@
 -- Datos de ejemplo. Idempotente: no falla si el correo/código ya existe.
 -- Contraseña de demo (solo local): demo1234
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
 -- Hash generado con: password_hash('demo1234', PASSWORD_DEFAULT)
 -- Los usuarios demo ya tienen email_confirmed = 1 (pueden iniciar sesión sin el flujo de email).
 -- Tras 01_init.sql los IDs demos suelen ser: 1=donante, 2=banco, 3=admin, centro=1.

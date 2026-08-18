@@ -6,6 +6,7 @@
 -- Orden: DROP hijos → padres; CREATE padres → hijos.
 -- Tipos de sangre: O+, O-, A+, A-, B+, B-, AB+, AB- (CHECK, no tabla lookup).
 
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS donor_achievements;

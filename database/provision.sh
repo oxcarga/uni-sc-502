@@ -23,15 +23,19 @@ DB_PASSWORD="${MYSQL_PASSWORD:-pulso_password}"
 DB_CONTAINER="${DB_CONTAINER:-pulso-solidario-db}"
 
 MYSQL_SSL_FLAGS=(--skip-ssl)
+# El cliente MariaDB del backend (locale POSIX) usa latin1 por defecto.
+# Sin utf8mb4, acentos del seed se guardan como mojibake (Rodríguez → RodrÃ­guez).
+MYSQL_CHARSET_FLAGS=(--default-character-set=utf8mb4)
 
 run_sql() {
   local file="$1"
   echo "→ $(basename "$file")"
   if command -v mysql &>/dev/null; then
-    mysql -h"$DB_HOST" -u"$DB_USER" -p"$DB_PASSWORD" "${MYSQL_SSL_FLAGS[@]}" "$DB_NAME" < "$file"
+    mysql -h"$DB_HOST" -u"$DB_USER" -p"$DB_PASSWORD" \
+      "${MYSQL_SSL_FLAGS[@]}" "${MYSQL_CHARSET_FLAGS[@]}" "$DB_NAME" < "$file"
   else
     docker exec -i "$DB_CONTAINER" \
-      mysql -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" < "$file"
+      mysql -u"$DB_USER" -p"$DB_PASSWORD" "${MYSQL_CHARSET_FLAGS[@]}" "$DB_NAME" < "$file"
   fi
 }
 
