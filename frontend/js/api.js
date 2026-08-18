@@ -180,6 +180,7 @@ export const notificationsApi = {
 };
 
 export const adminApi = {
+  getDashboard: () => apiFetch('/admin/dashboard'),
   getPolicies: () => apiFetch('/admin/policies'),
   updatePolicies: (data) =>
     apiFetch('/admin/policies', {
