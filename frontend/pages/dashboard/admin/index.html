@@ -301,17 +301,15 @@
 
           <div class="col-lg-7">
 
-            <section class="card p-3 h-100" aria-labelledby="seed-snapshot">
+            <section class="card p-3 h-100" aria-labelledby="recent-audit">
 
               <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
 
-                <h2 class="section-title mb-0" id="seed-snapshot">
-                  Cuentas demo
+                <h2 class="section-title mb-0" id="recent-audit">
+                  Actividad reciente
                 </h2>
 
-                <span class="demo-badge">
-                  Local
-                </span>
+                <span id="home-audit-count" class="demo-badge">—</span>
 
               </div>
 
@@ -321,70 +319,25 @@
 
                   <thead>
                     <tr>
-                      <th scope="col">Concepto</th>
-                      <th scope="col">Detalle</th>
-                      <th scope="col">Estado</th>
+                      <th scope="col">Cuándo</th>
+                      <th scope="col">Quién</th>
+                      <th scope="col">Acción</th>
                     </tr>
                   </thead>
 
-                  <tbody>
-
+                  <tbody id="home-audit-body">
                     <tr>
-                      <td class="fw-semibold">
-                        Admin
-                      </td>
-
-                      <td class="text-muted" style="font-size: 0.875rem">
-                        admin@test.com / demo1234
-                      </td>
-
-                      <td>
-                        <span class="badge-soft badge-soft--teal">
-                          <span class="dot"></span>
-                          Activa
-                        </span>
-                      </td>
+                      <td colspan="3" class="text-muted text-center py-3">Cargando…</td>
                     </tr>
-
-                    <tr>
-                      <td class="fw-semibold">
-                        Donante inactivo
-                      </td>
-
-                      <td class="text-muted" style="font-size: 0.875rem">
-                        donante_inactivo@test.com
-                      </td>
-
-                      <td>
-                        <span class="badge-soft badge-soft--slate">
-                          <span class="dot"></span>
-                          No entra
-                        </span>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td class="fw-semibold">
-                        Donante O−
-                      </td>
-
-                      <td class="text-muted" style="font-size: 0.875rem">
-                        donante_o@test.com / demo1234
-                      </td>
-
-                      <td>
-                        <span class="badge-soft badge-soft--teal">
-                          <span class="dot"></span>
-                          Activa
-                        </span>
-                      </td>
-                    </tr>
-
                   </tbody>
 
                 </table>
 
               </div>
+
+              <a href="/dashboard/admin/audit/" class="btn btn-outline-secondary rounded-3 fw-semibold w-100 mt-3">
+                Ver auditoría
+              </a>
 
             </section>
 
