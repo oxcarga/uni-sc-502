@@ -14,6 +14,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class AdminUserController
 {
+    private const ERROR_CODE_EMAIL_DUPLICATED = '23000';
+    private const MIN_PASSWORD_LENGTH = 8;
+
     public function __construct(
         private readonly UserRepository $users,
         private readonly AuditLogRepository $audit,
@@ -58,6 +61,82 @@ class AdminUserController
         } catch (PDOException $error) {
             $this->logger->error('Error al listar usuarios admin.', ['error' => $error->getMessage()]);
             return JsonResponse::error($response, 'Error al listar usuarios.', 500);
+        }
+    }
+
+    public function create(Request $request, Response $response): Response
+    {
+        $auth = $request->getAttribute('auth_user');
+        if (!is_array($auth) || ($auth['role'] ?? '') !== 'admin') {
+            return JsonResponse::error($response, 'Solo administradores.', 403);
+        }
+
+        $body = (array) $request->getParsedBody();
+        $firstName = trim((string) ($body['first_name'] ?? ''));
+        $lastName = trim((string) ($body['last_name'] ?? ''));
+        $email = strtolower(trim((string) ($body['email'] ?? '')));
+        $password = (string) ($body['password'] ?? '');
+        $bloodType = isset($body['blood_type']) ? trim((string) $body['blood_type']) : null;
+        $phone = isset($body['phone']) ? trim((string) $body['phone']) : null;
+
+        if ($firstName === '' || mb_strlen($firstName) > 100) {
+            return JsonResponse::error($response, 'El nombre es obligatorio (máx. 100).', 422);
+        }
+        if ($lastName === '' || mb_strlen($lastName) > 100) {
+            return JsonResponse::error($response, 'El apellido es obligatorio (máx. 100).', 422);
+        }
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 100) {
+            return JsonResponse::error($response, 'El correo electrónico no es válido.', 422);
+        }
+        if ($password === '' || strlen($password) < self::MIN_PASSWORD_LENGTH) {
+            return JsonResponse::error(
+                $response,
+                'La contraseña debe tener al menos ' . self::MIN_PASSWORD_LENGTH . ' caracteres.',
+                422
+            );
+        }
+        if (!UserRepository::isValidBloodType($bloodType)) {
+            return JsonResponse::error($response, 'El tipo de sangre no es válido.', 422);
+        }
+        if ($phone !== null && mb_strlen($phone) > 40) {
+            return JsonResponse::error($response, 'El teléfono es demasiado largo.', 422);
+        }
+
+        try {
+            $user = $this->users->create([
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'email' => $email,
+                'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+                'role' => 'donor',
+                'email_confirmed' => true,
+                'blood_type' => $bloodType !== '' ? $bloodType : null,
+                'phone' => $phone !== '' ? $phone : null,
+            ]);
+
+            $created = $this->users->findAdminById((int) $user['id'])
+                ?? UserRepository::toAdminListItem($user);
+
+            $this->audit->write(
+                (int) $auth['id'],
+                'user.create',
+                'user',
+                (int) $user['id'],
+                json_encode([
+                    'email' => $email,
+                    'role' => 'donor',
+                ], JSON_UNESCAPED_UNICODE),
+                $this->clientIp($request)
+            );
+
+            return JsonResponse::success($response, $created, 'Donante creado.', 201);
+        } catch (PDOException $error) {
+            if ($this->isDuplicateEmailError($error)) {
+                return JsonResponse::error($response, 'El correo electrónico ya está registrado.', 409);
+            }
+
+            $this->logger->error('Error al crear donante admin.', ['error' => $error->getMessage()]);
+            return JsonResponse::error($response, 'Error al crear el donante.', 500);
         }
     }
 
@@ -221,5 +300,13 @@ class AdminUserController
         return is_string($serverParams['REMOTE_ADDR'] ?? null)
             ? $serverParams['REMOTE_ADDR']
             : null;
+    }
+
+    private function isDuplicateEmailError(PDOException $error): bool
+    {
+        $sqlState = (string) ($error->errorInfo[0] ?? $error->getCode());
+        $driverCode = (int) ($error->errorInfo[1] ?? 0);
+
+        return $sqlState === self::ERROR_CODE_EMAIL_DUPLICATED || $driverCode === 1062;
     }
 }

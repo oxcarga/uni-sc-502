@@ -15,6 +15,8 @@ return function (App $app) {
 
     $app->get('/admin/users', [AdminUserController::class, 'index'])
         ->add(AuthMiddleware::class);
+    $app->post('/admin/users', [AdminUserController::class, 'create'])
+        ->add(AuthMiddleware::class);
     $app->patch('/admin/users/{id}', [AdminUserController::class, 'patch'])
         ->add(AuthMiddleware::class);
 

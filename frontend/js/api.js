@@ -206,6 +206,12 @@ export const adminApi = {
     const qs = query.toString();
     return apiFetch(`/admin/users${qs ? `?${qs}` : ''}`);
   },
+  createUser: (data) =>
+    apiFetch('/admin/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
   patchUser: (id, data) =>
     apiFetch(`/admin/users/${id}`, {
       method: 'PATCH',
